@@ -1,17 +1,20 @@
 import express, { Request, Response } from "express";
 import { db } from "../data";
-import moment from "moment";
+import { ReturnValidationErrors } from "../middleware";
+import { param } from "express-validator";
 
 export const surveyRouter = express.Router();
 
-surveyRouter.get("/",
+surveyRouter.get("/:token", [param("token").notEmpty()], ReturnValidationErrors,
     async (req: Request, res: Response) => {
-        let list = await db("asset_scan").where({ scan_user: req.user.email }).orderBy("scan_date", "desc");
+        let { token } = req.params;
+        let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first();
 
-        for (let item of list) {
-            item.scan_date = moment(item.scan_date).utc(true).format("YYYY-MM-DD @ h:mm a");
-            item.description = item.scan_value;
+        if (participant) {
+            let survey = await db("SRVT.SURVEY").where({ SID: participant.SID }).first();
+            let questions = await db("SRVT.QUESTION").where({ SID: participant.SID }).orderBy("ORDER");
+            return res.json({ data: { survey, questions } });
         }
 
-        return res.json({ data: list });
+        res.status(404).send();
     });

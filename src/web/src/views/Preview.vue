@@ -10,6 +10,7 @@
 
 <script>
 import * as config from "../config";
+import store from "../store";
 
 export default {
   name: "Login",
@@ -17,6 +18,9 @@ export default {
     title: `Welcome to ${config.applicationName}`,
   }),
   async created() {
+    let surveyId = 1;
+
+    await store.dispatch("loadSurveyw", surveyId);
   },
 };
 </script>
