@@ -10,9 +10,7 @@ export class SurveyService {
         let t = await this.db.raw(`select "SURVEY"."SID" sid, "SURVEY"."NAME" name, count("PID") as participant_count from "SRVT"."SURVEY"
         INNER JOIN "SRVT"."PARTICIPANT" ON "SURVEY"."SID" = "PARTICIPANT"."SID"
         GROUP BY "SURVEY"."SID", "SURVEY"."NAME"`);
-
-        console.log(t);
-        return t.rows;
+        return t;
     }
 
     async getParticipantsForSurvey(sid: number): Promise<any> {
