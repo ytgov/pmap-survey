@@ -15,7 +15,7 @@ const run = async () => {
         process.exit();
     }
 
-    let choices = surveyList.map(s => `(${s.SID}) ${s.NAME} - ${s.participant_count} participants found`)
+    let choices = surveyList.map(s => `(${s.SID}) ${s.NAME} - ${s.PARTICIPANT_COUNT} participants found`)
 
     let choice = await inquirer.prompt([{
         name: "pick",
@@ -25,7 +25,7 @@ const run = async () => {
     }]);
 
     let choiceId = choice.pick.substring(1, choice.pick.indexOf(")"))
-    let selected = (surveyList.filter(s => s.sid === parseInt(choiceId)))[0];
+    let selected = (surveyList.filter(s => s.SID === parseInt(choiceId)))[0];
 
     let send = await inquirer.prompt([{
         name: "pick",
