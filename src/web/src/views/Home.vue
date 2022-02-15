@@ -1,8 +1,8 @@
 <template>
   <div class="hello">
-    <h1>{{ title }}</h1>
+   <!--  <h1>{{ title }}</h1> -->
     <p>
-      The URL you use to reach this site appears to be incorrect
+      The URL you used to reach this site appears to be incorrect
     </p>
 
   </div>

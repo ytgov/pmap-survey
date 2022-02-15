@@ -1,73 +1,69 @@
 <template>
   <div>
-    <v-card class="default mb-5">
-      <v-card-title>
+    <v-card class="default mb-5 question">
+      <v-card-title class="pb-0" style="min-height: 48px">
         <v-row>
-          <v-col cols="10"> Question {{ index + 1 }}: {{question.ASK}}</v-col>
-          <v-col cols="2"
-            ><div class="float-right">
-              <v-icon
-                color="red"
-                class="float-right"
-                style="width: 40px"
-                title="Question incomplete"
-                v-if="!isValid && question.OPTIONAL == 0"
-                >mdi-alert-octagon</v-icon
-              >
+          <v-col cols="10" class="pb-1" style="line-height: 24px">
+            Question {{ index + 1 }}: {{ question.ASK }} <br />
+            <small
+              :class="!question.isValid() && question.OPTIONAL == 0 ? 'text-error' : ''"
+              >{{ hint }}</small
+            >
+          </v-col>
+          <v-col cols="2" class="pb-1">
+            <div class="float-right">
               <v-icon
                 color="green"
                 class="float-right"
                 style="width: 40px"
                 title="Question complete"
-                v-if="isValid && question.OPTIONAL == 0"
+                v-if="question.isValid() && question.OPTIONAL == 0"
                 >mdi-check-bold</v-icon
               >
-            </div></v-col
-          >
+            </div>
+          </v-col>
         </v-row>
       </v-card-title>
-      <v-card-text>
-        <span>{{ hint }}</span>
+      <v-card-text style="clear: both">
         <div v-if="question.TYPE == 'boolean'">
-          <v-select
-            v-model="answer"
-            :items="['Yes', 'No']"
-            dense
-            outlined
-            hide-details
-            background-color="white"
-          ></v-select>
+          <v-radio-group v-model="question.answer" row hide-details>
+            <v-radio label="Yes" value="Yes"></v-radio>
+            <v-radio label="No" value="No"></v-radio>
+          </v-radio-group>
         </div>
-        <div v-if="question.TYPE == 'range'">
-          <v-select
-            v-model="answer"
-            :items="options"
-            :item-text="'descr'"
-            :item-value="'val'"
-            dense
-            outlined
-            hide-details
-            background-color="white"
-          ></v-select>
+        <div v-else-if="question.TYPE == 'range'">
+          <v-radio-group v-model="question.answer" row hide-details>
+            <v-radio
+              :label="item.descr"
+              :value="item.val"
+              v-for="item of options"
+              :key="item.val"
+            ></v-radio>
+          </v-radio-group>
         </div>
 
-        <div v-if="question.TYPE == 'multi-select'">
-          <v-select
-            v-model="answer"
-            :items="options"
-            :item-text="'descr'"
-            :item-value="'val'"
+        <div v-else-if="question.TYPE == 'multi-select'">
+          <v-combobox
+            class="mt-4"
+            clearable
             dense
-            outlined
+            hide-selected
             hide-details
             multiple
+            outlined
+            small-chips
+            deletable-chips
+            v-model="question.answer"
+            :items="options"
+            :item-text="'descr'"
+            :item-value="'val'"
             background-color="white"
-          ></v-select>
+          ></v-combobox>
         </div>
 
-        <div v-if="question.TYPE == 'select'">
+        <div v-else-if="question.TYPE == 'select'">
           <v-select
-            v-model="answer"
+            v-model="question.answer"
             :items="options"
             :item-text="'descr'"
             :item-value="'val'"
@@ -75,22 +71,51 @@
             outlined
             hide-details
             background-color="white"
+            class="mt-4"
+            v-if="options.length >= 7"
           ></v-select>
+
+          <v-radio-group
+            v-model="question.answer"
+            row
+            hide-details
+            v-if="options.length < 7"
+          >
+            <v-radio
+              :label="item.descr"
+              :value="item.val"
+              v-for="item of options"
+              :key="item.val"
+            ></v-radio>
+          </v-radio-group>
         </div>
 
-        <div v-if="question.TYPE == 'free-text'">
+        <div v-else-if="question.TYPE == 'free-text'">
           <v-textarea
-            :label="question.ASK"
             dense
+            v-model="question.answer"
             outlined
             hide-details
             background-color="white"
+            class="mt-4"
           ></v-textarea>
+        </div>
+        <div v-else>
+          {{question}}
         </div>
       </v-card-text>
     </v-card>
   </div>
 </template>
+
+<style>
+.question .v-label {
+  color: #323232 !important;
+}
+.question .v-radio {
+  padding-top: 12px;
+}
+</style>
 
 <script>
 export default {
@@ -123,16 +148,8 @@ export default {
 
       return hint;
     },
-    isValid: function () {
-      if (this.question.OPTIONAL == 1) return true;
-      let trimAnswer = `${this.answer}`.replace('null','').trim()
-      if (trimAnswer && trimAnswer.length > 0) return true;
-      return false;
-    },
   },
   data: () => ({
-    answer: null,
   }),
-  methods: {},
 };
 </script>

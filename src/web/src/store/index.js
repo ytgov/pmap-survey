@@ -14,11 +14,20 @@ export default new Vuex.Store({
   },
   mutations: {
     SET_SURVEY(state, value) {
+      for (let q of value.questions) {
+        q.answer = null;
+        q.isValid = () => {
+          if (q.OPTIONAL == 1) return true;
+          let trimAnswer = `${q.answer}`.replace("null", "").trim();
+          if (trimAnswer && trimAnswer.length > 0) return true;
+          return false;
+        }
+      }
+
       state.survey = value;
     },
   },
   actions: {
-
     loadSurvey({ commit }, id) {
       axios.get(`${SURVEY_URL}/${id}`)
         .then(resp => { commit("SET_SURVEY", resp.data.data) });

@@ -4,6 +4,7 @@ import Home from "../views/Home.vue";
 import NotFound from "../views/NotFound.vue";
 import Preview from "../views/Preview.vue";
 import Survey from "../views/Survey.vue";
+import Complete from "../views/Complete.vue";
 
 Vue.use(VueRouter);
 
@@ -12,6 +13,11 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home
+  },
+  {
+    path: "/survey/complete",
+    name: "Complete",
+    component: Complete
   },
   {
     path: "/survey/:token",
