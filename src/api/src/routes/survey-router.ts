@@ -26,12 +26,9 @@ surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors
         let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first();
 
         if (participant) {
-
-
             for (let question of questions) {
                 let id = question.QID;
                 let answer = question.answer;
-
 
                 let ans: any = {
                     TOKEN: token,
@@ -44,10 +41,6 @@ surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors
                     ans.TVALUE = JSON.stringify(answer);
                 else
                     ans.TVALUE = answer;
-
-
-
-                console.log(answer, ans)
 
                 await db("SRVT.RESPONSE_LINE").insert(ans);
             }
