@@ -15,7 +15,7 @@ const run = async () => {
         process.exit();
     }
 
-    let choices = surveyList.map(s => `(${s.sid}) ${s.name} - ${s.participant_count} participants found`)
+    let choices = surveyList.map(s => `(${s.SID}) ${s.NAME} - ${s.participant_count} participants found`)
 
     let choice = await inquirer.prompt([{
         name: "pick",
@@ -35,7 +35,7 @@ const run = async () => {
         choices: [SEND_EMAILS, DRY_RUN]
     }]);
 
-    let participants = await service.getParticipantsForSurvey(selected.sid)
+    let participants = await service.getParticipantsForSurvey(selected.SID)
     let mode = send.pick;
 
     if (mode == DRY_RUN) {
