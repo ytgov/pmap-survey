@@ -1,0 +1,39 @@
+#The commented out sections below are for when the application is set up for SSL
+#They should be uncommented out when application is SSL enabled
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pmap-srvt-ingressroute
+  namespace: pmap-srvt
+  #The commented out section below is for SSL redirects
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  entryPoints:
+    #websecure is the entry point for HTTPS connections
+    - websecure
+  routes:
+    - kind: Rule
+      #match requests to this domain
+      match: Host(`pmap-srvt.ynet.gov.yk.ca`)
+      services:
+        - name: pmap-srvt
+          port: 3000
+          weight: 10
+    - kind: Rule
+      #match requests to this domain
+      match: Host(`pmap-srvt.gov.yk.ca`)
+      services:
+        - name: pmap-srvt
+          port: 3000
+          weight: 10
+
+
+  tls:
+    secretName: pmap-srvt-tls-secret
+    domains:
+    - main: pmap-srvt.ynet.gov.yk.ca
+      sans:
+      - pmap-srvt.ynet.gov.yk.ca
+
