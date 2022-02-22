@@ -1,29 +1,41 @@
-FROM node:14-alpine3.10
+FROM oraclelinux:7-slim
 
-RUN mkdir /home/node/app && chown -R node:node /home/node/app
-RUN mkdir /home/node/web && chown -R node:node /home/node/web
+RUN yum upgrade -y && yum install yum-utils
+RUN  yum -y install oracle-release-el7 && \
+     yum-config-manager --enable ol7_oracle_instantclient && \
+     yum -y install oracle-instantclient19.3-basiclite && \
+     rm -rf /var/cache/yum
 
-COPY --chown=node:node src/web/package*.json /home/node/web/
-COPY --chown=node:node src/api/package*.json /home/node/app/
+RUN yum-config-manager --enable *addons
+RUN yum install -y gcc-c++ make libaio
 
-USER node
+RUN curl -sL https://rpm.nodesource.com/setup_13.x | bash -
+RUN yum install -y nodejs
 
-WORKDIR /home/node/app
-RUN npm install && npm cache clean --force --loglevel=error
-COPY --chown=node:node src/api/.env* ./
-
+RUN mkdir /home/node 
+RUN mkdir /home/node/web 
 WORKDIR /home/node/web
+COPY src/web/package*.json ./
 RUN npm install && npm cache clean --force --loglevel=error
+COPY src/web ./
 
-COPY --chown=node:node src/api /home/node/app/
-COPY --chown=node:node src/web /home/node/web/
+RUN mkdir /home/node/app 
+RUN mkdir /home/node/app/db
+WORKDIR /home/node/app
+COPY src/api/package*.json ./
+COPY src/api/.env* ./
 
-RUN npm run build:docker
+ENV NODE_ENV=test
+RUN npm install && npm cache clean --force --loglevel=error
+COPY src/api ./
 
+RUN npm run build
 EXPOSE 3000
 
+WORKDIR /home/node/web
+ENV NODE_ENV=production
+RUN npm run build:docker
+
 WORKDIR /home/node/app
 
-ENV NODE_ENV=production
-RUN npm run build
-CMD [ "node", "./dist/index.js" ]
+CMD ["node", "./dist/index.js"]
