@@ -2,8 +2,8 @@
   <div class="hello">
     <h1>Thank You!</h1>
     <h3>
-      Your answers have been submitted. We appreciate the time you took to
-      respond.
+      Thank you for the taking part in the survey. Your answers will help
+      improve the organization.
     </h3>
     <p>
       <em
@@ -19,9 +19,7 @@
 <script>
 export default {
   name: "Complete",
-  data: () => ({
-  }),
-  async created() {
-  },
+  data: () => ({}),
+  async created() {},
 };
 </script>
