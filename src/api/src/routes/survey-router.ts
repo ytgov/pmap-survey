@@ -8,7 +8,11 @@ export const surveyRouter = express.Router();
 surveyRouter.get("/:token", [param("token").notEmpty()], ReturnValidationErrors,
     async (req: Request, res: Response) => {
         let { token } = req.params;
-        let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first();
+        let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first()
+            .then(r => r)
+            .catch(err => {
+                console.log("DATABASE ERROR: ", err)
+            });
 
         if (participant) {
             let survey = await db("SRVT.SURVEY").where({ SID: participant.SID }).first();

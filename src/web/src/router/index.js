@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import NotFound from "../views/NotFound.vue";
+import SurveyNotFound from "../views/SurveyNotFound.vue";
 import Preview from "../views/Preview.vue";
 import Survey from "../views/Survey.vue";
 import Complete from "../views/Complete.vue";
@@ -20,18 +21,20 @@ const routes = [
     component: Complete
   },
   {
+    path: "/survey/not-found",
+    name: "SurveyNotFound",
+    component: SurveyNotFound
+  },
+  {
     path: "/survey/:token",
     name: "Survey",
     component: Survey
   },
-
   {
     path: "/preview/:token",
     name: "Preview",
     component: Preview
   },
-
-
   {
     path: "*",
     name: "Not Found",
@@ -47,7 +50,7 @@ const router = new VueRouter({
 
 
 router.beforeEach(async (to, from, next) => {
-  
+
   return next();
 });
 

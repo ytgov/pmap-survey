@@ -81,9 +81,12 @@ export default {
     surveyId: "",
     moveOn: false,
   }),
-  async created() {
+  mounted() {
     this.surveyId = this.$route.params.token;
-    await store.dispatch("loadSurvey", this.surveyId);
+    store.dispatch("loadSurvey", this.surveyId).catch((msg) => {
+      console.log("ERROR ON SURVEY GET: ", msg);
+      this.$router.push(`/survey/not-found`);
+    });
   },
   methods: {
     submitSurvey() {
@@ -109,6 +112,9 @@ export default {
           .post(`${SURVEY_URL}/${this.surveyId}`, { questions: qs })
           .then(() => {
             this.$router.push("/survey/complete");
+          })
+          .catch((msg) => {
+            console.log("ERRROR", msg);
           });
       }
     },

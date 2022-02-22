@@ -29,8 +29,8 @@ export default new Vuex.Store({
   },
   actions: {
     loadSurvey({ commit }, id) {
-      axios.get(`${SURVEY_URL}/${id}`)
-        .then(resp => { commit("SET_SURVEY", resp.data.data) });
+      return axios.get(`${SURVEY_URL}/${id}`)
+        .then(resp => { commit("SET_SURVEY", resp.data.data) })
     },
   },
 });
