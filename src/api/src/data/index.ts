@@ -1,5 +1,5 @@
 import * as knex from "knex";
-import { DB_CONFIG, DB_NAME } from "../config";
+import { DB_CONFIG } from "../config";
 
 export const db = knex.knex(DB_CONFIG);
 

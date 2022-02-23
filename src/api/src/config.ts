@@ -35,8 +35,18 @@ export const DB_CONFIG = {
   connection: {
     server: DB_HOST,
     user: DB_USER,
+    password: DB_PASS
+  }
+}
+
+export const DB_CONFIG_DEV = {
+  client: DB_CLIENT,
+  connection: {
+    server: DB_HOST,
+    user: DB_USER,
     password: DB_PASS,
     database: DB_NAME,
     port: DB_PORT
   }
 }
+
