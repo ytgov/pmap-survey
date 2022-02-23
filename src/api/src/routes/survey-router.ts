@@ -11,7 +11,7 @@ surveyRouter.get("/:token", [param("token").notEmpty()], ReturnValidationErrors,
         let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first()
             .then(r => r)
             .catch(err => {
-                console.log("DATABASE ERROR: ", err)
+                res.status(500).send(err);
             });
 
         if (participant) {
