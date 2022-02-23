@@ -100,7 +100,7 @@ export default {
           delete q.RANGE;
           delete q.SELECTION_JSON;
           delete q.OPTIONAL;
-          delete q.ORDER;
+          delete q.ORD;
           delete q.SID;
           delete q.TYPE;
           qs.push(q);

@@ -17,7 +17,7 @@ surveyRouter.get("/:token", [param("token").notEmpty()], ReturnValidationErrors,
 
         if (participant) {
             let survey = await db("SRVT.SURVEY").where({ SID: participant.SID }).first();
-            let questions = await db("SRVT.QUESTION").where({ SID: participant.SID }).orderBy("ORDER");
+            let questions = await db("SRVT.QUESTION").where({ SID: participant.SID }).orderBy("ORD");
             return res.json({ data: { survey, questions } });
         }
 
