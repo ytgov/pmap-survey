@@ -25,13 +25,13 @@
         </v-row>
       </v-card-title>
       <v-card-text style="clear: both">
-        <div v-if="question.TYPE == '1'">
+        <div v-if="question.TYPE == 'boolean'">
           <v-radio-group v-model="question.answer" row hide-details>
             <v-radio label="Yes" value="Yes"></v-radio>
             <v-radio label="No" value="No"></v-radio>
           </v-radio-group>
         </div>
-        <div v-else-if="question.TYPE == '4'">
+        <div v-else-if="question.TYPE == 'range'">
           <v-radio-group v-model="question.answer" row hide-details>
             <v-radio
               :label="item.descr"
@@ -42,7 +42,7 @@
           </v-radio-group>
         </div>
 
-        <div v-else-if="question.TYPE == '3'">
+        <div v-else-if="question.TYPE == 'multi-select'">
           <v-combobox
             class="mt-4"
             clearable
@@ -61,7 +61,7 @@
           ></v-combobox>
         </div>
 
-        <div v-else-if="question.TYPE == '5'">
+        <div v-else-if="question.TYPE == 'select'">
           <v-select
             v-model="question.answer"
             :items="options"
@@ -90,7 +90,7 @@
           </v-radio-group>
         </div>
 
-        <div v-else-if="question.TYPE == '2'">
+        <div v-else-if="question.TYPE == 'free-text'">
           <v-textarea
             dense
             v-model="question.answer"
