@@ -1,27 +1,37 @@
 <template>
   <div class="hello">
-    <h1>You have been asked to complete {{ survey.survey.NAME }}</h1>
+    <h1>
+      We'd like to hear from you. Please take the {{ survey.survey.NAME }}
+    </h1>
     <p>{{ survey.survey.DESCRIPTION }}</p>
 
     <div v-if="!moveOn">
       <v-card class="default">
         <v-card-text>
           <p>
-            Your participation in this survey is completely voluntary. Your
-            answers are kept securely on a Government of Yukon server and is
-            stored in an non-identifiable format.
+            Your participation in this survey is voluntary, and you may submit
+            your responses only once.
           </p>
+
           <p>
-            Only non-identifiable and aggregated informtion will be used in
-            reporting results. By participation in this survey, you agree that
-            the information can be used inform on business improvement and more
-            efficient general public service program planning.
+            Your answers are kept securely on a Yukon Government server and are
+            stored in a non-identifiable format.
           </p>
+
+          <p>
+            Only non-identifiable and aggregated information will be used when
+            reporting results. By participating in this survey, you consent that
+            your information can be used to inform business improvement and
+            program planning initiatives towards creating a more efficient
+            public service.
+          </p>
+
           <p>
             If you have any questions about the collection, use or disclosure of
-            your personal information, contact the Director, People, Metrics,
+            your personal information, contact the Director, People Metrics,
             Analytics and Projects Branch at (867) 332-2738 or in person at:
           </p>
+
           <p class="ml-3">
             Main Administration Building, <br />2071 2nd Ave.<br />
             Whitehorse YT, Y1A 1B2

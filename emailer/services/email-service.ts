@@ -17,15 +17,15 @@ export class EmailService {
             this.TRANSPORT = nodemailer.createTransport(MAIL_CONFIG_DEV as TransportOptions);
     }
 
-    async sendSurveyEmail(participant: any): Promise<any> {
-        return this.sendEmail(participant.EMAIL, participant.TOKEN, "Survey");
+    async sendSurveyEmail(participant: any, survey: any): Promise<any> {
+        return this.sendEmail(participant.EMAIL, participant.TOKEN, `Please take the ${survey.NAME}`, survey.DESCRIPTION);
     }
 
-    async sendEmail(toEmail: string, token: string, subject: string): Promise<any> {
+    async sendEmail(toEmail: string, token: string, subject: string, customContent: string): Promise<any> {
         let basePath = path.join(__dirname, BASE_TEMPLATE);
         let baseContent = fs.readFileSync(basePath).toString();
 
-        //baseContent = baseContent.replace(/``CUSTOM_CONTENT``/, customContent);
+        baseContent = baseContent.replace(/``CUSTOM_CONTENT``/, customContent);
         baseContent = baseContent.replace(/``APPLICATION_URL``/g, FRONTEND_URL);
         baseContent = baseContent.replace(/``SURVEY_URL``/g, `${FRONTEND_URL}/survey/${token}`);
         baseContent = baseContent.replace(/``APPLICATION_NAME``/g, APPLICATION_NAME);

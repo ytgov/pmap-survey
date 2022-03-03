@@ -45,13 +45,12 @@ const run = async () => {
         let emailer = new EmailService();
 
         for (let p of participants) {
-            let resp = await emailer.sendSurveyEmail(p);
+            let resp = await emailer.sendSurveyEmail(p, selected);
+
+            // try and capture the status of the SMTP call
             console.log(resp)
         }
     }
-
-
-    // try and capture the status of the SMTP call
 
     process.exit();
 }
