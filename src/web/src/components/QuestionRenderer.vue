@@ -3,14 +3,11 @@
     <v-card class="default mb-5 question">
       <v-card-title class="pb-0" style="min-height: 48px">
         <v-row>
-          <v-col cols="10" class="pb-1" style="line-height: 24px">
-            Question {{ index + 1 }}: {{ question.ASK }} <br />
-            <small
-              :class="!question.isValid() && question.OPTIONAL == 0 ? 'text-error' : ''"
-              >{{ hint }}</small
-            >
+          <v-col cols="11" class="pb-1" style="line-height: 24px">
+            Question {{ index + 1 }}: {{ question.ASK }}
+            <span v-if="question.OPTIONAL == 0" class="text-error">*</span>
           </v-col>
-          <v-col cols="2" class="pb-1">
+          <v-col cols="1" class="py-1">
             <div class="float-right">
               <v-icon
                 color="green"
@@ -26,24 +23,25 @@
       </v-card-title>
       <v-card-text style="clear: both">
         <div v-if="question.TYPE == 'boolean'">
-          <v-radio-group v-model="question.answer" row hide-details>
-            <v-radio label="Yes" value="Yes"></v-radio>
-            <v-radio label="No" value="No"></v-radio>
+          <v-radio-group v-model="question.answer" hide-details>
+            <v-radio label="Yes" value="Yes" class="pt-1"></v-radio>
+            <v-radio label="No" value="No" class="pt-1"></v-radio>
           </v-radio-group>
         </div>
         <div v-else-if="question.TYPE == 'range'">
-          <v-radio-group v-model="question.answer" row hide-details>
+          <v-radio-group v-model="question.answer" hide-details>
             <v-radio
               :label="item.descr"
               :value="item.val"
               v-for="item of options"
               :key="item.val"
+              class="pt-1"
             ></v-radio>
           </v-radio-group>
         </div>
 
         <div v-else-if="question.TYPE == 'multi-select'">
-          <v-combobox
+          <v-autocomplete
             class="mt-4"
             clearable
             dense
@@ -53,12 +51,13 @@
             outlined
             small-chips
             deletable-chips
+            
             v-model="question.answer"
             :items="options"
             :item-text="'descr'"
             :item-value="'val'"
             background-color="white"
-          ></v-combobox>
+          ></v-autocomplete>
         </div>
 
         <div v-else-if="question.TYPE == 'select'">
@@ -77,7 +76,6 @@
 
           <v-radio-group
             v-model="question.answer"
-            row
             hide-details
             v-if="options.length < 7"
           >
@@ -86,8 +84,20 @@
               :value="item.val"
               v-for="item of options"
               :key="item.val"
+              class="pt-1"
             ></v-radio>
           </v-radio-group>
+
+          <div v-if="allowCustomText" class="mt-4 pl-5">
+            <p class="mb-2">{{ customTextAsk }}</p>
+            <v-text-field
+              v-model="question.answer_text"
+              dense
+              outlined
+              hide-details
+              background-color="white"
+            ></v-text-field>
+          </div>
         </div>
 
         <div v-else-if="question.TYPE == 'free-text'">
@@ -101,7 +111,7 @@
           ></v-textarea>
         </div>
         <div v-else>
-          {{question}}
+          {{ question }}
         </div>
       </v-card-text>
     </v-card>
@@ -138,9 +148,9 @@ export default {
     hint: function () {
       let hint = "";
       if (this.question.OPTIONAL == 0) {
-        hint = "* Required";
+        hint = "*";
       } else {
-        hint = "* Optional";
+        hint = "";
       }
 
       if (this.question.TYPE == "multi-select")
@@ -148,8 +158,42 @@ export default {
 
       return hint;
     },
+    selectedOption: function () {
+      return this.options.find((o) => o.val == this.question.answer);
+    },
+    allowCustomText: function () {
+      if (
+        this.selectedOption &&
+        this.selectedOption.allow_custom &&
+        this.selectedOption.allow_custom == "true"
+      ) {
+        return true;
+      }
+      return false;
+    },
+    customTextAsk: function () {
+      if (this.allowCustomText) {
+        return this.selectedOption.custom_ask;
+      }
+      return "";
+    },
   },
-  data: () => ({
-  }),
+  data: () => ({}),
+  methods: {
+    checkCustom() {
+      console.log(this.selectedOption);
+
+      if (
+        this.selectedOption &&
+        this.selectedOption.allow_custom &&
+        this.selectedOption.allow_custom == "true"
+      ) {
+        this.showCustomField = true;
+      } else {
+        this.showCustomField = false;
+        this.question.answer_text = "";
+      }
+    },
+  },
 };
 </script>

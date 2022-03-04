@@ -32,5 +32,9 @@ export default new Vuex.Store({
       return axios.get(`${SURVEY_URL}/${id}`)
         .then(resp => { commit("SET_SURVEY", resp.data.data) })
     },
+    loadSurveyPreview({ commit }, id) {
+      return axios.get(`${SURVEY_URL}/${id}/preview`)
+        .then(resp => { commit("SET_SURVEY", resp.data.data) })
+    },
   },
 });

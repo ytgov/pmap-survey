@@ -1,7 +1,9 @@
 <template>
   <div class="hello">
     <h1>{{ survey.survey.PAGE_TITLE }}</h1>
-    <p class="lead" style="font-size: 1.2rem; font-weight: 300">{{ survey.survey.DESCRIPTION }}</p>
+    <p class="lead" style="font-size: 1.2rem; font-weight: 300">
+      {{ survey.survey.DESCRIPTION }}
+    </p>
 
     <div v-if="!moveOn">
       <v-card class="default">
@@ -51,17 +53,25 @@
         This survey consists of {{ survey.questions.length }} questions. Once
         completed, please press 'Submit' at the bottom.
       </h4>
-
-      <div v-for="(question, idx) of survey.questions" :key="idx">
-        <question-renderer
-          :index="idx"
-          :question="question"
-        ></question-renderer>
+      <div class="row">
+        <div class="col-sm-12 col-md-9 col-lg-7">
+          <div v-for="(question, idx) of survey.questions" :key="idx">
+            <question-renderer
+              :index="idx"
+              :question="question"
+            ></question-renderer>
+          </div>
+        </div>
       </div>
 
-      <v-btn color="primary" :disabled="!allValid" @click="submitSurvey"
-        >Submit</v-btn
-      >
+      <v-btn color="primary" :disabled="!allValid" @click="submitSurvey">
+        Submit
+      </v-btn>
+
+      <span style="font-size: 0.9rem" class="pl-4 text-error" v-if="!allValid">
+        * Not all required questions have answers (look for the red asterisks
+        next to the question)
+      </span>
     </div>
   </div>
 </template>

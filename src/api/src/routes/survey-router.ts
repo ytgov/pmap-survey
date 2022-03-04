@@ -25,6 +25,19 @@ surveyRouter.get("/:token", [param("token").notEmpty()], ReturnValidationErrors,
         res.status(404).send();
     });
 
+surveyRouter.get("/:token/preview", [param("token").notEmpty()], ReturnValidationErrors,
+    async (req: Request, res: Response) => {
+        let { token } = req.params;
+
+        let survey = await db("SRVT.SURVEY").where({ SID: token }).first();
+
+        if (survey) {
+            let questions = await db("SRVT.QUESTION").where({ SID: token }).orderBy("ORD");
+            return res.json({ data: { survey, questions } });
+        }
+        res.status(404).send();
+    });
+
 surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors,
     async (req: Request, res: Response) => {
         let { token } = req.params;
@@ -35,6 +48,7 @@ surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors
             for (let question of questions) {
                 let id = question.QID;
                 let answer = question.answer;
+                let answer_text = question.answer_text
 
                 let ans: any = {
                     TOKEN: token,
@@ -47,6 +61,10 @@ surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors
                     ans.TVALUE = JSON.stringify(answer);
                 else
                     ans.TVALUE = answer;
+
+                if (answer_text && answer_text.length > 0) {
+                    ans.TVALUE = answer_text;
+                }
 
                 await db("SRVT.RESPONSE_LINE").insert(ans);
             }
