@@ -1,13 +1,22 @@
 import { EmailService } from "./services/email-service.js"
 import { SurveyService } from "./services/survey-service.js"
-import * as config from "./config.js"
 import inquirer from "inquirer";
 
 const DRY_RUN = "Dry run";
 const SEND_EMAILS = "Send emails";
 
 const run = async () => {
-    let service = new SurveyService();
+
+    let userQ = await inquirer.prompt([{
+        name: "username",
+        message: "Enter the database username",
+    }]);
+    let passQ = await inquirer.prompt([{
+        name: "password",
+        message: "Enter the database password",
+    }]);
+
+    let service = new SurveyService(userQ.username, passQ.password);
     let surveyList = await service.getSurveysWithParticipants();
 
     if (surveyList.length == 0) {
