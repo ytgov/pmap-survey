@@ -1,14 +1,15 @@
 <template>
   <div class="hello">
-    <h1>
-      We'd like to hear from you. Please take the {{ survey.survey.NAME }}
-    </h1>
-    <p>{{ survey.survey.DESCRIPTION }}</p>
+    <h1>{{ survey.survey.PAGE_TITLE }}</h1>
+    <p class="lead" style="font-size: 1.2rem; font-weight: 300">{{ survey.survey.DESCRIPTION }}</p>
 
     <div v-if="!moveOn">
       <v-card class="default">
         <v-card-text>
-          <p>
+          <div v-html="survey.survey.PAGE_INTRO"></div>
+
+          <!--
+            <p>
             Your participation in this survey is voluntary, and you may submit
             your responses only once.
           </p>
@@ -36,6 +37,7 @@
             Main Administration Building, <br />2071 2nd Ave.<br />
             Whitehorse YT, Y1A 1B2
           </p>
+          -->
 
           <v-btn @click="moveOn = true" large color="primary"
             >Continue to Survey</v-btn
