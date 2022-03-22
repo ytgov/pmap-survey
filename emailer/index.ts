@@ -20,7 +20,7 @@ const run = async () => {
     let surveyList = await service.getSurveysWithParticipants();
 
     if (surveyList.length == 0) {
-        console.log("We didn't find ay active surveys - Exiting");
+        console.log("We didn't find ay active surveys with participants - Exiting");
         process.exit();
     }
 
@@ -55,6 +55,8 @@ const run = async () => {
 
         for (let p of participants) {
             let resp = await emailer.sendSurveyEmail(p, selected);
+
+            await service.recordSentDate(p);
 
             // try and capture the status of the SMTP call
             console.log(resp)
