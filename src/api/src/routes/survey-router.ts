@@ -8,7 +8,15 @@ export const surveyRouter = express.Router();
 surveyRouter.get("/:token", [param("token").notEmpty()], ReturnValidationErrors,
     async (req: Request, res: Response) => {
         let { token } = req.params;
-        let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first()
+
+        let p = db("SRVT.PARTICIPANT")
+            .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+            .where({ "PARTICIPANT.TOKEN": token }).whereNotNull("EMAIL").first()
+
+        let participant = await db("SRVT.PARTICIPANT")
+            .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+            .where({ "PARTICIPANT.TOKEN": token }).whereNotNull("EMAIL")
+            .select("PARTICIPANT.*").first()
             .then(r => r)
             .catch(err => {
                 console.log("DATABASE CONNECTION ERROR", err);
@@ -42,7 +50,10 @@ surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors
     async (req: Request, res: Response) => {
         let { token } = req.params;
         let { questions } = req.body;
-        let participant = await db("SRVT.PARTICIPANT").where({ TOKEN: token }).first();
+        let participant = await db("SRVT.PARTICIPANT")
+            .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+            .where({ "PARTICIPANT.TOKEN": token }).whereNotNull("EMAIL")
+            .select("PARTICIPANT.*").first();
 
         if (participant) {
             for (let question of questions) {
@@ -68,6 +79,8 @@ surveyRouter.post("/:token", [param("token").notEmpty()], ReturnValidationErrors
 
                 await db("SRVT.RESPONSE_LINE").insert(ans);
             }
+
+            await db("SRVT.PARTICIPANT_DATA").where({ "TOKEN": token }).update({ "EMAIL": null, "RESPONSE_DATE": new Date() });
 
             return res.json({ data: {}, messages: [{ variant: "success" }] });
         }
