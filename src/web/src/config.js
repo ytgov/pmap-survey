@@ -1,4 +1,4 @@
-export const applicationName = "PMAP Survey Tool";
+export const applicationName = "Polus Surveys";
 export const applicationIcon = "mdi-cash-register";
 export const hasSidebar = true;
 export const hasSidebarClosable = false;
