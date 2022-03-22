@@ -16,7 +16,7 @@ export class SurveyService {
 		INNER JOIN "SRVT"."PARTICIPANT_DATA" ON "PARTICIPANT"."TOKEN" = "PARTICIPANT_DATA"."TOKEN"
 		WHERE "PARTICIPANT_DATA"."EMAIL" IS NOT NULL AND "PARTICIPANT_DATA"."RESENT_DATE" IS NULL
         GROUP BY "SURVEY"."SID", "SURVEY"."NAME", "SURVEY"."DESCRIPTION"`);
-        return t.rows;
+        return t;
     }
 
     async getParticipantsForSurvey(sid: number): Promise<any> {
