@@ -63,6 +63,7 @@ surveyRouter.post(
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
     let { questions, contact } = req.body;
+    
     let participant = await db("SRVT.PARTICIPANT")
       .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
       .where({ "PARTICIPANT.TOKEN": token })
@@ -95,8 +96,6 @@ surveyRouter.post(
       //await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).update({ EMAIL: null, RESPONSE_DATE: new Date() });
 
       if (contact) {
-        console.log("WANTS TO BE CONTACTED");
-
         await db("SRVT.CONTACT_REQUEST").insert({
           SID: participant.SID,
           REQUEST_EMAIL: participant.EMAIL,
