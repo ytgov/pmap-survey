@@ -93,7 +93,7 @@ surveyRouter.post(
         await db("SRVT.RESPONSE_LINE").insert(ans);
       }
 
-      //await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).update({ EMAIL: null, RESPONSE_DATE: new Date() });
+      await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).update({ EMAIL: null, RESPONSE_DATE: new Date() });
 
       if (contact) {
         await db("SRVT.CONTACT_REQUEST").insert({

@@ -142,7 +142,7 @@ export default {
         axios
           .post(`${SURVEY_URL}/${this.surveyId}`, { questions: qs, contact: this.contactMe })
           .then(() => {
-            //this.$router.push("/survey/complete");
+            this.$router.push("/survey/complete");
           })
           .catch((msg) => {
             console.log("ERRROR", msg);
