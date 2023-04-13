@@ -19,5 +19,16 @@ services:
       - pg-data:/var/lib/postgresql/data
       - ./db/secrets/:/run/secrets
 
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: michael@icefoganalytics.com
+      PGADMIN_DEFAULT_PASSWORD: sugaray99
+    ports:
+      - "8111:80"
+    volumes:
+      - my-data:/var/lib/pgadmin
+      
 volumes:
   pg-data:
+  my-data:
