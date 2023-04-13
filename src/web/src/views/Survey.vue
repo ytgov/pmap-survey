@@ -83,6 +83,7 @@
         * Not all required questions have answers (look for the red asterisks next to the question)
       </span>
     </div>
+    <Notifications ref="notify"></Notifications>
   </div>
 </template>
 
@@ -91,6 +92,7 @@ import axios from "axios";
 import store from "../store";
 import { SURVEY_URL } from "../urls";
 import _ from "lodash";
+import Notifications from "../components/Notifications.vue";
 
 export default {
   name: "Login",
@@ -100,12 +102,10 @@ export default {
     },
     allValid: function() {
       let v = true;
-
       for (let q of this.survey.questions) {
         let qv = q.isValid();
         v = v && qv;
       }
-
       return v;
     },
   },
@@ -125,10 +125,8 @@ export default {
     submitSurvey() {
       if (this.allValid) {
         let qs = [];
-
         for (let sq of this.survey.questions) {
           let q = _.clone(sq);
-
           delete q.ASK;
           delete q.RANGE;
           delete q.SELECTION_JSON;
@@ -138,18 +136,19 @@ export default {
           delete q.TYPE;
           qs.push(q);
         }
-
         axios
           .post(`${SURVEY_URL}/${this.surveyId}`, { questions: qs, contact: this.contactMe })
           .then(() => {
             this.$router.push("/survey/complete");
           })
           .catch((msg) => {
-            console.log("ERRROR", msg);
+            this.$refs.notify.showError(msg.response.data);
+            console.log("ERROR", msg);
           });
       }
     },
   },
+  components: { Notifications },
 };
 </script>
 
