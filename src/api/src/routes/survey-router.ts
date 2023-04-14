@@ -63,7 +63,7 @@ surveyRouter.post(
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
     let { questions, contact } = req.body;
-    
+
     let participant = await db("SRVT.PARTICIPANT")
       .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
       .where({ "PARTICIPANT.TOKEN": token })
@@ -106,7 +106,7 @@ surveyRouter.post(
       return res.json({ data: {}, messages: [{ variant: "success" }] });
     }
 
-    res.status(404).send();
+    res.status(404).send("Sorry, it appears that you have already completed this survey.");
   }
 );
 
