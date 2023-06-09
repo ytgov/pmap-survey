@@ -32,12 +32,8 @@ export const API_GATEWAY_KEY = process.env.API_GATEWAY_KEY || "";
 
 export const DB_CONFIG = {
   client: DB_CLIENT,
-  connection: {
-    connectString: DB_HOST,
-    user: DB_USER,
-    password: DB_PASS
-  }
-}
+  connection: { host: DB_HOST, user: DB_USER, password: DB_PASS, database: DB_NAME, port: DB_PORT },
+};
 
 export const DB_CONFIG_DEV = {
   client: DB_CLIENT,
@@ -46,7 +42,6 @@ export const DB_CONFIG_DEV = {
     user: DB_USER,
     password: DB_PASS,
     database: DB_NAME,
-    port: DB_PORT
-  }
-}
-
+    port: DB_PORT,
+  },
+};
