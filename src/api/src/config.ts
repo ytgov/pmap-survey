@@ -45,3 +45,27 @@ export const DB_CONFIG_DEV = {
     port: DB_PORT,
   },
 };
+
+export const MAIL_FROM = process.env.MAIL_FROM || "test@yukon.ca";
+export const MAIL_HOST = process.env.MAIL_HOST || "smtp.gov.yk.ca";
+export const MAIL_PORT = process.env.MAIL_PORT || 587;
+export const MAIL_USER = process.env.MAIL_USER || "";
+export const MAIL_PASS = process.env.MAIL_PASS || "";
+
+export const MAIL_CONFIG_DEV = {
+  host: MAIL_HOST,
+  port: MAIL_PORT,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: MAIL_USER,
+    pass: MAIL_PASS,
+  },
+};
+
+export const MAIL_CONFIG = {
+  host: MAIL_HOST,
+  port: MAIL_PORT,
+  secure: false, // true for 465, false for other ports
+};
+
+export const APPLICATION_NAME = process.env.APPLICATION_NAME || "Survey Tool";
