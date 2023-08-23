@@ -12,7 +12,8 @@ integrationRouter.get("/suppress/:token", async (req: Request, res: Response) =>
   const { token } = req.params;
 
   const db = knex.knex(DB_CONFIG);
-  let resp = await db.raw(`BEGIN SRVT.UPDATE_SUPPRESSION(?); END;`, [token]);
+  let value = -1;
+  let resp = await db.raw(`BEGIN SRVT.UPDATE_SUPRESSION(?, ?, ?); END;`, [token, "D", value]);
 
-  return res.json({ data: resp });
+  res.json({ data: resp, value });
 });
