@@ -1,12 +1,38 @@
 import express, { Request, Response } from "express";
-import { ReturnValidationErrors } from "../middleware";
-import { param } from "express-validator";
 import * as knex from "knex";
 import { DB_CONFIG } from "../config";
+import { EmailService } from "../services";
 
 export const integrationRouter = express.Router();
 
-integrationRouter.get("/emailer", async (req: Request, res: Response) => {});
+integrationRouter.get("/emailer/:surveyId", async (req: Request, res: Response) => {
+  const { surveyId } = req.params;
+  const db = knex.knex(DB_CONFIG);
+
+  let survey = await db("SRVT.SURVEY").where({ SID: surveyId }).first();
+
+  let participants = await db("SRVT.PARTICIPANT")
+    .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .where({ SID: surveyId })
+    .whereNull("RESPONSE_DATE")
+    .whereNotNull("EMAIL")
+    .whereNull("RESENT_DATE")
+    .select("EMAIL", "PARTICIPANT.TOKEN");
+
+  let emailer = new EmailService();
+
+  for (let p of participants) {
+    
+    //let resp = await emailer.sendSurveyEmail(p, survey);
+
+    //await recordSentDate(p);
+
+    // try and capture the status of the SMTP call
+    //console.log(resp);
+  }
+
+  res.json({ data: { survey, participant_count: participants.length, participants } });
+});
 
 integrationRouter.get("/suppress/:token", async (req: Request, res: Response) => {
   const { token } = req.params;
@@ -17,3 +43,17 @@ integrationRouter.get("/suppress/:token", async (req: Request, res: Response) =>
 
   res.json({ data: resp, value });
 });
+
+async function recordSentDate(participant: any): Promise<any> {
+  const db = knex.knex(DB_CONFIG);
+  let token = participant.TOKEN;
+  let data = await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).first();
+
+  if (data.SENT_DATE) {
+    await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).update({ RESENT_DATE: new Date() });
+  } else {
+    await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).update({ SENT_DATE: new Date() });
+  }
+
+  return Promise.resolve(true);
+}
