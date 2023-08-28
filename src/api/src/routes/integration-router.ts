@@ -22,11 +22,35 @@ integrationRouter.get("/emailer/:surveyId", async (req: Request, res: Response) 
   let emailer = new EmailService();
 
   for (let p of participants) {
-    
+    let resp = await emailer.sendSurveyEmail(p, survey);
+    await recordSentDate(p);
+
+    // try and capture the status of the SMTP call
+    //console.log(resp);
+  }
+
+  res.json({ data: { survey, participant_count: participants.length, participants } });
+});
+
+integrationRouter.get("/emailer/:surveyId/preview", async (req: Request, res: Response) => {
+  const { surveyId } = req.params;
+  const db = knex.knex(DB_CONFIG);
+
+  let survey = await db("SRVT.SURVEY").where({ SID: surveyId }).first();
+
+  let participants = await db("SRVT.PARTICIPANT")
+    .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .where({ SID: surveyId })
+    .whereNull("RESPONSE_DATE")
+    .whereNotNull("EMAIL")
+    .whereNull("RESENT_DATE")
+    .select("EMAIL", "PARTICIPANT.TOKEN");
+
+  let emailer = new EmailService();
+
+  for (let p of participants) {
     //let resp = await emailer.sendSurveyEmail(p, survey);
-
     //await recordSentDate(p);
-
     // try and capture the status of the SMTP call
     //console.log(resp);
   }
