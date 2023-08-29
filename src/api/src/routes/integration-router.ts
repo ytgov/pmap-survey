@@ -26,7 +26,7 @@ integrationRouter.get("/emailer/:surveyId", async (req: Request, res: Response) 
     await recordSentDate(p);
 
     // try and capture the status of the SMTP call
-    //console.log(resp);
+    console.log(resp);
   }
 
   res.json({ data: { survey, participant_count: participants.length, participants } });
@@ -65,7 +65,10 @@ integrationRouter.get("/suppress/:token", async (req: Request, res: Response) =>
   let value = -1;
   let resp = await db.raw(`BEGIN SRVT.UPDATE_SUPRESSION(?, ?, ?); END;`, [token, "D", value]);
 
-  res.json({ data: resp, value });
+  console.log(resp);
+  // Participant successfully removed from survey or Participant not found in database
+
+  res.send("Participant successfully removed from survey");
 });
 
 async function recordSentDate(participant: any): Promise<any> {
