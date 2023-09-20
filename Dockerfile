@@ -38,4 +38,6 @@ RUN npm run build:docker
 
 WORKDIR /home/node/app
 
+COPY --chown=node:node src/api/src/templates/* /home/node/app/dist/templates/
+
 CMD ["node", "./dist/index.js"]
