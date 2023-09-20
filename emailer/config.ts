@@ -18,7 +18,7 @@ export const NODE_ENV = process.env.NODE_ENV || "development";
 
 export const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:8080";
 
-export const MAIL_FROM = process.env.MAIL_FROM || "test@yukon.ca";
+export const MAIL_FROM = process.env.MAIL_FROM || "PMAPService@yukon.ca";
 export const MAIL_HOST = process.env.MAIL_HOST || "smtp.gov.yk.ca";
 export const MAIL_PORT = process.env.MAIL_PORT || 587;
 export const MAIL_USER = process.env.MAIL_USER || "";
