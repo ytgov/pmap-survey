@@ -15,10 +15,22 @@ export class EmailService {
   }
 
   async sendSurveyEmail(participant: any, survey: any): Promise<any> {
-    return this.sendEmail(participant.EMAIL, participant.TOKEN, `Please take the ${survey.NAME}`, survey.DESCRIPTION);
+    return this.sendEmail(
+      participant.EMAIL,
+      participant.TOKEN,
+      `Please take the ${survey.NAME}`,
+      survey.DESCRIPTION,
+      survey.PAGE_TITLE
+    );
   }
 
-  async sendEmail(toEmail: string, token: string, subject: string, customContent: string): Promise<any> {
+  async sendEmail(
+    toEmail: string,
+    token: string,
+    subject: string,
+    customContent: string,
+    fromName: string = "PMAP Service"
+  ): Promise<any> {
     let basePath = path.join(__dirname, BASE_TEMPLATE);
     let baseContent = fs.readFileSync(basePath).toString();
 
@@ -30,7 +42,7 @@ export class EmailService {
     baseContent = baseContent.replace(/``TO_EMAIL``/g, toEmail);
 
     let message: MailOptions = {
-      from: MAIL_FROM,
+      from: `"${fromName}" <${MAIL_FROM}>`,
       to: `${toEmail}`,
       subject: `${subject}`,
       html: baseContent,
