@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div class="hello" v-if="survey.survey && survey.survey.PAGE_TITLE">
     <h1>{{ survey.survey.PAGE_TITLE }}</h1>
     <p class="lead" style="font-size: 1.2rem; font-weight: 300">
       {{ survey.survey.DESCRIPTION }}
@@ -9,40 +9,8 @@
       <v-card class="default">
         <v-card-text>
           <div v-html="survey.survey.PAGE_INTRO"></div>
-
-          <!--
-            <p>
-            Your participation in this survey is voluntary, and you may submit
-            your responses only once.
-          </p>
-
-          <p>
-            Your answers are kept securely on a Yukon Government server and are
-            stored in a non-identifiable format.
-          </p>
-
-          <p>
-            Only non-identifiable and aggregated information will be used when
-            reporting results. By participating in this survey, you consent that
-            your information can be used to inform business improvement and
-            program planning initiatives towards creating a more efficient
-            public service.
-          </p>
-
-          <p>
-            If you have any questions about the collection, use or disclosure of
-            your personal information, contact the Director, People Metrics,
-            Analytics and Projects Branch at (867) 332-2738 or in person at:
-          </p>
-
-          <p class="ml-3">
-            Main Administration Building, <br />2071 2nd Ave.<br />
-            Whitehorse YT, Y1A 1B2
-          </p>
-          -->
-
-          <v-btn @click="moveOn = true" large color="primary">Continue to Survey</v-btn></v-card-text
-        >
+          <v-btn @click="moveOn = true" large color="primary">Continue to Survey</v-btn>
+        </v-card-text>
       </v-card>
     </div>
 
@@ -62,9 +30,7 @@
             <v-card class="default mb-5 question">
               <v-card-title class="pb-0" style="min-height: 48px">
                 <v-row>
-                  <v-col cols="12" class="pb-1" style="line-height: 24px">
-                    Regarding this survey...
-                  </v-col>
+                  <v-col cols="12" class="pb-1" style="line-height: 24px"> Regarding this survey... </v-col>
                 </v-row>
               </v-card-title>
               <v-card-text style="clear: both">
@@ -75,9 +41,7 @@
         </div>
       </div>
 
-      <v-btn color="primary" :disabled="!allValid" @click="submitSurvey">
-        Submit
-      </v-btn>
+      <v-btn color="primary" :disabled="!allValid" @click="submitSurvey"> Submit </v-btn>
 
       <span style="font-size: 0.9rem" class="pl-4 text-error" v-if="!allValid">
         * Not all required questions have answers (look for the red asterisks next to the question)
@@ -89,7 +53,8 @@
 
 <script>
 import axios from "axios";
-import store from "../store";
+import { mapActions, mapState } from "pinia";
+import { useSurveyStore } from "@/store/SurveyStore";
 import { SURVEY_URL } from "../urls";
 import _ from "lodash";
 import Notifications from "../components/Notifications.vue";
@@ -97,10 +62,9 @@ import Notifications from "../components/Notifications.vue";
 export default {
   name: "Login",
   computed: {
-    survey: function() {
-      return store.getters.survey;
-    },
-    allValid: function() {
+    ...mapState(useSurveyStore, ["survey"]),
+
+    allValid: function () {
       let v = true;
       for (let q of this.survey.questions) {
         let qv = q.isValid();
@@ -116,12 +80,14 @@ export default {
   }),
   mounted() {
     this.surveyId = this.$route.params.token;
-    store.dispatch("loadSurvey", this.surveyId).catch((msg) => {
+    this.loadSurvey(this.surveyId).catch((msg) => {
       console.log("ERROR ON SURVEY GET: ", msg);
       this.$router.push(`/survey/not-found`);
     });
   },
   methods: {
+    ...mapActions(useSurveyStore, ["loadSurvey"]),
+
     submitSurvey() {
       if (this.allValid) {
         let qs = [];

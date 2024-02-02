@@ -20,6 +20,8 @@ console.log(`LOADING ${NODE_ENV} CONFIG FROM ${path}`);
 export const API_PORT = process.env.API_PORT || "3000";
 export const FRONTEND_URL = process.env.FRONTEND_URL || "";
 export const AUTH_REDIRECT = process.env.AUTH_REDIRECT || "";
+export const AUTH0_DOMAIN = `${process.env.AUTH0_DOMAIN}` || "";
+export const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE;
 
 export const DB_USER = process.env.DB_USER || "postgres";
 export const DB_PASS = process.env.DB_PASS || "";
@@ -69,3 +71,6 @@ export const MAIL_CONFIG = {
 };
 
 export const APPLICATION_NAME = process.env.APPLICATION_NAME || "Survey Tool";
+
+export const DB_SCHEMA = process.env.DB_SCHEMA || "";
+export const DB_USER_TABLE = process.env.DB_USER_TABLE || "";

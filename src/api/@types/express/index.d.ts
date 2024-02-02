@@ -1,10 +1,10 @@
-
 namespace Express {
-    export interface Request {
-        user?: any;
-        store?: any;
-        oidc?: any;
+  export interface Request {
+    user?: any;
+    store?: any;
+    oidc?: any;
+    auth?: any;
 
-        isAuthenticated(): boolean;
-    }
+    isAuthenticated(): boolean;
+  }
 }
