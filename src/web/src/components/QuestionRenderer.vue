@@ -1,11 +1,14 @@
 <template>
   <div>
     <v-card class="default mb-5 question">
-      <v-card-title class="pb-0" style="min-height: 48px">
+      <v-card-text style="clear: both">
         <v-row>
-          <v-col cols="11" class="pb-1" style="line-height: 24px">
-            Question {{ index + 1 }}: {{ question.ASK }}
-            <span v-if="question.OPTIONAL == 0" class="text-error">*</span>
+          <v-col cols="11" class="pb-1 text-heading2" style="line-height: 24px">
+            <div v-if="question.TYPE == 'text'" v-html="renderMarkdown(question.ASK)" class="pb-2"></div>
+            <h3 v-else>
+              Question {{ index + 1 }}: {{ question.ASK }}
+              <span v-if="question.OPTIONAL == 0" class="text-error">*</span>
+            </h3>
           </v-col>
           <v-col cols="1" class="py-1">
             <div class="float-right">
@@ -20,8 +23,6 @@
             </div>
           </v-col>
         </v-row>
-      </v-card-title>
-      <v-card-text style="clear: both">
         <div v-if="question.TYPE == 'boolean'">
           <v-radio-group v-model="question.answer" hide-details>
             <v-radio label="Yes" value="Yes" class="pt-1"></v-radio>
@@ -35,8 +36,7 @@
               :value="item.val"
               v-for="item of options"
               :key="item.val"
-              class="pt-1"
-            ></v-radio>
+              class="pt-1"></v-radio>
           </v-radio-group>
         </div>
 
@@ -51,13 +51,11 @@
             outlined
             small-chips
             deletable-chips
-            
             v-model="question.answer"
             :items="options"
             :item-text="'descr'"
             :item-value="'val'"
-            background-color="white"
-          ></v-autocomplete>
+            background-color="white"></v-autocomplete>
         </div>
 
         <div v-else-if="question.TYPE == 'select'">
@@ -71,21 +69,15 @@
             hide-details
             background-color="white"
             class="mt-4"
-            v-if="options.length >= 7"
-          ></v-select>
+            v-if="options.length >= 7"></v-select>
 
-          <v-radio-group
-            v-model="question.answer"
-            hide-details
-            v-if="options.length < 7"
-          >
+          <v-radio-group v-model="question.answer" hide-details v-if="options.length < 7">
             <v-radio
               :label="item.descr"
               :value="item.val"
               v-for="item of options"
               :key="item.val"
-              class="pt-1"
-            ></v-radio>
+              class="pt-1"></v-radio>
           </v-radio-group>
 
           <div v-if="allowCustomText" class="mt-4 pl-5">
@@ -95,8 +87,7 @@
               dense
               outlined
               hide-details
-              background-color="white"
-            ></v-text-field>
+              background-color="white"></v-text-field>
           </div>
         </div>
 
@@ -107,12 +98,39 @@
             outlined
             hide-details
             background-color="white"
-            class="mt-4"
-          ></v-textarea>
+            class="mt-4"></v-textarea>
         </div>
-        <div v-else>
+
+        <div v-else-if="question.TYPE == 'title_question'">
+          <table class="matrix">
+            <tr>
+              <td></td>
+              <th v-for="ch of question.subQuestions[1].choices">{{ ch.descr }}</th>
+            </tr>
+
+            <tr v-for="sub of question.subQuestions">
+              <th style="text-align: left">
+                {{ sub.ASK }}
+              </th>
+              <td v-for="ch of sub.choices">
+                <v-checkbox
+                  class="my-0 mx-auto"
+                  v-model="sub.answer"
+                  hide-details
+                  :value="ch.val"
+                  density="compact"
+                  style="width: 30px" />
+              </td>
+            </tr>
+          </table>
+
+          <!-- {{ question.subQuestions }} -->
+        </div>
+        <div v-else-if="question.TYPE != 'text'">
           {{ question }}
         </div>
+        <!--  <hr />
+        {{ question }} -->
       </v-card-text>
     </v-card>
   </div>
@@ -125,25 +143,33 @@
 .question .v-radio {
   padding-top: 12px;
 }
+table.matrix {
+  /* border-left: 1px #323232 solid;
+  border-top: 1px #323232 solid; */
+  width: 100%;
+  border-collapse: collapse;
+  /* background-color: #efefef; */
+}
+table.matrix td,
+table.matrix th {
+  /* border-right: 1px #323232 solid;*/
+  border-bottom: 1px #32323233 solid;
+  padding: 2px 4px;
+  text-align: center;
+  font-weight: 400;
+  font-size: 0.95rem;
+}
 </style>
 
 <script>
+import markdownit from "markdown-it";
+
 export default {
   name: "Home",
   props: ["index", "question"],
   computed: {
     options: function () {
-      if (
-        this.question.TYPE == "multi-select" ||
-        this.question.TYPE == "select" ||
-        this.question.TYPE == "range"
-      ) {
-        let optsS = this.question.SELECTION_JSON;
-        let opts = JSON.parse(optsS);
-
-        return opts.choices;
-      }
-      return [];
+      return this.question.choices || [];
     },
     hint: function () {
       let hint = "";
@@ -153,8 +179,7 @@ export default {
         hint = "";
       }
 
-      if (this.question.TYPE == "multi-select")
-        hint += ", you may select as many as you see fit";
+      if (this.question.TYPE == "multi-select") hint += ", you may select as many as you see fit";
 
       return hint;
     },
@@ -162,11 +187,7 @@ export default {
       return this.options.find((o) => o.val == this.question.answer);
     },
     allowCustomText: function () {
-      if (
-        this.selectedOption &&
-        this.selectedOption.allow_custom &&
-        this.selectedOption.allow_custom == "true"
-      ) {
+      if (this.selectedOption && this.selectedOption.allow_custom && this.selectedOption.allow_custom == "true") {
         return true;
       }
       return false;
@@ -181,18 +202,16 @@ export default {
   data: () => ({}),
   methods: {
     checkCustom() {
-      console.log(this.selectedOption);
-
-      if (
-        this.selectedOption &&
-        this.selectedOption.allow_custom &&
-        this.selectedOption.allow_custom == "true"
-      ) {
+      if (this.selectedOption && this.selectedOption.allow_custom && this.selectedOption.allow_custom == "true") {
         this.showCustomField = true;
       } else {
         this.showCustomField = false;
         this.question.answer_text = "";
       }
+    },
+    renderMarkdown(input) {
+      const md = markdownit();
+      return md.render(input);
     },
   },
 };

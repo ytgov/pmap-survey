@@ -46,9 +46,21 @@ surveyRouter.get(
     let { token } = req.params;
 
     let survey = await db("SRVT.SURVEY").where({ SID: token }).first();
+    let choices = await db("SRVT.JSON_DEF").where({ SID: token });
+
+    for (let choice of choices) {
+      choice.choices = JSON.parse(choice.SELECTION_JSON);
+    }
 
     if (survey) {
       let questions = await db("SRVT.QUESTION").where({ SID: token }).orderBy("ORD");
+
+      for (let q of questions) {
+        if (q.JSON_ID) {
+          q.choices = choices.find((c) => c.JSON_ID == q.JSON_ID)?.choices;
+        }
+      }
+
       return res.json({ data: { survey, questions } });
     }
     res.status(404).send();

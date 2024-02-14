@@ -45,4 +45,25 @@ export default createVuetify({
       },
     },
   },
+  defaults: {
+    VTextField: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+      //hideDetails: "true",
+    },
+    VTextarea: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+      //hideDetails: "true",
+      rows: "3",
+    },
+    VSelect: {
+      variant: "outlined",
+      density: "comfortable",
+      color: "primary",
+      //hideDetails: "true",
+    },
+  },
 });

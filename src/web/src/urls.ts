@@ -12,3 +12,6 @@ export const USERS_URL = `${config.apiBaseUrl}/api/user`;
 // probably delete later
 export const ANSWER_URL = `${config.apiBaseUrl}/api/`
 export const PARTICIPANT_URL = `${config.apiBaseUrl}/api/`
+
+
+export const ADMIN_SURVEY_URL = `${config.apiBaseUrl}/api/admin/survey`;

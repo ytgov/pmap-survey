@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { useQuestionStore } from "@/modules/administration/modules/question/store";
+import { useAdminSurveyStore } from "@/modules/administration/modules/survey/store";
 import { mapActions } from "pinia";
 import { useResponseStore } from "../modules/response/store";
 import { useParticipantsStore } from "../modules/participants/store";
@@ -53,7 +53,7 @@ export default {
     this.participantStats = await this.getParticipantStats(this.question.ID);
   },
   methods: {
-    ...mapActions(useQuestionStore, ["stateTitle"]),
+    ...mapActions(useAdminSurveyStore, ["stateTitle"]),
     ...mapActions(useParticipantsStore, ["getParticipantStats"]),
     ...mapActions(useResponseStore, [
       "moderatedCountForQuestion",

@@ -61,7 +61,7 @@
 import { mapActions, mapState } from "pinia";
 import { useResponseStore } from "../store";
 import ResponseEditor from "../components/ResponseEditor.vue";
-import { useQuestionStore } from "../../question/store";
+import { useAdminSurveyStore } from "@/modules/administration/modules/survey/store";
 
 export default {
   components: { ResponseEditor },
@@ -78,7 +78,7 @@ export default {
   }),
   computed: {
     ...mapState(useResponseStore, ["responses"]),
-    ...mapState(useQuestionStore, ["questions"]),
+    ...mapState(useAdminSurveyStore, ["questions"]),
     breadcrumbs() {
       return [
         {
@@ -110,7 +110,7 @@ export default {
   },
   methods: {
     ...mapActions(useResponseStore, ["loadResponses", "select"]),
-    ...mapActions(useQuestionStore, ["loadQuestions"]),
+    ...mapActions(useAdminSurveyStore, ["loadQuestions"]),
     async loadItems() {
       await this.loadResponses();
       await this.loadQuestions();

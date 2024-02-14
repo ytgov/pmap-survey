@@ -1,5 +1,5 @@
 <template>
-  <div class="hello" v-if="survey.survey && survey.survey.PAGE_TITLE">
+  <div class="hello" v-if="survey && survey.survey && survey.survey.PAGE_TITLE">
     <h1>{{ survey.survey.PAGE_TITLE }}</h1>
     <p class="lead" style="font-size: 1.2rem; font-weight: 300">
       {{ survey.survey.DESCRIPTION }}
@@ -8,7 +8,7 @@
     <div v-if="!moveOn">
       <v-card class="default">
         <v-card-text>
-          <div v-html="survey.survey.PAGE_INTRO"></div>
+          <div v-html="renderMarkdown(survey.survey.PAGE_INTRO)"></div>
           <v-btn @click="moveOn = true" large color="primary">Continue to Survey</v-btn>
         </v-card-text>
       </v-card>
@@ -16,12 +16,11 @@
 
     <div v-if="moveOn">
       <h4 class="mb-4">
-        This survey consists of {{ survey.questions.length }} questions. Once completed, please press 'Submit' at the
-        bottom.
+        This survey consists of {{ questionCount }} questions. Once completed, please press 'Submit' at the bottom.
       </h4>
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-7">
-          <div v-for="(question, idx) of survey.questions" :key="idx">
+          <div v-for="(question, idx) of questionGroups" :key="idx">
             <question-renderer :index="idx" :question="question"></question-renderer>
           </div>
 
@@ -50,6 +49,7 @@
 </template>
 
 <script>
+import markdownit from "markdown-it";
 import { mapActions, mapState } from "pinia";
 import { useSurveyStore } from "@/store/SurveyStore";
 
@@ -67,6 +67,32 @@ export default {
       }
 
       return v;
+    },
+    questionCount() {
+      const ignoreTypes = ["text", "title_question"];
+      return this.survey.questions.filter((q) => !ignoreTypes.includes(q.TYPE)).length;
+    },
+    questionGroups() {
+      let list = [];
+      const specialTypes = ["matrix_question", "title_question"];
+
+      if (this.survey.questions) {
+        let lastTitle = null;
+        for (let question of this.survey.questions) {
+          if (question.TYPE == "title_question") {
+            question.subQuestions = [];
+            lastTitle = question;
+            list.push(question);
+          } else if (question.TYPE == "matrix_question") {
+            if (lastTitle) lastTitle.subQuestions.push(question);
+          } else {
+            list.push(question);
+          }
+        }
+
+        //return this.survey.questions;
+      }
+      return list;
     },
   },
   data: () => ({
@@ -87,6 +113,10 @@ export default {
       if (this.allValid) {
         alert("Submitting does nothing on preview");
       }
+    },
+    renderMarkdown(input) {
+      const md = markdownit();
+      return md.render(input);
     },
   },
 };

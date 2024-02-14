@@ -90,7 +90,7 @@
 <script lang="ts">
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useParticipantsStore } from "../store";
-import { useQuestionStore } from "../../question/store";
+import { useAdminSurveyStore } from "../../survey/store";
 
 export default {
   components: {},
@@ -110,7 +110,7 @@ export default {
   computed: {
     ...mapWritableState(useParticipantsStore, ["batch"]),
     ...mapState(useParticipantsStore, ["isLoading", "listTypes", "batchIsValid", "participants"]),
-    ...mapState(useQuestionStore, ["questions"]),
+    ...mapState(useAdminSurveyStore, ["questions"]),
 
     items() {
       return [];
@@ -145,7 +145,7 @@ export default {
   },
   methods: {
     ...mapActions(useParticipantsStore, ["parse", "create", "getParticipants", "deleteParticipant", "unselect"]),
-    ...mapActions(useQuestionStore, ["loadQuestions"]),
+    ...mapActions(useAdminSurveyStore, ["loadQuestions"]),
 
     async loadItems() {
       //await this.getAllUsers();

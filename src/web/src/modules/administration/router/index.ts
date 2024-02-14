@@ -17,7 +17,7 @@ const routes = [
         },
       },
       {
-        path: "/users",
+        path: "users",
         component: () => import("../modules/users/views/UserList.vue"),
         beforeEnter: requireAccess,
         meta: {
@@ -25,32 +25,23 @@ const routes = [
         },
       },
       {
-        path: "/moderation",
-        component: () => import("../modules/response/views/ResponseList.vue"),
-        beforeEnter: requireAccess,
-        meta: {
-          allow_admin: true,
-        },
-      },
-      {
-        path: "/moderation/:questionId",
-        component: () => import("../modules/response/views/QuestionResponseList.vue"),
-        beforeEnter: requireAccess,
-        meta: {
-          allow_admin: true,
-          role: "Moderator",
-        },
-      },
-      {
-        path: "/questions",
-        component: () => import("../modules/question/views/QuestionList.vue"),
+        path: "surveys",
+        component: () => import("../modules/survey/views/SurveyList.vue"),
         beforeEnter: requireAccess,
         meta: {
           require_admin: true,
         },
       },
       {
-        path: "/emailer",
+        path: "surveys/:SID",
+        component: () => import("../modules/survey/views/SurveyEditor.vue"),
+        beforeEnter: requireAccess,
+        meta: {
+          require_admin: true,
+        },
+      },
+      {
+        path: "emailer",
         component: () => import("../modules/emailer/views/EmailerHome.vue"),
         beforeEnter: requireAccess,
         meta: {
@@ -58,7 +49,7 @@ const routes = [
         },
       },
       {
-        path: "/participants",
+        path: "participants",
         component: () => import("../modules/participants/views/ParticipantList.vue"),
         beforeEnter: requireAccess,
         meta: {

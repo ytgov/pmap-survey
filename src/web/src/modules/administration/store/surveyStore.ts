@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { SURVEY_URL } from "@/urls";
-import { useApiStore } from "./ApiStore";
+import { useApiStore } from "@/store/ApiStore";
 
-export const useSurveyStore = defineStore("survey", {
+export const useAdminSurveyStore = defineStore("adminSurvey", {
   state: () => ({
     survey: { survey: {}, questions: [] },
     isLoading: false,
@@ -43,18 +43,6 @@ export const useSurveyStore = defineStore("survey", {
         q.answer = null;
         q.isValid = () => {
           if (q.OPTIONAL == 1) return true;
-
-          if (q.subQuestions) {
-            for (let sub of q.subQuestions) {
-              if (!sub.isValid()) return false;
-            }
-            return true;
-          }
-
-          if (q.TYPE == "matrix_question") {
-            return q.answer && q.answer != false;
-          }
-
           let trimAnswer = `${q.answer}`.replace("null", "").trim();
           if (trimAnswer && trimAnswer.length > 0) return true;
           return false;

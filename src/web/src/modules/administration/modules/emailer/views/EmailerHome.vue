@@ -119,7 +119,7 @@ import { useEmailerStore, Event } from "../store";
 
 import moment from "moment";
 import { useParticipantsStore } from "../../participants/store";
-import { QuestionState } from "../../question/store";
+//import { QuestionState } from "../../survey/store";
 
 export default {
   data: () => ({
@@ -138,11 +138,10 @@ export default {
     ...mapState(useParticipantsStore, ["opinionators", "raters"]),
 
     items() {
-      let validStatesForEmail = [
-        QuestionState.Inspire,
-        QuestionState.Opinionate,
+      let validStatesForEmail = [ 1
+       /*  QuestionState.Inspire,        QuestionState.Opinionate,
         QuestionState.Publish,
-        QuestionState.Rate,
+        QuestionState.Rate, */
       ];
 
       if (this.questions) {

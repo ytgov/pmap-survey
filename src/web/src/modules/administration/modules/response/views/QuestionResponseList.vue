@@ -51,7 +51,7 @@
 import { mapActions, mapState } from "pinia";
 import { useResponseStore } from "../store";
 import ResponseEditor from "../components/ResponseEditor.vue";
-import { Question, useQuestionStore } from "../../question/store";
+import { Question, useAdminSurveyStore } from "../../survey/store";
 import { isArray } from "lodash";
 
 export default {
@@ -78,7 +78,7 @@ export default {
   },
   computed: {
     ...mapState(useResponseStore, ["responses", "moderatedResponseCount", "unmoderatedResponseCount"]),
-    ...mapState(useQuestionStore, ["questions"]),
+    ...mapState(useAdminSurveyStore, ["questions"]),
     statusOptions() {
       return [`Moderated (${this.moderatedResponseCount})`, `Unmoderated (${this.unmoderatedResponseCount})`];
     },
@@ -114,7 +114,7 @@ export default {
   },
   methods: {
     ...mapActions(useResponseStore, ["loadResponsesFor", "select"]),
-    ...mapActions(useQuestionStore, ["loadQuestions"]),
+    ...mapActions(useAdminSurveyStore, ["loadQuestions"]),
     async loadItems() {
       await this.loadResponsesFor(this.questionId);
       await this.loadQuestions();

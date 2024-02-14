@@ -46,15 +46,15 @@
     </v-col>
 
     <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
-      <v-card elevation="3" color="#F2760C66" to="/administration/questions">
+      <v-card elevation="3" color="#F2760C66" to="/administration/surveys">
         <v-card-text style="text-align: right">
           <v-icon
             class="float-left"
             style="font-size: 90px; opacity: 25%; position: absolute; left: 10px; margin-top: -12px"
             >mdi-head-question</v-icon
           >
-          <div style="font-size: 52px; line-height: 52px">{{ questionCount }}</div>
-          <div>Questions</div>
+          <div style="font-size: 52px; line-height: 52px">{{ surveyCount }}</div>
+          <div>Surveys</div>
         </v-card-text>
       </v-card>
     </v-col>
@@ -87,14 +87,14 @@
     </v-col>
   </v-row>
 
-  <div v-if="myQuestions.length > 0">
+  <!-- <div v-if="mySurveys.length > 0">
     <h2 class="mb-3">My Questions</h2>
     <v-row>
-      <v-col cols="12" md="6" v-for="question of myQuestions">
+      <v-col cols="12" md="6" v-for="question of mySurveys">
         <moderator-card :question="question"></moderator-card>
       </v-col>
     </v-row>
-  </div>
+  </div> -->
 </template>
 
 <script lang="ts">
@@ -103,7 +103,7 @@ import { mapActions, mapState } from "pinia";
 import { useUserAdminStore } from "../modules/users/store";
 import { useUserStore } from "@/store/UserStore";
 import { useResponseStore } from "../modules/response/store";
-import { useQuestionStore } from "@/modules/administration/modules/question/store";
+import { useAdminSurveyStore } from "@/modules/administration/modules/survey/store";
 import ModeratorCard from "../components/ModeratorCard.vue";
 
 export default {
@@ -113,17 +113,17 @@ export default {
     breadcrumbs: [{ title: "Home", disabled: false }],
   }),
   computed: {
-    ...mapState(useQuestionStore, ["questionCount", "responseCount", "moderateCount", "myQuestions"]),
+    ...mapState(useAdminSurveyStore, ["surveyCount", "mySurveys"]),
     ...mapState(useUserAdminStore, ["userCount"]),
     ...mapState(useUserStore, ["user"]),
   },
   async mounted() {
     await this.getAllUsers();
-    await this.loadQuestions();
+    await this.loadSurveys();
     await this.loadResponses();
   },
   methods: {
-    ...mapActions(useQuestionStore, ["loadQuestions", "stateTitle"]),
+    ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
     ...mapActions(useUserAdminStore, ["getAllUsers"]),
     ...mapActions(useResponseStore, [
       "loadResponses",
