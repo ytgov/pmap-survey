@@ -107,7 +107,7 @@ export default {
       { title: "Token", key: "TOKEN" },
       { title: "Email", key: "EMAIL" },
       { title: "Sent Date", key: "SENT_DATE" },
-      { title: "Reset Date", key: "RESENT_DATE" },
+      { title: "Resent Date", key: "RESENT_DATE" },
       { title: "Response Date", key: "RESPONSE_DATE" },
     ],
     search: "",

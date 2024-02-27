@@ -71,7 +71,7 @@ integrationRouter.get("/suppress/:token", async (req: Request, res: Response) =>
   res.send("Participant successfully removed from survey");
 });
 
-async function recordSentDate(participant: any): Promise<any> {
+export async function recordSentDate(participant: any): Promise<any> {
   const db = knex.knex(DB_CONFIG);
   let token = participant.TOKEN;
   let data = await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).first();

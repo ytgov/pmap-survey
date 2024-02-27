@@ -2,8 +2,12 @@ import express, { Request, Response } from "express";
 import { db } from "../data";
 import { ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
+import { EmailService } from "../services";
+import { recordSentDate } from "./integration-router";
+import { checkJwt, loadUser } from "../middleware/authz.middleware";
 
 export const adminSurveyRouter = express.Router();
+adminSurveyRouter.use(checkJwt, loadUser);
 
 adminSurveyRouter.get("/", async (req: Request, res: Response) => {
   let list = await db("SRVT.SURVEY");
@@ -108,3 +112,42 @@ adminSurveyRouter.delete(
     res.json({ data: "success" });
   }
 );
+
+adminSurveyRouter.post("/:SID/send-email-test", async (req: Request, res: Response) => {
+  let { SID } = req.params;
+  let { subject, body } = req.body;
+
+  let survey = await db("SRVT.SURVEY").where({ SID }).first();
+  let emailer = new EmailService();
+
+  await emailer.sendEmail(req.user.EMAIL, "111222333", `[TEST EMAIL]: ${subject}`, body);
+
+  res.json({ data: "success" });
+});
+
+adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) => {
+  let { SID } = req.params;
+  let { subject, body, recipientType } = req.body;
+
+  //let survey = await db("SRVT.SURVEY").where({ SID }).first();
+
+  let query = db("SRVT.PARTICIPANT")
+    .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .where({ SID })
+    .whereNull("RESPONSE_DATE")
+    .whereNotNull("EMAIL")
+    .whereNull("RESENT_DATE")
+    .select("EMAIL", "PARTICIPANT.TOKEN");
+
+  if (recipientType == "SEND") query.whereNull("SENT_DATE");
+  let participants = await query;
+
+  let emailer = new EmailService();
+
+  for (let p of participants) {
+    await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+    await recordSentDate(p);
+  }
+
+  res.json({ data: `Sent ${participants.length} emails` });
+});

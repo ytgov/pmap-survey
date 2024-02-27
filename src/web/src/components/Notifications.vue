@@ -6,6 +6,10 @@
 </template>
 
 <script>
+import { mapState } from "pinia";
+import { useNotificationStore } from "@/store/NotificationStore";
+import { isEmpty } from "lodash";
+
 export default {
   name: "Home",
   data: () => ({
@@ -14,6 +18,16 @@ export default {
     text: "",
     icon: "",
   }),
+  computed: {
+    ...mapState(useNotificationStore, ["message"]),
+  },
+  watch: {
+    message(newVal, oldVal) {
+      if (!isEmpty(newVal.text)) {
+        this.showAPIMessages({ messages: [newVal] });
+      }
+    },
+  },
   methods: {
     show(color, icon, message) {
       this.color = color;
