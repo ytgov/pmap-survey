@@ -44,9 +44,7 @@ export const useParticipantsStore = defineStore("participants", {
 
         for (let item of array) {
           item = item.trim().replace(/;/g, "");
-          let t = new RegExp(
-            /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
-          ).test(item);
+          let t = new RegExp(/^[\w\-\.]+@([\w-]+\.)+[\w-]{2,}$/g).test(item);
           if (t) results.valid.push(item);
           else results.invalid.push(item);
         }
