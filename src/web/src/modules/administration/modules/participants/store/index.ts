@@ -11,8 +11,7 @@ export const useParticipantsStore = defineStore("participants", {
   state: (): ParticipantStore => ({
     isLoading: false,
     responses: new Array<Response>(),
-    batch: { participants: "", participant_type: "Opinionator", question: undefined, addresses: [] },
-    listTypes: ["Opinionator", "Rater"],
+    batch: { participants: "", survey: undefined, addresses: [] },
     participants: new Array<any>(),
   }),
   getters: {
@@ -20,13 +19,7 @@ export const useParticipantsStore = defineStore("participants", {
       return 122;
     },
     batchIsValid(state) {
-      return (
-        state.batch.participant_type &&
-        state.batch.participant_type.length > 0 &&
-        state.batch.question &&
-        state.batch.addresses &&
-        state.batch.addresses.length > 0
-      );
+      return state.batch.survey && state.batch.addresses && state.batch.addresses.length > 0;
     },
     opinionators(state) {
       if (state.participants && state.participants.length > 0)
@@ -50,6 +43,7 @@ export const useParticipantsStore = defineStore("participants", {
         let array = list.split(/[\s\,]/gi).filter((s: string) => s.length > 0);
 
         for (let item of array) {
+          item = item.trim().replace(/;/g, "");
           let t = new RegExp(
             /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/
           ).test(item);
@@ -72,7 +66,7 @@ export const useParticipantsStore = defineStore("participants", {
         .secureCall("post", PARTICIPANT_URL, this.batch)
         .then(async (resp) => {
           await this.loadResponses();
-          await this.getParticipants(this.batch.question);
+          await this.getParticipants(this.batch.survey);
           m.notify({ text: "Participants saved", variant: "success" });
         })
         .catch();
@@ -83,7 +77,7 @@ export const useParticipantsStore = defineStore("participants", {
           .secureCall("put", `${PARTICIPANT_URL}/${this.batch.SID}`, this.batch)
           .then(async (resp) => {
             await this.loadResponses();
-            await this.getParticipants(this.batch.question);
+            await this.getParticipants(this.batch.survey);
             m.notify({ text: "Participants saved", variant: "success" });
           })
           .catch();
@@ -93,42 +87,27 @@ export const useParticipantsStore = defineStore("participants", {
       this.batch = item;
     },
     unselect() {
-      this.batch = { participants: "", participant_type: "Opinionator", question: undefined, addresses: [] };
+      this.batch = { participants: "", survey: undefined, addresses: [] };
       this.participants = new Array<any>();
     },
 
-    async getParticipants(questionId: number) {
+    async getParticipants(surveyId: number) {
       await api
-        .secureCall("get", `${PARTICIPANT_URL}/${questionId}`)
+        .secureCall("get", `${PARTICIPANT_URL}/${surveyId}`)
         .then(async (resp) => {
           this.participants = resp.data;
         })
         .catch();
     },
 
-    async deleteParticipant(questionId: number, id: number) {
+    async deleteParticipant(surveyId: number, id: number) {
       await api
         .secureCall("delete", `${PARTICIPANT_URL}/${id}`)
         .then(async (resp) => {
-          this.getParticipants(questionId);
+          this.getParticipants(surveyId);
           m.notify({ variant: "success", text: "Participant removed" });
         })
         .catch();
-    },
-
-    async getParticipantStats(questionId: number | undefined) {
-      if (questionId)
-        return api
-          .secureCall("get", `${PARTICIPANT_URL}/${questionId}`)
-          .then(async (resp) => {
-            return {
-              raters: resp.data.filter((r: any) => r.IS_RATER == 1).length,
-              opinionators: resp.data.filter((r: any) => r.IS_RESPONDER == 1).length,
-            };
-          })
-          .catch();
-
-      return { raters: 0, opinionators: 0 };
     },
   },
 });
@@ -137,7 +116,6 @@ export interface ParticipantStore {
   isLoading: boolean;
   responses: Response[];
   batch: any | undefined;
-  listTypes: string[];
   participants: any[];
 }
 

@@ -19,15 +19,15 @@
   <base-card showHeader="t" heading="" elevation="0">
     <template v-slot:left>
       <v-select
-        v-model="batch.question"
+        v-model="batch.survey"
         density="compact"
-        label="Question"
-        :items="earlyStageQuestions"
-        @update:model-value="questionChanged"
-        item-title="TITLE"
+        label="Surveys"
+        :items="surveys"
+        @update:model-value="surveyChanged"
+        item-title="NAME"
+        item-value="SID"
         hide-details
-        class="ml-2"
-        item-value="ID"></v-select>
+        class="ml-2"></v-select>
     </template>
     <template v-slot:right>
       <v-text-field
@@ -41,7 +41,7 @@
     </template>
     <v-row>
       <v-col>
-        <v-btn @click="openEditor" color="primary" variant="tonal" class="float-right" :disabled="!batch.question"
+        <v-btn @click="openEditor" color="primary" variant="tonal" class="float-right" :disabled="!batch.survey"
           >Add Participants</v-btn
         >
       </v-col>
@@ -49,10 +49,21 @@
 
     <v-data-table :search="search" :headers="headers" :items="participants">
       <template v-slot:item.actions="{ item }">
-        <div>
-          <v-btn icon="mdi-delete" variant="tonal" color="warning" @click="deleteClick(item.ID)"></v-btn>
+        <div v-if="item.EMAIL">
+          <v-btn icon="mdi-delete" variant="tonal" color="warning" size="x-small" @click="deleteClick(item.TOKEN)"></v-btn>
         </div>
       </template>
+
+      <template v-slot:item.SENT_DATE="{item}">
+        {{ formatDate(item.SENT_DATE) }}
+      </template>
+      <template v-slot:item.RESENT_DATE="{item}">
+        {{ formatDate(item.RESENT_DATE) }}
+      </template>
+      <template v-slot:item.RESPONSE_DATE="{item}">
+        {{ formatDate(item.RESPONSE_DATE) }}
+      </template>
+
     </v-data-table>
 
     <v-dialog v-model="visible" persistent max-width="700">
@@ -62,18 +73,12 @@
           <v-btn icon @click="closeEditor" color="white"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
         <v-card-text>
-          <v-select
-            label="Type"
-            :items="listTypes"
-            density="comfortable"
-            variant="outlined"
-            v-model="batch.participant_type"></v-select>
-
           <v-textarea
             v-model="batch.participants"
             variant="outlined"
             density="comfortable"
             bg-color="white"
+            rows="8"
             label="Participants"></v-textarea>
 
           <div class="d-flex mb-3">
@@ -91,6 +96,7 @@
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useParticipantsStore } from "../store";
 import { useAdminSurveyStore } from "../../survey/store";
+import moment from "moment";
 
 export default {
   components: {},
@@ -98,10 +104,11 @@ export default {
     participantType: "",
     headers: [
       { title: "", key: "actions", width: "60px" },
+      { title: "Token", key: "TOKEN" },
       { title: "Email", key: "EMAIL" },
-      { title: "Responder", key: "IS_RESPONDER" },
-      { title: "Rater", key: "IS_RATER" },
-      { title: "Submitted", key: "ANSWERS_SUBMITTED" },
+      { title: "Sent Date", key: "SENT_DATE" },
+      { title: "Reset Date", key: "RESENT_DATE" },
+      { title: "Response Date", key: "RESPONSE_DATE" },
     ],
     search: "",
     parseMessage: "",
@@ -109,8 +116,8 @@ export default {
   }),
   computed: {
     ...mapWritableState(useParticipantsStore, ["batch"]),
-    ...mapState(useParticipantsStore, ["isLoading", "listTypes", "batchIsValid", "participants"]),
-    ...mapState(useAdminSurveyStore, ["questions"]),
+    ...mapState(useParticipantsStore, ["isLoading", "batchIsValid", "participants"]),
+    ...mapState(useAdminSurveyStore, ["surveys"]),
 
     items() {
       return [];
@@ -129,23 +136,17 @@ export default {
         },
       ];
     },
-    earlyStageQuestions() {
-      if (this.questions) {
-        return this.questions.filter((q) => q.STATE == 0);
-      }
-      return [];
-    },
   },
   beforeMount() {
     this.loadItems();
-    this.loadQuestions();
+    this.loadSurveys();
   },
   unmounted() {
     this.unselect();
   },
   methods: {
     ...mapActions(useParticipantsStore, ["parse", "create", "getParticipants", "deleteParticipant", "unselect"]),
-    ...mapActions(useAdminSurveyStore, ["loadQuestions"]),
+    ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
 
     async loadItems() {
       //await this.getAllUsers();
@@ -160,11 +161,15 @@ export default {
     async saveClick() {
       await this.create();
     },
-    async questionChanged() {
-      await this.getParticipants(this.batch.question);
+    async surveyChanged() {
+      await this.getParticipants(this.batch.survey);
     },
     async deleteClick(participantId: any) {
-      await this.deleteParticipant(this.batch.question, participantId);
+      await this.deleteParticipant(this.batch.survey, participantId);
+    },
+    formatDate(input: any) {
+      if (input) return moment(input).format("YYYY-MM-DD @ hh:mm a");
+      return "";
     },
 
     openEditor() {
