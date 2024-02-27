@@ -79,6 +79,8 @@ export default {
       if (this.survey.questions) {
         let lastTitle = null;
         for (let question of this.survey.questions) {
+
+
           if (question.TYPE == "title_question") {
             question.subQuestions = [];
             lastTitle = question;
@@ -89,6 +91,7 @@ export default {
             list.push(question);
           }
         }
+
 
         //return this.survey.questions;
       }

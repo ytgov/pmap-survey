@@ -14,7 +14,11 @@
     </template>
   </v-breadcrumbs>
 
-  <h1>Survey Editor</h1>
+  <div class="d-flex">
+    <h1>Survey Editor</h1>
+    <v-spacer />
+    <v-btn color="info" variant="tonal" @click="openPreview">Preview</v-btn>
+  </div>
 
   <base-card showHeader="" heading="" elevation="0" v-if="survey">
     <v-row>
@@ -105,7 +109,6 @@ export default {
     },
   },
   async mounted() {
-
     if (!this.survey) {
       await this.loadSurveys();
       this.selectById(parseInt(this.$route.params.SID as string));
@@ -144,6 +147,9 @@ export default {
       this.delete().then(() => {
         this.close();
       });
+    },
+    openPreview() {
+      if (this.survey) window.open(`/preview/${this.survey.SID}`);
     },
   },
 };

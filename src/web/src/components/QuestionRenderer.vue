@@ -102,10 +102,10 @@
         </div>
 
         <div v-else-if="question.TYPE == 'title_question'">
-          <table class="matrix">
+          <table class="matrix" v-if="question.subQuestions.length > 0 && question.subQuestions[0].choices">
             <tr>
               <td></td>
-              <th v-for="ch of question.subQuestions[1].choices">{{ ch.descr }}</th>
+              <th v-for="ch of question.subQuestions[0].choices">{{ ch.descr }}</th>
             </tr>
 
             <tr v-for="sub of question.subQuestions">
@@ -123,8 +123,6 @@
               </td>
             </tr>
           </table>
-
-          <!-- {{ question.subQuestions }} -->
         </div>
         <div v-else-if="question.TYPE != 'text'">
           {{ question }}
