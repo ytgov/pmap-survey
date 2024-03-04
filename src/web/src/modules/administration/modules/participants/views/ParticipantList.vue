@@ -50,20 +50,34 @@
     <v-data-table :search="search" :headers="headers" :items="participants">
       <template v-slot:item.actions="{ item }">
         <div v-if="item.EMAIL">
-          <v-btn icon="mdi-delete" variant="tonal" color="warning" size="x-small" @click="deleteClick(item.TOKEN)"></v-btn>
+          <v-btn
+            icon="mdi-delete"
+            variant="tonal"
+            color="warning"
+            size="x-small"
+            @click="deleteClick(item.TOKEN)"></v-btn>
+        </div>
+      </template>
+      <template v-slot:item.email="{ item }">
+        <div v-if="item.EMAIL">
+          <v-btn
+            icon="mdi-email"
+            variant="tonal"
+            color="warning"
+            size="x-small"
+            @click="emailClick(item.TOKEN)"></v-btn>
         </div>
       </template>
 
-      <template v-slot:item.SENT_DATE="{item}">
+      <template v-slot:item.SENT_DATE="{ item }">
         {{ formatDate(item.SENT_DATE) }}
       </template>
-      <template v-slot:item.RESENT_DATE="{item}">
+      <template v-slot:item.RESENT_DATE="{ item }">
         {{ formatDate(item.RESENT_DATE) }}
       </template>
-      <template v-slot:item.RESPONSE_DATE="{item}">
+      <template v-slot:item.RESPONSE_DATE="{ item }">
         {{ formatDate(item.RESPONSE_DATE) }}
       </template>
-
     </v-data-table>
 
     <v-dialog v-model="visible" persistent max-width="700">
@@ -73,6 +87,12 @@
           <v-btn icon @click="closeEditor" color="white"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
         <v-card-text>
+          <v-text-field label="Token prefix" />
+          <v-file-input
+            variant="outlined"
+            density="comfortable"
+            accept="text/csv"
+            label="Choose a CSV to import"></v-file-input>
           <v-textarea
             v-model="batch.participants"
             variant="outlined"
@@ -109,6 +129,7 @@ export default {
       { title: "Sent Date", key: "SENT_DATE" },
       { title: "Resent Date", key: "RESENT_DATE" },
       { title: "Response Date", key: "RESPONSE_DATE" },
+      { title: "", key: "email", width: "60px" },
     ],
     search: "",
     parseMessage: "",
@@ -145,7 +166,14 @@ export default {
     this.unselect();
   },
   methods: {
-    ...mapActions(useParticipantsStore, ["parse", "create", "getParticipants", "deleteParticipant", "unselect"]),
+    ...mapActions(useParticipantsStore, [
+      "parse",
+      "create",
+      "getParticipants",
+      "deleteParticipant",
+      "unselect",
+      "manualSend",
+    ]),
     ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
 
     async loadItems() {
@@ -166,6 +194,9 @@ export default {
     },
     async deleteClick(participantId: any) {
       await this.deleteParticipant(this.batch.survey, participantId);
+    },
+    async emailClick(participantId: any) {
+      await this.manualSend(this.batch.survey, participantId);
     },
     formatDate(input: any) {
       if (input) return moment(input).format("YYYY-MM-DD @ hh:mm a");

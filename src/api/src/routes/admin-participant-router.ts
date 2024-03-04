@@ -43,13 +43,14 @@ adminParticipantRouter.delete("/:TOKEN", async (req: Request, res: Response) => 
 
   await db("SRVT.PARTICIPANT").where({ TOKEN }).delete();
   await db("SRVT.PARTICIPANT_DATA").where({ TOKEN }).delete();
+  // delete demographic also
 
   res.json({ data: {} });
 });
 
 function makeToken() {
   const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-  const randomArray = Array.from({ length: 24 }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
+  const randomArray = Array.from({ length: 61 }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
 
   const randomString = randomArray.join("");
   return randomString;

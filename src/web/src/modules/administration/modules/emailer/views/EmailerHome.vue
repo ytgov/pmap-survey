@@ -81,7 +81,7 @@ export default {
     participantTypeOptions() {
       return [
         { title: `Recipients who haven't been sent yet - ${this.sendCount.length} recipients`, value: "SEND" },
-        { title: `Recipients who needa reminder - ${this.resendCount.length} recipients`, value: "RESEND" },
+        { title: `Recipients who need a reminder - ${this.resendCount.length} recipients`, value: "RESEND" },
       ];
     },
 

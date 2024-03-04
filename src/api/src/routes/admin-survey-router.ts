@@ -146,8 +146,31 @@ adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) =
 
   for (let p of participants) {
     await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+
     await recordSentDate(p);
   }
 
   res.json({ data: `Sent ${participants.length} emails` });
+});
+
+adminSurveyRouter.post("/:SID/resend/:TOKEN", async (req: Request, res: Response) => {
+  let { SID, TOKEN } = req.params;
+  let { subject, body } = req.body;
+
+  //let survey = await db("SRVT.SURVEY").where({ SID }).first();
+
+  let query = await db("SRVT.PARTICIPANT")
+    .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .where({ "PARTICIPANT.TOKEN": TOKEN })
+    .whereNull("RESPONSE_DATE")
+    .whereNotNull("EMAIL")
+    .select("EMAIL", "PARTICIPANT.TOKEN");
+
+  let emailer = new EmailService();
+
+  for (let p of query) {
+    await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+  }
+
+  return res.json({ data: `Sent ${query.length} emails` });
 });

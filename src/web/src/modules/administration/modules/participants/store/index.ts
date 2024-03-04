@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 
 import { useNotificationStore } from "@/store/NotificationStore";
 import { useApiStore } from "@/store/ApiStore";
-import { PARTICIPANT_URL } from "@/urls";
+import { ADMIN_SURVEY_URL, PARTICIPANT_URL } from "@/urls";
 
 let m = useNotificationStore();
 let api = useApiStore();
@@ -104,6 +104,15 @@ export const useParticipantsStore = defineStore("participants", {
         .then(async (resp) => {
           this.getParticipants(surveyId);
           m.notify({ variant: "success", text: "Participant removed" });
+        })
+        .catch();
+    },
+
+    async manualSend(surveyId: number, id: number) {
+      await api
+        .secureCall("post", `${ADMIN_SURVEY_URL}/${surveyId}/resend/${id}`)
+        .then(async (resp) => {
+          m.notify({ variant: "success", text: "Email sent" });
         })
         .catch();
     },
