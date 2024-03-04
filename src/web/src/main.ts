@@ -1,4 +1,4 @@
-import { createApp, defineComponent } from "vue";
+import { createApp } from "vue";
 import { createPinia } from "pinia";
 import { router } from "./routes";
 import { AuthHelper } from "@/plugins/auth";
@@ -26,8 +26,8 @@ declare module "@vue/runtime-core" {
   }
 }
 
-import Notifications from "./components/Notifications";
-import QuestionRenderer from "./components/QuestionRenderer";
+import Notifications from "@/components/Notifications.vue";
+import QuestionRenderer from "@/components/QuestionRenderer.vue";
 
 app.component("notifications", Notifications);
 app.component("question-renderer", QuestionRenderer);

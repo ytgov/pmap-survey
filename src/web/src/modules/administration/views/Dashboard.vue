@@ -102,13 +102,10 @@ import { mapActions, mapState } from "pinia";
 
 import { useUserAdminStore } from "../modules/users/store";
 import { useUserStore } from "@/store/UserStore";
-import { useResponseStore } from "../modules/response/store";
 import { useAdminSurveyStore } from "@/modules/administration/modules/survey/store";
-import ModeratorCard from "../components/ModeratorCard.vue";
 
 export default {
   name: "Dashboard",
-  components: { ModeratorCard },
   data: () => ({
     breadcrumbs: [{ title: "Home", disabled: false }],
   }),
@@ -120,17 +117,10 @@ export default {
   async mounted() {
     await this.getAllUsers();
     await this.loadSurveys();
-    await this.loadResponses();
   },
   methods: {
     ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
     ...mapActions(useUserAdminStore, ["getAllUsers"]),
-    ...mapActions(useResponseStore, [
-      "loadResponses",
-      "moderatedCountForQuestion",
-      "unmoderatedCountForQuestion",
-      "ratingCountForQuestion",
-    ]),
   },
 };
 </script>

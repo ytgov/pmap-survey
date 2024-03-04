@@ -62,8 +62,6 @@ const routes = [
 ];
 
 async function requireAccess(to: RouteLocation): Promise<boolean | string> {
-  console.log("REQUIRE");
-
   let hasAuth = await authGuard(to);
   if (!hasAuth) return false;
 

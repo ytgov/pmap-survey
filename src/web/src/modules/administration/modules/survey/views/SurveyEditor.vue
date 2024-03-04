@@ -102,7 +102,7 @@ export default {
           to: "/administration/surveys",
         },
         {
-          title: this.survey?.NAME,
+          title: this.survey ? this.survey.NAME : "",
           to: "",
         },
       ];
