@@ -126,7 +126,7 @@ export default {
             console.log(err);
           })
           .finally(() => (this.isLoading = false));
-      });
+      }, 500);
     },
   },
 };
