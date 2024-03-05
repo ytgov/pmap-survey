@@ -35,15 +35,6 @@
               variant="outlined"
               density="comfortable"></v-checkbox
           ></v-col>
-          <v-col>
-            <v-checkbox
-              v-if="!selectedUser.IS_ADMIN"
-              label="Moderator"
-              v-model="selectedUser.ROLE"
-              value="Moderator"
-              variant="outlined"
-              density="comfortable"></v-checkbox
-          ></v-col>
         </v-row>
       </v-card-text>
       <v-card-actions class="mx-4 mb-2">

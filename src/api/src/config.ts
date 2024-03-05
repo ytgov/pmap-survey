@@ -74,3 +74,7 @@ export const APPLICATION_NAME = process.env.APPLICATION_NAME || "Survey Tool";
 
 export const DB_SCHEMA = process.env.DB_SCHEMA || "";
 export const DB_USER_TABLE = process.env.DB_USER_TABLE || "";
+
+export const AD_CLIENT_ID = process.env.AD_CLIENT_ID || "";
+export const AD_CLIENT_SECRET = process.env.AD_CLIENT_SECRET || "";
+export const AD_TENANT_ID = process.env.AD_TENANT_ID || "";
