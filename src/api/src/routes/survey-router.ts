@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 import * as knex from "knex";
-import { DB_CONFIG } from "../config";
+import { DB_CONFIG, DB_SCHEMA } from "../config";
 
 export const surveyRouter = express.Router();
 
@@ -14,8 +14,9 @@ surveyRouter.get(
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
 
-    let participant = await db("SRVT.PARTICIPANT")
-      .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    let participant = await db("PARTICIPANT")
+      .withSchema(DB_SCHEMA)
+      .join("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
       .where({ "PARTICIPANT.TOKEN": token })
       .whereNotNull("EMAIL")
       .select("PARTICIPANT.*")
@@ -27,8 +28,8 @@ surveyRouter.get(
       });
 
     if (participant) {
-      let survey = await db("SRVT.SURVEY").where({ SID: participant.SID }).first();
-      let questions = await db("SRVT.QUESTION").where({ SID: participant.SID }).orderBy("ORD");
+      let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID: participant.SID }).first();
+      let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: participant.SID }).orderBy("ORD");
 
       return res.json({ data: { survey, questions } });
     }
@@ -45,15 +46,15 @@ surveyRouter.get(
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
 
-    let survey = await db("SRVT.SURVEY").where({ SID: token }).first();
-    let choices = await db("SRVT.JSON_DEF").where({ SID: token });
+    let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID: token }).first();
+    let choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: token });
 
     for (let choice of choices) {
       choice.choices = JSON.parse(choice.SELECTION_JSON);
     }
 
     if (survey) {
-      let questions = await db("SRVT.QUESTION").where({ SID: token }).orderBy("ORD");
+      let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: token }).orderBy("ORD");
 
       for (let q of questions) {
         if (q.JSON_ID) {
@@ -76,8 +77,9 @@ surveyRouter.post(
     let { token } = req.params;
     let { questions, contact } = req.body;
 
-    let participant = await db("SRVT.PARTICIPANT")
-      .join("SRVT.PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    let participant = await db("PARTICIPANT")
+      .withSchema(DB_SCHEMA)
+      .join("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
       .where({ "PARTICIPANT.TOKEN": token })
       .whereNotNull("EMAIL")
       .select("PARTICIPANT.*", "PARTICIPANT_DATA.EMAIL")
@@ -102,13 +104,16 @@ surveyRouter.post(
           ans.TVALUE = answer_text;
         }
 
-        await db("SRVT.RESPONSE_LINE").insert(ans);
+        await db("RESPONSE_LINE").withSchema(DB_SCHEMA).insert(ans);
       }
 
-      await db("SRVT.PARTICIPANT_DATA").where({ TOKEN: token }).update({ EMAIL: null, RESPONSE_DATE: new Date() });
+      await db("PARTICIPANT_DATA")
+        .withSchema(DB_SCHEMA)
+        .where({ TOKEN: token })
+        .update({ EMAIL: null, RESPONSE_DATE: new Date() });
 
       if (contact) {
-        await db("SRVT.CONTACT_REQUEST").insert({
+        await db("CONTACT_REQUEST").withSchema(DB_SCHEMA).insert({
           SID: participant.SID,
           REQUEST_EMAIL: participant.EMAIL,
           EMAILED_CHECK: "N",
@@ -130,7 +135,7 @@ surveyRouter.get(
   async (req: Request, res: Response) => {
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
-    let answers = await db("SRVT.RESPONSE_LINE").where({ TOKEN: token });
+    let answers = await db("RESPONSE_LINE").withSchema(DB_SCHEMA).where({ TOKEN: token });
     return res.json({ data: answers });
   }
 );

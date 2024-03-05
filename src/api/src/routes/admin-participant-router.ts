@@ -1,15 +1,15 @@
 import express, { Request, Response } from "express";
 import { db } from "../data";
-import { ReturnValidationErrors } from "../middleware";
-import { param } from "express-validator";
+import { DB_SCHEMA } from "../config";
 
 export const adminParticipantRouter = express.Router();
 
 adminParticipantRouter.get("/:SID", async (req: Request, res: Response) => {
   let { SID } = req.params;
 
-  let list = await db("SRVT.PARTICIPANT_DATA")
-    .innerJoin("SRVT.PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
+  let list = await db("PARTICIPANT_DATA")
+    .withSchema(DB_SCHEMA)
+    .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
     .where("PARTICIPANT.SID", SID);
 
   res.json({ data: list });
@@ -18,8 +18,9 @@ adminParticipantRouter.get("/:SID", async (req: Request, res: Response) => {
 adminParticipantRouter.post("/", async (req: Request, res: Response) => {
   let { addresses, survey } = req.body;
 
-  let existingAddresses = await db("SRVT.PARTICIPANT_DATA")
-    .innerJoin("SRVT.PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
+  let existingAddresses = await db("PARTICIPANT_DATA")
+    .withSchema(DB_SCHEMA)
+    .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
     .where("PARTICIPANT.SID", survey)
     .whereNotNull("EMAIL")
     .select("EMAIL");
@@ -31,8 +32,8 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
 
     let token = makeToken();
 
-    await db("SRVT.PARTICIPANT").insert({ TOKEN: token, SID: survey });
-    await db("SRVT.PARTICIPANT_DATA").insert({ TOKEN: token, EMAIL: address });
+    await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
+    await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: address });
   }
 
   res.json({ data: {} });
@@ -41,8 +42,8 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
 adminParticipantRouter.delete("/:TOKEN", async (req: Request, res: Response) => {
   let { TOKEN } = req.params;
 
-  await db("SRVT.PARTICIPANT").where({ TOKEN }).delete();
-  await db("SRVT.PARTICIPANT_DATA").where({ TOKEN }).delete();
+  await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
+  await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
   // delete demographic also
 
   res.json({ data: {} });
