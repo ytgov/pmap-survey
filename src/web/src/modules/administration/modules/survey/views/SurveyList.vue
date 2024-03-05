@@ -79,10 +79,10 @@ export default {
       this.select({
         CONTACT_EMAIL: "",
         CONTACT_QUESTION: "",
-        DESCRIPTION: "",
+        DESCRIPTION: "This describes the survey",
         NAME: "NEW SURVEY",
-        PAGE_INTRO: "",
-        PAGE_TITLE: "",
+        PAGE_INTRO: "This goes in the top of the survey page",
+        PAGE_TITLE: "This is the title of the page",
       });
 
       let resp = await this.create();
