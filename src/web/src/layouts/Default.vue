@@ -17,14 +17,6 @@
           </template>
 
           <v-list density="compact">
-            <v-list-item to="/profile">
-              <template v-slot:prepend>
-                <v-icon>mdi-account</v-icon>
-              </template>
-              <v-list-item-title style="font-size: 0.9rem !important">My profile</v-list-item-title>
-            </v-list-item>
-
-            <v-divider />
             <v-list-item @click="logoutClick">
               <template v-slot:prepend>
                 <v-icon>mdi-exit-run</v-icon>
