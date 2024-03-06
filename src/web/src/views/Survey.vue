@@ -23,7 +23,7 @@
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-7">
           <div v-for="(question, idx) of survey.questions" :key="idx">
-            <question-renderer :index="idx" :question="question"></question-renderer>
+            <question-renderer :index="idx" :question="question" @answerChanged="checkAnswer"></question-renderer>
           </div>
 
           <div v-if="survey.survey.CONTACT_QUESTION">
@@ -40,8 +40,6 @@
           </div>
         </div>
       </div>
-      {{ allValid }}
-
       <v-btn color="primary" :disabled="!allValid" @click="submitSurvey"> Submit </v-btn>
 
       <span style="font-size: 0.9rem" class="pl-4 text-error" v-if="!allValid">
@@ -64,24 +62,12 @@ export default {
   name: "Login",
   computed: {
     ...mapState(useSurveyStore, ["survey"]),
-
-    allValid() {
-      let v = true;
-        console.log("VALID CHECK");
-      for (let q of this.survey.questions) {
-        let qv = q.isValid();
-
-        console.log("VALID", qv);
-
-        v = v && qv;
-      }
-      return v;
-    },
   },
   data: () => ({
     surveyId: "",
     moveOn: false,
     contactMe: false,
+    allValid: false,
   }),
   mounted() {
     this.surveyId = this.$route.params.token;
@@ -92,6 +78,20 @@ export default {
   },
   methods: {
     ...mapActions(useSurveyStore, ["loadSurvey"]),
+
+    checkAnswer(val) {
+      this.checkAllValid();
+    },
+
+    checkAllValid() {
+      let v = true;
+      for (let q of this.survey.questions) {
+        let qv = q.isValid();
+
+        v = v && qv;
+      }
+      this.allValid = v;
+    },
 
     submitSurvey() {
       if (this.allValid) {

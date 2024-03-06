@@ -70,11 +70,11 @@
             background-color="white"
             class="mt-4"
             v-if="options.length >= 7"></v-select>
-
+          
           <v-radio-group v-model="question.answer" hide-details v-if="options.length < 7">
             <v-radio
               :label="item.descr"
-              :value="item.val"
+              :value="`${item.val}`"
               v-for="item of options"
               :key="item.val"
               class="pt-1"></v-radio>
@@ -161,6 +161,7 @@ table.matrix th {
 
 <script>
 import markdownit from "markdown-it";
+import { nextTick } from "vue";
 
 export default {
   name: "Home",
@@ -202,15 +203,17 @@ export default {
   },
   mounted() {
     let value = localStorage.getItem(this.storageID);
+    let q = this.question;
 
-    if (value) this.question.answer = value;
-
-    console.log("VALUES", value);
+    nextTick(() => {
+      if (value) q.answer = value;
+      console.log("TICK", q.answer, value);
+    });
   },
   watch: {
     "question.answer": function (nval) {
-      console.log("WATCHING", nval, this.storageID, this.question.isValid());
       localStorage.setItem(this.storageID, nval);
+      this.$emit("answerChanged", nval);
     },
   },
   data: () => ({}),
