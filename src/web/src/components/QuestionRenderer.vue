@@ -196,6 +196,22 @@ export default {
       }
       return "";
     },
+    storageID() {
+      return `${this.question.QID}_ANSWER`;
+    },
+  },
+  mounted() {
+    let value = localStorage.getItem(this.storageID);
+
+    if (value) this.question.answer = value;
+
+    console.log("VALUES", value);
+  },
+  watch: {
+    "question.answer": function (nval) {
+      console.log("WATCHING", nval, this.storageID, this.question.isValid());
+      localStorage.setItem(this.storageID, nval);
+    },
   },
   data: () => ({}),
   methods: {

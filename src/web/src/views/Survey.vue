@@ -40,6 +40,7 @@
           </div>
         </div>
       </div>
+      {{ allValid }}
 
       <v-btn color="primary" :disabled="!allValid" @click="submitSurvey"> Submit </v-btn>
 
@@ -64,10 +65,14 @@ export default {
   computed: {
     ...mapState(useSurveyStore, ["survey"]),
 
-    allValid: function () {
+    allValid() {
       let v = true;
+        console.log("VALID CHECK");
       for (let q of this.survey.questions) {
         let qv = q.isValid();
+
+        console.log("VALID", qv);
+
         v = v && qv;
       }
       return v;

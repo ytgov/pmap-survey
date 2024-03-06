@@ -39,7 +39,7 @@
         <v-select
           v-if="selectedUser.STATUS == 'Active' && !selectedUser.IS_ADMIN"
           label="Surveys to Manage"
-          v-model="selectedSurveys"
+          v-model="selectedUser.surveys"
           multiple
           :items="surveys"
           item-title="NAME"
@@ -62,7 +62,6 @@ import { useAdminSurveyStore } from "../../survey/store";
 export default {
   name: "UserEditor",
   data: () => ({
-    selectedSurveys: [],
   }),
   computed: {
     ...mapState(useUserAdminStore, ["selectedUser"]),

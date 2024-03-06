@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { db } from "../data";
 import { ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
-import { EmailService } from "../services";
+import { EmailService, UserService } from "../services";
 import { recordSentDate } from "./integration-router";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { DB_SCHEMA } from "../config";
@@ -11,8 +11,15 @@ import { uniq } from "lodash";
 export const adminSurveyRouter = express.Router();
 adminSurveyRouter.use(checkJwt, loadUser);
 
+const userService = new UserService();
+
 adminSurveyRouter.get("/", async (req: Request, res: Response) => {
-  let list = await db("SURVEY").withSchema(DB_SCHEMA);
+  let surveys = await userService.getSurveysByEmail(req.user.EMAIL);
+  let list = [];
+
+  if (req.user.IS_ADMIN == "N") {
+    list = await db("SURVEY").withSchema(DB_SCHEMA).whereIn("SID", surveys);
+  } else list = await db("SURVEY").withSchema(DB_SCHEMA);
 
   for (let item of list) {
     item.questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: item.SID }).orderBy("ORD");

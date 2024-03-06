@@ -8,16 +8,17 @@ export const userRouter = express.Router();
 const db = new UserService();
 
 userRouter.get("/me", async (req: Request, res: Response) => {
-  return res.json({ data: req.user });
+  return res.json({ data: { ...req.user, surveys: await db.getSurveysByEmail(req.user.EMAIL) } });
 });
 
 userRouter.get("/", async (req: Request, res: Response) => {
   let list = await db.getAll();
 
-  list.map((l) => {
+  for (let l of list) {
     l.display_name = `${l.FIRST_NAME} ${l.LAST_NAME}`;
     l.IS_ADMIN = l.IS_ADMIN == "Y";
-  });
+    l.surveys = await db.getSurveysByEmail(l.EMAIL);
+  }
 
   return res.json({ data: list });
 });
@@ -52,7 +53,7 @@ userRouter.put(
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     let { email } = req.params;
-    let { STATUS, IS_ADMIN, ROLE } = req.body;
+    let { STATUS, IS_ADMIN, ROLE, surveys } = req.body;
 
     let existing = await db.getByEmail(email);
 
@@ -67,6 +68,13 @@ userRouter.put(
       }
 
       await db.update(email, existing);
+      await db.clearSurveysByEmail(email);
+
+      if (!IS_ADMIN && STATUS == "Active") {
+        await db.setSurveysByEmail(email, surveys);
+      }
+
+      console.log("SURVEYS", surveys);
 
       return res.json({
         messages: [{ variant: "success", text: "User saved" }],

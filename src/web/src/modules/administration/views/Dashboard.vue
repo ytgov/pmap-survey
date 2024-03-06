@@ -17,7 +17,7 @@
   <h1>Survey Tool Dashboard</h1>
 
   <v-row class="mb-6">
-    <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
+    <v-col cols="12" md="4" v-if="user">
       <v-card elevation="3" color="#F2760C66" to="/administration/participants">
         <v-card-text style="text-align: right">
           <v-icon
@@ -31,7 +31,7 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
+    <v-col cols="12" md="4" v-if="user">
       <v-card elevation="3" color="#F2760C66" to="/administration/results">
         <v-card-text style="text-align: right" color="white">
           <v-icon
@@ -45,7 +45,7 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
+    <v-col cols="12" md="4" v-if="user">
       <v-card elevation="3" color="#F2760C66" to="/administration/surveys">
         <v-card-text style="text-align: right">
           <v-icon
@@ -72,7 +72,7 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
+    <v-col cols="12" md="4" v-if="user">
       <v-card elevation="3" color="#F2760C66" to="/administration/emailer">
         <v-card-text style="text-align: right">
           <v-icon

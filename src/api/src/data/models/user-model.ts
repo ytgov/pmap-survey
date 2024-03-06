@@ -10,6 +10,7 @@ export interface User {
   ROLE: string;
 
   display_name?: string;
+  surveys?: number[];
 }
 
 export enum UserStatus {

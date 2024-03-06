@@ -28,4 +28,19 @@ export class UserService {
   async update(EMAIL: string, item: User_Update): Promise<User> {
     return db(DB_USER_TABLE).withSchema(DB_SCHEMA).where({ EMAIL }).update(item);
   }
+
+  async getSurveysByEmail(EMAIL: string) {
+    let lines = await db("SURVEY_USER").withSchema(DB_SCHEMA).where({ EMAIL }).select("SID");
+    return lines.map((s) => s.SID);
+  }
+
+  async clearSurveysByEmail(EMAIL: string) {
+    return db("SURVEY_USER").withSchema(DB_SCHEMA).where({ EMAIL }).delete();
+  }
+
+  async setSurveysByEmail(EMAIL: string, surveys: number[]) {
+    for (let SID of surveys) {
+      await db("SURVEY_USER").withSchema(DB_SCHEMA).insert({ EMAIL, SID });
+    }
+  }
 }

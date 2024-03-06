@@ -28,7 +28,7 @@ const routes = [
         component: () => import("../modules/survey/views/SurveyList.vue"),
         beforeEnter: requireAccess,
         meta: {
-          require_admin: true,
+          allow_admin: true,
         },
       },
       {
@@ -36,7 +36,7 @@ const routes = [
         component: () => import("../modules/survey/views/SurveyEditor.vue"),
         beforeEnter: requireAccess,
         meta: {
-          require_admin: true,
+          allow_admin: true,
         },
       },
       {
@@ -44,7 +44,7 @@ const routes = [
         component: () => import("../modules/emailer/views/EmailerHome.vue"),
         beforeEnter: requireAccess,
         meta: {
-          require_admin: true,
+          allow_admin: true,
         },
       },
       {

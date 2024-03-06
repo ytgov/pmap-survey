@@ -94,4 +94,6 @@ export interface AppUser {
   IS_ADMIN: boolean;
   STATUS: string;
   ROLE: string;
+
+  surveys?: number[];
 }

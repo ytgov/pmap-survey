@@ -28,7 +28,15 @@
         class="ml-2"></v-text-field>
     </template>
     <template v-slot:right>
-      <v-btn color="primary" variant="tonal" size="small" class="mr-5" @click="addSurveyClick">Add Survey</v-btn>
+      <v-btn
+        v-if="user.IS_ADMIN == 'Y'"
+        color="primary"
+        variant="tonal"
+        size="small"
+        class="mr-5"
+        @click="addSurveyClick"
+        >Add Survey</v-btn
+      >
     </template>
 
     <v-data-table :search="search" :headers="headers" :items="surveys" :loading="isLoading" @click:row="rowClick">
