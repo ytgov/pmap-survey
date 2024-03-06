@@ -202,7 +202,7 @@ export default {
           var reader = new FileReader();
           reader.onload = async (end) => {
             const fileContent = end.target?.result;
-            const records = [];
+            const records = new Array<any>();
             const parser = csvParser({ delimiter: "," });
 
             parser.on("readable", () => {

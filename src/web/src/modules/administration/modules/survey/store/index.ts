@@ -152,6 +152,8 @@ interface Survey {
   PAGE_INTRO: string;
   CONTACT_QUESTION: string;
   CONTACT_EMAIL: string;
+  EMAIL_SUBJECT?: string;
+  EMAIL_BODY?: string;
   questions?: Question[];
   choices?: any[];
 }
