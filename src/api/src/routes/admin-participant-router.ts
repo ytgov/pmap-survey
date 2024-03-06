@@ -16,24 +16,66 @@ adminParticipantRouter.get("/:SID", async (req: Request, res: Response) => {
 });
 
 adminParticipantRouter.post("/", async (req: Request, res: Response) => {
-  let { addresses, survey } = req.body;
+  let { addresses, survey, fileData, prefix } = req.body;
 
-  let existingAddresses = await db("PARTICIPANT_DATA")
-    .withSchema(DB_SCHEMA)
-    .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
-    .where("PARTICIPANT.SID", survey)
-    .whereNotNull("EMAIL")
-    .select("EMAIL");
+  if (fileData && fileData.headers && fileData.headers.length > 0) {
+    let demographicList = await db("DEMOGRAPHIC_TYPE").withSchema(DB_SCHEMA);
+    let demographics = demographicList.map((d) => d.DEMOGRAPHIC);
 
-  let existingList = existingAddresses.map((e) => e.EMAIL);
+    // remove the EMAIL header
+    fileData.headers.shift();
 
-  for (let address of addresses) {
-    if (existingList.includes(address)) continue;
+    for (let records of fileData.records) {
+      let existingAddresses = await db("PARTICIPANT_DATA")
+        .withSchema(DB_SCHEMA)
+        .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
+        .where("PARTICIPANT.SID", survey)
+        .whereNotNull("EMAIL")
+        .select("EMAIL");
 
-    let token = makeToken();
+      let existingList = existingAddresses.map((e) => e.EMAIL);
 
-    await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
-    await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: address });
+      let email = records.shift();
+      if (existingList.includes(email)) continue;
+
+      let token = makeToken(prefix);
+
+      for (let i = 0; i < fileData.headers.length; i++) {
+        let header = fileData.headers[i];
+        let value = records[i];
+
+        let demo = header;
+        if (!demographics.includes(demo)) return res.status(500).send(`Invalid demographic: ${demo}`);
+
+        let nval = isNumeric(value) ? Number(value) : null;
+        let tval = isNumeric(value) ? null : value;
+
+        console.log("HEADER", email, { TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });
+
+        await db("PARTICIPANT_DEMOGRAPHIC")
+          .withSchema(DB_SCHEMA)
+          .insert({ TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });
+      }
+
+      await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
+      await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: email });
+    }
+  } else {
+    for (let address of addresses) {
+      let existingAddresses = await db("PARTICIPANT_DATA")
+        .withSchema(DB_SCHEMA)
+        .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
+        .where("PARTICIPANT.SID", survey)
+        .whereNotNull("EMAIL")
+        .select("EMAIL");
+
+      let existingList = existingAddresses.map((e) => e.EMAIL);
+      if (existingList.includes(address)) continue;
+
+      let token = makeToken(prefix);
+      await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
+      await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: address });
+    }
   }
 
   res.json({ data: {} });
@@ -44,15 +86,19 @@ adminParticipantRouter.delete("/:TOKEN", async (req: Request, res: Response) => 
 
   await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
   await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
-  // delete demographic also
+  await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
 
   res.json({ data: {} });
 });
 
-function makeToken() {
+function makeToken(prefix: string) {
   const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-  const randomArray = Array.from({ length: 61 }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
+  const randomArray = Array.from({ length: 64 }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
 
-  const randomString = randomArray.join("");
-  return randomString;
+  let randomString = `${prefix}_${randomArray.join("")}`;
+  randomString = randomString.replace(/^_/, "");
+  return randomString.substring(0, 64);
+}
+function isNumeric(n: any) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }

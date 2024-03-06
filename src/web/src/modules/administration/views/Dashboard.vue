@@ -32,15 +32,15 @@
     </v-col>
 
     <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
-      <v-card elevation="3" color="#F2760C66" to="/administration/moderation">
+      <v-card elevation="3" color="#F2760C66" to="/administration/results">
         <v-card-text style="text-align: right" color="white">
           <v-icon
             class="float-left"
             style="font-size: 90px; opacity: 25%; position: absolute; left: 10px; margin-top: -12px"
-            >mdi-lightbulb-outline</v-icon
+            >mdi-chart-bar</v-icon
           >
           <div style="font-size: 52px; line-height: 52px">&nbsp;</div>
-          <div>All Responses (Admin only)</div>
+          <div>Survey Results</div>
         </v-card-text>
       </v-card>
     </v-col>

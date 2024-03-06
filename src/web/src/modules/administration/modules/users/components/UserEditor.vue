@@ -36,6 +36,14 @@
               density="comfortable"></v-checkbox
           ></v-col>
         </v-row>
+        <v-select
+          v-if="selectedUser.STATUS == 'Active' && !selectedUser.IS_ADMIN"
+          label="Surveys to Manage"
+          v-model="selectedSurveys"
+          multiple
+          :items="surveys"
+          item-title="NAME"
+          item-value="SID"></v-select>
       </v-card-text>
       <v-card-actions class="mx-4 mb-2">
         <v-btn color="primary" variant="flat" @click="saveUser()">Save</v-btn>
@@ -49,12 +57,16 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia";
 import { useUserAdminStore } from "../store";
+import { useAdminSurveyStore } from "../../survey/store";
 
 export default {
   name: "UserEditor",
-  data: () => ({}),
+  data: () => ({
+    selectedSurveys: [],
+  }),
   computed: {
     ...mapState(useUserAdminStore, ["selectedUser"]),
+    ...mapState(useAdminSurveyStore, ["surveys"]),
     visible() {
       return this.selectedUser ? true : false;
     },

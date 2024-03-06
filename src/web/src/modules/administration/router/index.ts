@@ -13,7 +13,6 @@ const routes = [
         beforeEnter: requireAccess,
         meta: {
           allow_admin: true,
-          role: "Moderator",
         },
       },
       {
@@ -54,7 +53,22 @@ const routes = [
         beforeEnter: requireAccess,
         meta: {
           allow_admin: true,
-          role: "Moderator",
+        },
+      },
+      {
+        path: "results",
+        component: () => import("../modules/results/views/ResultsList.vue"),
+        beforeEnter: requireAccess,
+        meta: {
+          allow_admin: true,
+        },
+      },
+      {
+        path: "results/:SID",
+        component: () => import("../modules/results/views/ResultsDetail.vue"),
+        beforeEnter: requireAccess,
+        meta: {
+          allow_admin: true,
         },
       },
     ],

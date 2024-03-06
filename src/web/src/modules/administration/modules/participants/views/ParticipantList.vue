@@ -87,8 +87,14 @@
           <v-btn icon @click="closeEditor" color="white"><v-icon>mdi-close</v-icon></v-btn>
         </v-toolbar>
         <v-card-text>
-          <v-text-field label="Token prefix" />
+          <v-text-field
+            label="Token prefix"
+            maxlength="3"
+            v-model="batch.prefix"
+            density="comfortable"
+            variant="outlined" />
           <v-file-input
+            v-model="csvFile"
             variant="outlined"
             density="comfortable"
             accept="text/csv"
@@ -117,6 +123,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useParticipantsStore } from "../store";
 import { useAdminSurveyStore } from "../../survey/store";
 import moment from "moment";
+import { parse as csvParser } from "csv-parse/browser/esm";
 
 export default {
   components: {},
@@ -134,6 +141,8 @@ export default {
     search: "",
     parseMessage: "",
     visible: false,
+    csvFile: [],
+    parsedCsv: "",
   }),
   computed: {
     ...mapWritableState(useParticipantsStore, ["batch"]),
@@ -183,11 +192,54 @@ export default {
       //this.selectUser(clone(thing.item.value));
     },
     async parseClick() {
-      let items = await this.parse();
-      this.parseMessage = `${items.valid.length} valid email address and ${items.invalid.length} invalid`;
+      if (this.csvFile && this.csvFile.length > 0) {
+        let file = this.csvFile[0];
+        if (file) {
+          var reader = new FileReader();
+          reader.onload = async (end) => {
+            const fileContent = end.target?.result;
+            const records = [];
+            const parser = csvParser({ delimiter: "," });
+
+            parser.on("readable", () => {
+              let record;
+              while ((record = parser.read()) !== null) {
+                records.push(record);
+              }
+            });
+            parser.on("error", function (err) {
+              console.error(err.message);
+            });
+
+            parser.write(fileContent);
+            parser.end();
+
+            let headers = records.shift();
+            let emails = records.map((r) => r[0]);
+
+            this.batch.fileData = { headers, records };
+            this.batch.participants = emails.join(", ");
+
+            let items = await this.parse();
+            this.parseMessage = `${items.valid.length} valid email address and ${items.invalid.length} invalid`;
+          };
+
+          reader.readAsText(file);
+        }
+      } else {
+        this.batch.fileData = {};
+        let items = await this.parse();
+        this.parseMessage = `${items.valid.length} valid email address and ${items.invalid.length} invalid`;
+      }
     },
     async saveClick() {
-      await this.create();
+      await this.create()
+        .then(() => {
+          this.closeEditor();
+        })
+        .catch(() => {
+          console.log("ERROR IN THEN");
+        });
     },
     async surveyChanged() {
       await this.getParticipants(this.batch.survey);

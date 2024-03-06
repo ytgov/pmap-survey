@@ -47,6 +47,7 @@ import { useUserAdminStore } from "../store";
 import UserEditor from "../components/UserEditor.vue";
 import { clone } from "lodash";
 import AddUser from "../components/AddUser.vue";
+import { useAdminSurveyStore } from "../../survey/store";
 
 export default {
   components: { UserEditor, AddUser },
@@ -81,9 +82,11 @@ export default {
   },
   beforeMount() {
     this.loadItems();
+    this.loadSurveys();
   },
   methods: {
     ...mapActions(useUserAdminStore, ["getAllUsers", "selectUser"]),
+    ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
 
     async loadItems() {
       await this.getAllUsers();

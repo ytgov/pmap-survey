@@ -11,7 +11,7 @@ export const useParticipantsStore = defineStore("participants", {
   state: (): ParticipantStore => ({
     isLoading: false,
     responses: new Array<Response>(),
-    batch: { participants: "", survey: undefined, addresses: [] },
+    batch: { participants: "", survey: undefined, addresses: [], prefix: "", fileData: {} },
     participants: new Array<any>(),
   }),
   getters: {
@@ -60,14 +60,17 @@ export const useParticipantsStore = defineStore("participants", {
 
       if (this.batch.addresses.length == 0) return;
 
-      await api
-        .secureCall("post", PARTICIPANT_URL, this.batch)
-        .then(async (resp) => {
-          await this.loadResponses();
-          await this.getParticipants(this.batch.survey);
+      await api.secureCall("post", PARTICIPANT_URL, this.batch).then(async (resp) => {
+        await this.loadResponses();
+        await this.getParticipants(this.batch.survey);
+
+        if (resp.error) {
+          m.notify({ text: resp.error.response.data, variant: "error" });
+        } else {
           m.notify({ text: "Participants saved", variant: "success" });
-        })
-        .catch();
+          this.unselect();
+        }
+      });
     },
     async update() {
       if (this.batch) {
@@ -85,7 +88,7 @@ export const useParticipantsStore = defineStore("participants", {
       this.batch = item;
     },
     unselect() {
-      this.batch = { participants: "", survey: undefined, addresses: [] };
+      this.batch = { participants: "", survey: undefined, addresses: [], prefix: "" };
       this.participants = new Array<any>();
     },
 

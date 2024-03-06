@@ -6,6 +6,7 @@ import { EmailService } from "../services";
 import { recordSentDate } from "./integration-router";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { DB_SCHEMA } from "../config";
+import { uniq } from "lodash";
 
 export const adminSurveyRouter = express.Router();
 adminSurveyRouter.use(checkJwt, loadUser);
@@ -21,6 +22,40 @@ adminSurveyRouter.get("/", async (req: Request, res: Response) => {
   }
 
   res.json({ data: list });
+});
+
+adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
+  const { SID } = req.params;
+
+  let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
+  survey.questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID }).orderBy("ORD");
+  survey.stats = await db("PARTICIPANT")
+    .withSchema(DB_SCHEMA)
+    .leftJoin("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .where({ SID })
+    .count("PARTICIPANT.TOKEN AS tokenCount")
+    .count("SENT_DATE AS sentCount")
+    .count("RESENT_DATE AS resentCount")
+    .count("RESPONSE_DATE AS responseCount")
+    .select("SID")
+    .groupBy("SID")
+    .first();
+
+  let tokenList = new Array<string>();
+
+  for (let question of survey.questions) {
+    question.responses = await db("RESPONSE_LINE")
+      .withSchema(DB_SCHEMA)
+      .where({ QID: question.QID })
+      .select("NVALUE", "TVALUE");
+
+    question.responseCount = question.responses.length;
+    tokenList.concat(uniq(survey.questions.map((s: any) => s.TOKEN)));
+  }
+
+  survey.responseCount = uniq(tokenList).length;
+
+  res.json({ data: survey });
 });
 
 adminSurveyRouter.post("/", async (req: Request, res: Response) => {
