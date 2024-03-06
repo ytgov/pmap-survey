@@ -95,6 +95,13 @@ export default {
     resendCount() {
       return this.viableParticipants.filter((p) => p.SENT_DATE && !p.RESENT_DATE);
     },
+    selectedSurvey() {
+      if (this.survey) {
+        return this.surveys.find((s) => s.SID == this.survey);
+      }
+
+      return null;
+    },
   },
   beforeMount() {
     this.loadItems();
@@ -120,7 +127,9 @@ export default {
       await this.sendEmail();
     },
     async surveyChange() {
-      if (this.survey) {
+      if (this.survey && this.selectedSurvey) {
+        this.email.body = this.selectedSurvey.EMAIL_BODY ?? "";
+        this.email.subject = this.selectedSurvey.EMAIL_SUBJECT ?? "";
         await this.getParticipants(this.survey);
       }
     },

@@ -165,9 +165,13 @@ adminSurveyRouter.post("/:SID/send-email-test", async (req: Request, res: Respon
   let { subject, body } = req.body;
 
   let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
-  let emailer = new EmailService();
 
-  await emailer.sendEmail(req.user.EMAIL, "111222333", `[TEST EMAIL]: ${subject}`, body);
+  if (survey) {
+    await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({ EMAIL_SUBJECT: subject, EMAIL_BODY: body });
+
+    let emailer = new EmailService();
+    await emailer.sendEmail(req.user.EMAIL, "111222333", `[TEST EMAIL]: ${subject}`, body);
+  }
 
   res.json({ data: "success" });
 });
@@ -176,36 +180,39 @@ adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) =
   let { SID } = req.params;
   let { subject, body, recipientType } = req.body;
 
-  //let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
+  let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
 
-  let query = db("PARTICIPANT")
-    .withSchema(DB_SCHEMA)
-    .join("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
-    .where({ SID })
-    .whereNull("RESPONSE_DATE")
-    .whereNotNull("EMAIL")
-    .whereNull("RESENT_DATE")
-    .select("EMAIL", "PARTICIPANT.TOKEN");
+  if (survey) {
+    await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({ EMAIL_SUBJECT: subject, EMAIL_BODY: body });
 
-  if (recipientType == "SEND") query.whereNull("SENT_DATE");
-  let participants = await query;
+    let query = db("PARTICIPANT")
+      .withSchema(DB_SCHEMA)
+      .join("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+      .where({ SID })
+      .whereNull("RESPONSE_DATE")
+      .whereNotNull("EMAIL")
+      .whereNull("RESENT_DATE")
+      .select("EMAIL", "PARTICIPANT.TOKEN");
 
-  let emailer = new EmailService();
+    if (recipientType == "SEND") query.whereNull("SENT_DATE");
+    let participants = await query;
 
-  for (let p of participants) {
-    await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+    let emailer = new EmailService();
 
-    await recordSentDate(p);
+    for (let p of participants) {
+      await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+
+      await recordSentDate(p);
+    }
+    return res.json({ data: `Sent ${participants.length} emails` });
   }
-
-  res.json({ data: `Sent ${participants.length} emails` });
+  return res.status(404).send();
 });
 
 adminSurveyRouter.post("/:SID/resend/:TOKEN", async (req: Request, res: Response) => {
   let { SID, TOKEN } = req.params;
-  let { subject, body } = req.body;
 
-  //let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
+  let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
 
   let query = await db("PARTICIPANT")
     .withSchema(DB_SCHEMA)
@@ -218,7 +225,7 @@ adminSurveyRouter.post("/:SID/resend/:TOKEN", async (req: Request, res: Response
   let emailer = new EmailService();
 
   for (let p of query) {
-    await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+    await emailer.sendEmail(p.EMAIL, p.TOKEN, survey.EMAIL_SUBJECT, survey.EMAIL_BODY);
   }
 
   return res.json({ data: `Sent ${query.length} emails` });

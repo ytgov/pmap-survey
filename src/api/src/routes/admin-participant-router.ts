@@ -50,8 +50,6 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
         let nval = isNumeric(value) ? Number(value) : null;
         let tval = isNumeric(value) ? null : value;
 
-        console.log("HEADER", email, { TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });
-
         await db("PARTICIPANT_DEMOGRAPHIC")
           .withSchema(DB_SCHEMA)
           .insert({ TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });

@@ -69,6 +69,10 @@
         </div>
       </template>
 
+      <template v-slot:item.TOKEN="{ item }">
+        {{ trimToken(item.TOKEN) }}
+      </template>
+
       <template v-slot:item.SENT_DATE="{ item }">
         {{ formatDate(item.SENT_DATE) }}
       </template>
@@ -253,6 +257,9 @@ export default {
     formatDate(input: any) {
       if (input) return moment(input).format("YYYY-MM-DD @ hh:mm a");
       return "";
+    },
+    trimToken(input: string) {
+      return `${input.substring(0, 8)} ... ${input.substring(input.length - 6)}`;
     },
 
     openEditor() {
