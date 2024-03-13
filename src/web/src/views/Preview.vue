@@ -21,7 +21,7 @@
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-7">
           <div v-for="(question, idx) of questionGroups" :key="idx">
-            <question-renderer :index="idx" :question="question"></question-renderer>
+            <question-renderer :index="idx" :question="question" @answerChanged="checkAllValid"></question-renderer>
           </div>
 
           <div v-if="survey.survey.CONTACT_QUESTION">
@@ -38,7 +38,6 @@
           </div>
         </div>
       </div>
-
       <v-btn color="primary" :disabled="!allValid" @click="submitSurvey"> Submit </v-btn>
 
       <span style="font-size: 0.9rem" class="pl-4 text-error" v-if="!allValid">
@@ -50,24 +49,20 @@
 
 <script>
 import markdownit from "markdown-it";
+import { clone } from "lodash";
 import { mapActions, mapState } from "pinia";
 import { useSurveyStore } from "@/store/SurveyStore";
 
 export default {
   name: "Login",
+  data: () => ({
+    surveyId: "",
+    moveOn: false,
+    allValid: false,
+  }),
   computed: {
     ...mapState(useSurveyStore, ["survey"]),
 
-    allValid: function () {
-      let v = true;
-
-      for (let q of this.survey.questions) {
-        let qv = q.isValid();
-        v = v && qv;
-      }
-
-      return v;
-    },
     questionCount() {
       const ignoreTypes = ["text", "title_question"];
       return this.survey.questions.filter((q) => !ignoreTypes.includes(q.TYPE)).length;
@@ -79,8 +74,6 @@ export default {
       if (this.survey.questions) {
         let lastTitle = null;
         for (let question of this.survey.questions) {
-
-
           if (question.TYPE == "title_question") {
             question.subQuestions = [];
             lastTitle = question;
@@ -92,16 +85,11 @@ export default {
           }
         }
 
-
         //return this.survey.questions;
       }
       return list;
     },
   },
-  data: () => ({
-    surveyId: "",
-    moveOn: false,
-  }),
   mounted() {
     this.surveyId = this.$route.params.token;
     this.loadSurveyPreview(this.surveyId).catch((msg) => {
@@ -112,8 +100,34 @@ export default {
   methods: {
     ...mapActions(useSurveyStore, ["loadSurveyPreview"]),
 
+    checkAllValid() {
+      let v = true;
+
+      for (let q of this.survey.questions) {
+        let qv = q.isValid();
+        v = v && qv;
+      }
+
+      this.allValid = v;
+      return v;
+    },
     submitSurvey() {
       if (this.allValid) {
+        let qs = [];
+        for (let sq of this.survey.questions) {
+          let q = clone(sq);
+          delete q.ASK;
+          delete q.RANGE;
+          delete q.SELECTION_JSON;
+          delete q.OPTIONAL;
+          delete q.ORD;
+          delete q.SID;
+          delete q.TYPE;
+          qs.push(q);
+        }
+
+        console.log("SUBMIT", qs);
+
         alert("Submitting does nothing on preview");
       }
     },

@@ -8,7 +8,7 @@
     <div v-if="!moveOn">
       <v-card class="default">
         <v-card-text>
-          <div v-html="survey.survey.PAGE_INTRO"></div>
+          <div v-html="renderMarkdown(survey.survey.PAGE_INTRO)"></div>
           <v-btn @click="moveOn = true" large color="primary">Continue to Survey</v-btn>
         </v-card-text>
       </v-card>
@@ -16,14 +16,13 @@
 
     <div v-if="moveOn">
       <h4 class="mb-4">
-        This survey consists of {{ survey.questions.length }} questions. Once completed, please press 'Submit' at the
-        bottom.
+        This survey consists of {{ questionCount }} questions. Once completed, please press 'Submit' at the bottom.
       </h4>
 
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-7">
-          <div v-for="(question, idx) of survey.questions" :key="idx">
-            <question-renderer :index="idx" :question="question" @answerChanged="checkAnswer"></question-renderer>
+          <div v-for="(question, idx) of questionGroups" :key="idx">
+            <question-renderer :index="idx" :question="question" @answerChanged="checkAllValid"></question-renderer>
           </div>
 
           <div v-if="survey.survey.CONTACT_QUESTION">
@@ -55,13 +54,42 @@ import axios from "axios";
 import { mapActions, mapState } from "pinia";
 import { useSurveyStore } from "@/store/SurveyStore";
 import { SURVEY_URL } from "../urls";
-import _ from "lodash";
+import markdownit from "markdown-it";
+import { clone } from "lodash";
 import Notifications from "../components/Notifications.vue";
 
 export default {
+  components: { Notifications },
   name: "Login",
   computed: {
     ...mapState(useSurveyStore, ["survey"]),
+
+    questionCount() {
+      const ignoreTypes = ["text", "title_question"];
+      return this.survey.questions.filter((q) => !ignoreTypes.includes(q.TYPE)).length;
+    },
+    questionGroups() {
+      let list = [];
+      const specialTypes = ["matrix_question", "title_question"];
+
+      if (this.survey.questions) {
+        let lastTitle = null;
+        for (let question of this.survey.questions) {
+          if (question.TYPE == "title_question") {
+            question.subQuestions = [];
+            lastTitle = question;
+            list.push(question);
+          } else if (question.TYPE == "matrix_question") {
+            if (lastTitle) lastTitle.subQuestions.push(question);
+          } else {
+            list.push(question);
+          }
+        }
+
+        //return this.survey.questions;
+      }
+      return list;
+    },
   },
   data: () => ({
     surveyId: "",
@@ -79,25 +107,28 @@ export default {
   methods: {
     ...mapActions(useSurveyStore, ["loadSurvey"]),
 
-    checkAnswer(val) {
-      this.checkAllValid();
+    renderMarkdown(input) {
+      const md = markdownit();
+      return md.render(input);
     },
 
     checkAllValid() {
       let v = true;
+
       for (let q of this.survey.questions) {
         let qv = q.isValid();
-
         v = v && qv;
       }
+
       this.allValid = v;
+      return v;
     },
 
     submitSurvey() {
       if (this.allValid) {
         let qs = [];
         for (let sq of this.survey.questions) {
-          let q = _.clone(sq);
+          let q = clone(sq);
           delete q.ASK;
           delete q.RANGE;
           delete q.SELECTION_JSON;
@@ -119,7 +150,6 @@ export default {
       }
     },
   },
-  components: { Notifications },
 };
 </script>
 

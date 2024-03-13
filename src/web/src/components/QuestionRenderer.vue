@@ -44,33 +44,27 @@
           <v-autocomplete
             class="mt-4"
             clearable
-            dense
             hide-selected
             hide-details
             multiple
-            outlined
             small-chips
             deletable-chips
             v-model="question.answer"
             :items="options"
-            :item-text="'descr'"
-            :item-value="'val'"
-            background-color="white"></v-autocomplete>
+            :item-title="'descr'"
+            :item-value="'val'"></v-autocomplete>
         </div>
 
         <div v-else-if="question.TYPE == 'select'">
           <v-select
             v-model="question.answer"
             :items="options"
-            :item-text="'descr'"
+            :item-title="'descr'"
             :item-value="'val'"
-            dense
-            outlined
             hide-details
-            background-color="white"
             class="mt-4"
             v-if="options.length >= 7"></v-select>
-          
+
           <v-radio-group v-model="question.answer" hide-details v-if="options.length < 7">
             <v-radio
               :label="item.descr"
@@ -82,23 +76,12 @@
 
           <div v-if="allowCustomText" class="mt-4 pl-5">
             <p class="mb-2">{{ customTextAsk }}</p>
-            <v-text-field
-              v-model="question.answer_text"
-              dense
-              outlined
-              hide-details
-              background-color="white"></v-text-field>
+            <v-text-field v-model="question.answer_text" hide-details></v-text-field>
           </div>
         </div>
 
         <div v-else-if="question.TYPE == 'free-text'">
-          <v-textarea
-            dense
-            v-model="question.answer"
-            outlined
-            hide-details
-            background-color="white"
-            class="mt-4"></v-textarea>
+          <v-textarea v-model="question.answer" hide-details class="mt-4"></v-textarea>
         </div>
 
         <div v-else-if="question.TYPE == 'title_question'">
@@ -119,6 +102,7 @@
                   hide-details
                   :value="ch.val"
                   density="compact"
+                  @update:model-value="$emit('answerChanged', 1)"
                   style="width: 30px" />
               </td>
             </tr>
@@ -202,17 +186,17 @@ export default {
     },
   },
   mounted() {
-    let value = localStorage.getItem(this.storageID);
+    let val = localStorage.getItem(this.storageID);
+    let value = JSON.parse(val);
     let q = this.question;
 
     nextTick(() => {
-      if (value) q.answer = value;
-      console.log("TICK", q.answer, value);
+      if (value) q.answer = value.value;
     });
   },
   watch: {
     "question.answer": function (nval) {
-      localStorage.setItem(this.storageID, nval);
+      localStorage.setItem(this.storageID, JSON.stringify({ value: nval }));
       this.$emit("answerChanged", nval);
     },
   },

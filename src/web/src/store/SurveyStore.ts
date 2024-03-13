@@ -43,6 +43,7 @@ export const useSurveyStore = defineStore("survey", {
         q.answer = null;
         q.isValid = () => {
           if (q.OPTIONAL == 1) return true;
+          if (q.TYPE == 'text') return true;
 
           if (q.subQuestions) {
             for (let sub of q.subQuestions) {
