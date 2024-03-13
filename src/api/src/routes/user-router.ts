@@ -34,7 +34,7 @@ userRouter.post("/", async (req: Request, res: Response) => {
     }
 
     await db.create({
-      EMAIL: user.email.toLowerCase(),
+      EMAIL: user.email,
       USER_ID: "SUB_MISSING",
       STATUS: UserStatus.ACTIVE,
       FIRST_NAME: user.first_name,
