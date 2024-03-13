@@ -53,6 +53,8 @@ export class EmailService {
       return null;
     }
 
-    return this.TRANSPORT.sendMail(message);
+    return this.TRANSPORT.sendMail(message).catch((err) => {
+      console.log("ERROR Sending email");
+    });
   }
 }
