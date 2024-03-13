@@ -102,7 +102,7 @@
                   hide-details
                   :value="ch.val"
                   density="compact"
-                  @update:model-value="$emit('answerChanged', 1)"
+                  @update:model-value="subUpdated(sub)"
                   style="width: 30px" />
               </td>
             </tr>
@@ -190,6 +190,16 @@ export default {
     let value = JSON.parse(val);
     let q = this.question;
 
+    if (q.subQuestions) {
+      for (let sq of q.subQuestions) {
+        let subStorage = `${sq.QID}_ANSWER`;
+        let sqVal = localStorage.getItem(subStorage);
+        let sqValue = JSON.parse(sqVal);
+
+        if (sqValue) sq.answer = sqValue.value;
+      }
+    }
+
     nextTick(() => {
       if (value) q.answer = value.value;
     });
@@ -202,6 +212,11 @@ export default {
   },
   data: () => ({}),
   methods: {
+    subUpdated(subQ) {
+      localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
+      this.$emit("answerChanged", subQ.answer);
+    },
+
     checkCustom() {
       if (this.selectedOption && this.selectedOption.allow_custom && this.selectedOption.allow_custom == "true") {
         this.showCustomField = true;
