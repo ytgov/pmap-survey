@@ -83,6 +83,7 @@
         {{ formatDate(item.RESPONSE_DATE) }}
       </template>
     </v-data-table>
+    <ConfirmDialog ref="confirm"></ConfirmDialog>
 
     <v-dialog v-model="visible" persistent max-width="700">
       <v-card>
@@ -124,13 +125,14 @@
 </template>
 <script lang="ts">
 import { mapActions, mapState, mapWritableState } from "pinia";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import { useParticipantsStore } from "../store";
 import { useAdminSurveyStore } from "../../survey/store";
 import moment from "moment";
 import { parse as csvParser } from "csv-parse/browser/esm";
 
 export default {
-  components: {},
+  components: { ConfirmDialog },
   data: () => ({
     participantType: "",
     headers: [
@@ -249,10 +251,24 @@ export default {
       await this.getParticipants(this.batch.survey);
     },
     async deleteClick(participantId: any) {
-      await this.deleteParticipant(this.batch.survey, participantId);
+      this.$refs.confirm.show(
+        "Delete this participant?",
+        "Click confirm below to delete the selected participant.",
+        async () => {
+          await this.deleteParticipant(this.batch.survey, participantId);
+        },
+        () => {}
+      );
     },
     async emailClick(participantId: any) {
-      await this.manualSend(this.batch.survey, participantId);
+      this.$refs.confirm.show(
+        "Send email to this participant?",
+        "Click confirm below to send a single email using the supplied token. This will use the email format defined in the emailer for this survey. Please ensure it is setup before proceeding.",
+        async () => {
+          await this.manualSend(this.batch.survey, participantId);
+        },
+        () => {}
+      );
     },
     formatDate(input: any) {
       if (input) return moment(input).format("YYYY-MM-DD @ hh:mm a");
