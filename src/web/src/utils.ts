@@ -1,4 +1,5 @@
 import moment from "moment";
+import markdownit from "markdown-it";
 
 export function FormatDate(input: Date): string {
   return moment.utc(input).format("MMMM D, YYYY");
@@ -19,4 +20,15 @@ export function FormatTime(input: Date): string {
 export function FormatYesNo(input: any): string {
   if (input && (input == true || input == "y" || input == "Y" || input == 1)) return "Yes";
   return "No";
+}
+
+export function RenderMarkdown(input: string): { output: string; isMarkdown: boolean } {
+  let containsNewlines = input.includes("\\n");
+  let containsHash = input.includes("#");
+
+  if (containsNewlines || containsHash) {
+    return { output: markdownit().render(input), isMarkdown: true };
+  }
+
+  return { output: input, isMarkdown: false };
 }

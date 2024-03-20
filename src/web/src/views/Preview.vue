@@ -1,14 +1,23 @@
 <template>
   <div class="hello" v-if="survey && survey.survey && survey.survey.PAGE_TITLE">
     <h1>{{ survey.survey.PAGE_TITLE }}</h1>
-    <p class="lead" style="font-size: 1.2rem; font-weight: 300">
+    <div
+      class="markdown"
+      v-if="renderMarkdown(survey.survey.DESCRIPTION).isMarkdown"
+      v-html="renderMarkdown(survey.survey.DESCRIPTION).output"></div>
+
+    <p class="lead" style="font-size: 1.2rem; font-weight: 300" v-else>
       {{ survey.survey.DESCRIPTION }}
     </p>
 
     <div v-if="!moveOn">
       <v-card class="default">
         <v-card-text>
-          <div v-html="renderMarkdown(survey.survey.PAGE_INTRO)"></div>
+          <div class="markdown"
+            v-html="renderMarkdown(survey.survey.PAGE_INTRO).output"
+            v-if="renderMarkdown(survey.survey.PAGE_INTRO).isMarkdown"></div>
+          <p v-else>{{ survey.survey.PAGE_INTRO }}</p>
+
           <v-btn @click="moveOn = true" large color="primary">Continue to Survey</v-btn>
         </v-card-text>
       </v-card>
@@ -48,10 +57,10 @@
 </template>
 
 <script>
-import markdownit from "markdown-it";
 import { clone } from "lodash";
 import { mapActions, mapState } from "pinia";
 import { useSurveyStore } from "@/store/SurveyStore";
+import { RenderMarkdown } from "@/utils";
 
 export default {
   name: "Login",
@@ -132,8 +141,7 @@ export default {
       }
     },
     renderMarkdown(input) {
-      const md = markdownit();
-      return md.render(input);
+      return RenderMarkdown(input);
     },
   },
 };
