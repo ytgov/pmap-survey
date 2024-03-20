@@ -68,7 +68,7 @@ export const useParticipantsStore = defineStore("participants", {
           m.notify({ text: resp.error.response.data, variant: "error" });
         } else {
           m.notify({ text: "Participants saved", variant: "success" });
-          this.unselect();
+          //this.unselect();
         }
       });
     },
