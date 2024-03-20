@@ -40,6 +40,8 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
 
       let token = makeToken(prefix);
 
+      let demographicInsert = [];
+
       for (let i = 0; i < fileData.headers.length; i++) {
         let header = fileData.headers[i];
         let value = records[i];
@@ -49,14 +51,12 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
 
         let nval = isNumeric(value) ? Number(value) : null;
         let tval = isNumeric(value) ? null : value;
-
-        await db("PARTICIPANT_DEMOGRAPHIC")
-          .withSchema(DB_SCHEMA)
-          .insert({ TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });
+        demographicInsert.push({ TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });
       }
 
       await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
       await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: email });
+      await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).insert(demographicInsert);
     }
   } else {
     for (let address of addresses) {
