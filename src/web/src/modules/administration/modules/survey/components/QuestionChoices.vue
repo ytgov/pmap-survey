@@ -27,7 +27,7 @@
     </v-row>
     <v-divider class="my-2" />
   </div>
-  <v-btn @click="addClick" color="info">Add Choice</v-btn>
+  <v-btn @click="addClick" color="info" :disabled="!question.choiceTitle">Add Choice</v-btn>
 </template>
 <script>
 import { isArray } from "lodash";

@@ -55,7 +55,7 @@
           </v-col>
         </v-row>
         <div class="d-flex mb-2">
-          <v-btn color="primary" class="mt-5" @click="saveClick" :disabled="disabled">Save</v-btn>
+          <v-btn color="primary" class="mt-5" @click="saveClick" :disabled="disabled || !canSave">Save</v-btn>
           <v-spacer />
           <v-btn color="warning" class="mt-5" @click="deleteClick" :disabled="disabled">Delete</v-btn>
         </div>
@@ -75,6 +75,19 @@ export default {
   data: () => ({ visible: false }),
   computed: {
     ...mapState(useAdminSurveyStore, ["questionTypes", "groupOptions", "saveQuestion", "deleteQuestion"]),
+    canSave() {
+      if (this.question.TYPE == "matrix_question") {
+        if (!this.question.GROUP_ID) return false;
+      }
+
+      let optionTypes = ["select", "multi-select", "matrix_question", "range"];
+      if (optionTypes.includes(this.question.TYPE)) {
+        if (!this.question.choiceTitle || this.question.choiceTitle.length == 0) return false;
+        if (!this.question.choices || this.question.choices.length == 0) return false;
+      }
+
+      return true;
+    },
   },
   methods: {
     showEditor() {
