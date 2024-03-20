@@ -24,6 +24,11 @@ adminSurveyRouter.get("/", async (req: Request, res: Response) => {
   for (let item of list) {
     item.questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: item.SID }).orderBy("ORD");
     item.choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: item.SID }).orderBy("TITLE");
+    item.responses = await db("PARTICIPANT")
+      .withSchema(DB_SCHEMA)
+      .innerJoin("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+      .where({ SID: item.SID })
+      .whereNotNull("RESPONSE_DATE");
 
     item.choices.map((c: any) => (c.choices = JSON.parse(c.SELECTION_JSON)));
   }

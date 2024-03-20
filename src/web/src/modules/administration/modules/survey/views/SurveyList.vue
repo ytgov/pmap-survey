@@ -55,6 +55,7 @@ export default {
       { title: "SID", key: "SID" },
       { title: "Name", key: "NAME" },
       { title: "Questions", key: "questions.length" },
+      { title: "Responses", key: "responses.length" },
     ],
     search: "",
   }),

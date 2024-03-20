@@ -21,7 +21,7 @@
   </div>
 
   <base-card showHeader="" heading="" elevation="0" v-if="survey">
-    <v-row>
+    <v-row class="mb-2">
       <v-col cols="12" md="6">
         <v-text-field label="Title" v-model="survey.NAME" />
         <v-textarea label="Display text" v-model="survey.DESCRIPTION" hide-details />
@@ -37,14 +37,24 @@
         <v-text-field label="Contact question" v-model="survey.CONTACT_QUESTION" hide-details />
       </v-col>
       <v-col cols="12" md="12">
-        <v-text-field :label="fromLabel" v-model="survey.FROM_EMAIL" hide-details />
+        <v-text-field label="Email from" v-model="survey.FROM_EMAIL" persistent-hint :hint="fromLabel" />
       </v-col>
     </v-row>
 
     *** If question has responses, don't let changes happen<br />
     <div class="d-flex">
-      <v-btn color="primary" variant="flat" @click="saveClick" class="mr-5">Save</v-btn>
+      <v-btn
+        color="primary"
+        variant="flat"
+        @click="saveClick"
+        class="mr-5"
+        :disabled="survey.responses && survey.responses.length > 0"
+        >Save</v-btn
+      >
       <v-btn color="yg_sun" variant="outlined" @click="close">Close</v-btn>
+      <span class="mt-5 ml-4 text-warning" v-if="survey.responses && survey.responses.length > 0"
+        >This survey has respones and cannot be edited</span
+      >
       <v-spacer></v-spacer>
       <v-btn color="error" variant="tonal" @click="deleteClick">Delete</v-btn>
     </div>
@@ -57,14 +67,24 @@
           <h2>Questions</h2>
           <v-spacer />
 
-          <v-btn @click="addQuestionClick" color="info" class="mt-1 float-right" size="small">Add Question</v-btn>
+          <v-btn
+            @click="addQuestionClick"
+            color="info"
+            class="mt-1 float-right"
+            size="small"
+            :disabled="survey.responses && survey.responses.length > 0"
+            >Add Question</v-btn
+          >
         </div>
 
         <v-divider />
 
         <v-list variant="flat">
           <div v-for="(question, idx) of survey.questions">
-            <question-editor :question="question" :index="idx"></question-editor>
+            <question-editor
+              :question="question"
+              :index="idx"
+              :disabled="survey.responses && survey.responses.length > 0"></question-editor>
             <v-divider />
           </div> </v-list
       ></v-col>
@@ -90,7 +110,7 @@ import QuestionEditor from "../components/QuestionEditor.vue";
 
 export default {
   data: () => ({
-    fromLabel: `Email from (format: "Name" <EMAIL.ADDRESS>)`,
+    fromLabel: `FORMAT: "Name" <EMAIL.ADDRESS>`,
   }),
   components: { QuestionEditor },
   computed: {

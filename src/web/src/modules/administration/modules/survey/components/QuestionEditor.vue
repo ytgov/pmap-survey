@@ -55,9 +55,9 @@
           </v-col>
         </v-row>
         <div class="d-flex mb-2">
-          <v-btn color="primary" class="mt-5" @click="saveClick">Save</v-btn>
+          <v-btn color="primary" class="mt-5" @click="saveClick" :disabled="disabled">Save</v-btn>
           <v-spacer />
-          <v-btn color="warning" class="mt-5" @click="deleteClick">Delete</v-btn>
+          <v-btn color="warning" class="mt-5" @click="deleteClick" :disabled="disabled">Delete</v-btn>
         </div>
       </v-card-text>
     </v-card>
@@ -70,7 +70,7 @@ import { useAdminSurveyStore } from "../store";
 import QuestionChoices from "./QuestionChoices.vue";
 
 export default {
-  props: ["question", "index"],
+  props: ["question", "index", "disabled"],
   components: { QuestionChoices },
   data: () => ({ visible: false }),
   computed: {

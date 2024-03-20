@@ -159,6 +159,7 @@ interface Survey {
   FROM_EMAIL?: string;
   questions?: Question[];
   choices?: any[];
+  responses?: any[];
 }
 
 interface Question {
