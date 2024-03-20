@@ -13,7 +13,8 @@
       <v-card-text>
         <v-row>
           <v-col cols="12">
-            <v-text-field v-model="question.ASK" label="Ask" hide-details />
+            <v-textarea v-model="question.ASK" label="Ask" hide-details v-if="question.TYPE == 'text'" />
+            <v-text-field v-model="question.ASK" label="Ask" hide-details v-else />
           </v-col>
           <v-col cols="4">
             <v-select v-model="question.TYPE" label="Question type" :items="questionTypes" hide-details />
