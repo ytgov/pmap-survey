@@ -4,7 +4,13 @@
       <v-card-text style="clear: both">
         <v-row>
           <v-col cols="11" class="pb-1 text-heading2" style="line-height: 24px">
-            <div v-if="question.TYPE == 'text'" v-html="renderMarkdown(question.ASK)" class="pb-2"></div>
+            <div
+              v-if="question.TYPE == 'text' && renderMarkdown(question.ASK).isMarkdown"
+              v-html="renderMarkdown(question.ASK).output"
+              class="pb-2 markdown"></div>
+            <div v-else-if="question.TYPE == 'text'" class="pb-2">
+              <h3>{{ question.ASK }}</h3>
+            </div>
             <h3 v-else>
               Question {{ index + 1 }}: {{ question.ASK }}
               <span v-if="question.OPTIONAL == 0" class="text-error">*</span>
@@ -49,6 +55,7 @@
             multiple
             small-chips
             deletable-chips
+            @update:model-value="limiter"
             v-model="question.answer"
             :items="options"
             :item-title="'descr'"
@@ -118,33 +125,9 @@
   </div>
 </template>
 
-<style>
-.question .v-label {
-  color: #323232 !important;
-}
-.question .v-radio {
-  padding-top: 12px;
-}
-table.matrix {
-  /* border-left: 1px #323232 solid;
-  border-top: 1px #323232 solid; */
-  width: 100%;
-  border-collapse: collapse;
-  /* background-color: #efefef; */
-}
-table.matrix td,
-table.matrix th {
-  /* border-right: 1px #323232 solid;*/
-  border-bottom: 1px #32323233 solid;
-  padding: 2px 4px;
-  text-align: center;
-  font-weight: 400;
-  font-size: 0.95rem;
-}
-</style>
-
 <script>
-import markdownit from "markdown-it";
+import { RenderMarkdown } from "@/utils";
+import { isArray } from "lodash";
 import { nextTick } from "vue";
 
 export default {
@@ -226,9 +209,43 @@ export default {
       }
     },
     renderMarkdown(input) {
-      const md = markdownit();
-      return md.render(input);
+      return RenderMarkdown(input);
+    },
+
+    limiter(e) {
+      if (this.question.SELECT_LIMIT) {
+        if (isArray(e)) {
+          if (e.length > this.question.SELECT_LIMIT) {
+            e.pop();
+          }
+        }
+      }
     },
   },
 };
 </script>
+
+<style>
+.question .v-label {
+  color: #323232 !important;
+}
+.question .v-radio {
+  padding-top: 12px;
+}
+table.matrix {
+  /* border-left: 1px #323232 solid;
+  border-top: 1px #323232 solid; */
+  width: 100%;
+  border-collapse: collapse;
+  /* background-color: #efefef; */
+}
+table.matrix td,
+table.matrix th {
+  /* border-right: 1px #323232 solid;*/
+  border-bottom: 1px #32323233 solid;
+  padding: 2px 4px;
+  text-align: center;
+  font-weight: 400;
+  font-size: 0.95rem;
+}
+</style>
