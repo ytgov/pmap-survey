@@ -88,17 +88,19 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
       this.survey = undefined;
     },
 
-    addQuestion() {
+    async addQuestion() {
       if (this.survey && this.survey.SID) {
         this.survey.questions = this.survey.questions || [];
 
-        this.survey.questions.push({
+        let newQuestion = {
           SID: this.survey.SID,
           ASK: "New Question",
           OPTIONAL: 0,
           TYPE: "boolean",
           ORD: this.survey.questions.length + 1,
-        });
+        };
+
+        await this.saveQuestion(newQuestion as any);
       }
     },
     async saveQuestion(question: { QID?: number }) {
@@ -154,6 +156,7 @@ interface Survey {
   CONTACT_EMAIL: string;
   EMAIL_SUBJECT?: string;
   EMAIL_BODY?: string;
+  FROM_EMAIL?: string;
   questions?: Question[];
   choices?: any[];
 }
