@@ -31,10 +31,13 @@
         <v-textarea label="Page intro" v-model="survey.PAGE_INTRO" hide-details />
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field label="Contract email" v-model="survey.CONTACT_EMAIL" hide-details />
+        <v-text-field label="Contact email" v-model="survey.CONTACT_EMAIL" hide-details />
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field label="Contact question" v-model="survey.CONTACT_QUESTION" hide-details />
+      </v-col>
+      <v-col cols="12" md="12">
+        <v-text-field :label="fromLabel" v-model="survey.FROM_EMAIL" hide-details />
       </v-col>
     </v-row>
 
@@ -86,7 +89,9 @@ import { useAdminSurveyStore } from "../store";
 import QuestionEditor from "../components/QuestionEditor.vue";
 
 export default {
-  data: () => ({}),
+  data: () => ({
+    fromLabel: `Email from (format: "Name" <EMAIL.ADDRESS>)`,
+  }),
   components: { QuestionEditor },
   computed: {
     ...mapState(useAdminSurveyStore, ["survey"]),
