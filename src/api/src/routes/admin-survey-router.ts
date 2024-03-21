@@ -136,6 +136,14 @@ adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => 
   res.json({ data: "success" });
 });
 
+adminSurveyRouter.put("/:SID/question/:QID/order", async (req: Request, res: Response) => {
+  let { SID, QID } = req.params;
+  let { ORD } = req.body;
+
+  await db("QUESTION").withSchema(DB_SCHEMA).where({ QID }).update({ ORD });
+  res.json({ data: "success" });
+});
+
 adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response) => {
   let { SID, QID } = req.params;
   let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, choices, choiceTitle } = req.body;
@@ -182,7 +190,7 @@ adminSurveyRouter.post("/:SID/send-email-test", async (req: Request, res: Respon
     await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({ EMAIL_SUBJECT: subject, EMAIL_BODY: body });
 
     let emailer = new EmailService();
-    await emailer.sendEmail(req.user.EMAIL, "111222333", `[TEST EMAIL]: ${subject}`, body);
+    await emailer.sendEmail(req.user.EMAIL, "111222333", `[TEST EMAIL]: ${subject}`, body, survey.FROM_EMAIL);
   }
 
   res.json({ data: "success" });
@@ -212,7 +220,7 @@ adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) =
     let emailer = new EmailService();
 
     for (let p of participants) {
-      await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body);
+      await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body, survey.FROM_EMAIL);
 
       await recordSentDate(p);
     }
@@ -237,7 +245,7 @@ adminSurveyRouter.post("/:SID/resend/:TOKEN", async (req: Request, res: Response
   let emailer = new EmailService();
 
   for (let p of query) {
-    await emailer.sendEmail(p.EMAIL, p.TOKEN, survey.EMAIL_SUBJECT, survey.EMAIL_BODY);
+    await emailer.sendEmail(p.EMAIL, p.TOKEN, survey.EMAIL_SUBJECT, survey.EMAIL_BODY, survey.FROM_EMAIL);
   }
 
   return res.json({ data: `Sent ${query.length} emails` });

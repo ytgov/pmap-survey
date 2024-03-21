@@ -1,5 +1,19 @@
 <template>
   <v-list-item @click="showEditor">
+    <v-btn
+      @click.stop="moveUp(index)"
+      color="primary"
+      icon="mdi-chevron-up"
+      size="x-small"
+      class="float-right ml-1"
+      :disabled="index == 0"></v-btn>
+    <v-btn
+      @click.stop="moveDown(index)"
+      color="primary"
+      icon="mdi-chevron-down"
+      size="x-small"
+      class="float-right"
+      :disabled="index >= survey.questions.length - 1"></v-btn>
     <v-list-item-title>Question {{ index + 1 }}: ({{ question.TYPE }})</v-list-item-title>
     <v-list-item-subtitle>{{ question.ASK }}</v-list-item-subtitle>
   </v-list-item>
@@ -30,7 +44,7 @@
               ]" />
           </v-col>
           <v-col cols="4">
-            <v-text-field v-model="question.ORD" label="Order" hide-details />
+            <v-text-field v-model="question.ORD" label="Order" hide-details :disabled="true" />
           </v-col>
 
           <v-col v-if="question.TYPE == 'select'">
@@ -65,7 +79,7 @@
 </template>
 
 <script>
-import { mapState } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useAdminSurveyStore } from "../store";
 import QuestionChoices from "./QuestionChoices.vue";
 
@@ -74,7 +88,7 @@ export default {
   components: { QuestionChoices },
   data: () => ({ visible: false }),
   computed: {
-    ...mapState(useAdminSurveyStore, ["questionTypes", "groupOptions", "saveQuestion", "deleteQuestion"]),
+    ...mapState(useAdminSurveyStore, ["survey", "questionTypes", "groupOptions", "saveQuestion", "deleteQuestion"]),
     canSave() {
       if (this.question.TYPE == "matrix_question") {
         if (!this.question.GROUP_ID) return false;
@@ -90,6 +104,7 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useAdminSurveyStore, ["moveUp", "moveDown"]),
     showEditor() {
       this.visible = true;
     },

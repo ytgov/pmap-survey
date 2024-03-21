@@ -27,7 +27,14 @@ export function RenderMarkdown(input: string): { output: string; isMarkdown: boo
   let containsHash = input.includes("#");
 
   if (containsNewlines || containsHash) {
-    return { output: markdownit().render(input), isMarkdown: true };
+    return {
+      output: markdownit({
+        html: true,
+        linkify: true,
+        typographer: true,
+      }).render(input),
+      isMarkdown: true,
+    };
   }
 
   return { output: input, isMarkdown: false };

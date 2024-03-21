@@ -1,8 +1,9 @@
 import nodemailer, { Transporter, TransportOptions } from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
-import { MAIL_CONFIG, MAIL_FROM, NODE_ENV, FRONTEND_URL, APPLICATION_NAME, MAIL_CONFIG_DEV } from "../config";
+import { MAIL_CONFIG, MAIL_FROM, NODE_ENV, FRONTEND_URL, APPLICATION_NAME, MAIL_CONFIG_DEV, API_PORT } from "../config";
 import fs from "fs";
 import path from "path";
+import { RenderMarkdown } from "../utils/formatters";
 
 const BASE_TEMPLATE = "../templates/base.html";
 
@@ -20,7 +21,7 @@ export class EmailService {
       participant.TOKEN,
       `Please take the ${survey.NAME}`,
       survey.DESCRIPTION,
-      survey.PAGE_TITLE
+      survey.FROM_EMAIL
     );
   }
 
@@ -34,15 +35,15 @@ export class EmailService {
     let basePath = path.join(__dirname, BASE_TEMPLATE);
     let baseContent = fs.readFileSync(basePath).toString();
 
-    baseContent = baseContent.replace(/``CUSTOM_CONTENT``/, customContent);
+    baseContent = baseContent.replace(/{{API_PORT}}/, API_PORT);
     baseContent = baseContent.replace(/``APPLICATION_URL``/g, FRONTEND_URL);
-    baseContent = baseContent.replace(/``SURVEY_URL``/g, `${FRONTEND_URL}/survey/${token}`);
     baseContent = baseContent.replace(/``APPLICATION_NAME``/g, APPLICATION_NAME);
-    //baseContent = baseContent.replace(/``TO_NAME``/g, toName);
     baseContent = baseContent.replace(/``TO_EMAIL``/g, toEmail);
+    customContent = customContent.replace(/``SURVEY_URL``/g, `${FRONTEND_URL}/survey/${token}`);
+    baseContent = baseContent.replace(/``CUSTOM_CONTENT``/, RenderMarkdown(customContent).output);
 
     let message: MailOptions = {
-      from: `"${fromName}" <${MAIL_FROM}>`,
+      from: fromName,
       to: `${toEmail}`,
       subject: `${subject}`,
       html: baseContent,

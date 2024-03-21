@@ -103,6 +103,48 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
         await this.saveQuestion(newQuestion as any);
       }
     },
+
+    async moveUp(index: number) {
+      console.log("MOVING UP", index);
+      if (this.survey && this.survey.questions) {
+        let item = this.survey.questions[index];
+        let prev = this.survey.questions[index - 1];
+
+        let prevOrd = prev.ORD;
+        prev.ORD = item.ORD;
+        item.ORD = prevOrd;
+
+        await this.saveQuestionOrder(item);
+        await this.saveQuestionOrder(prev);
+      }
+    },
+    async moveDown(index: number) {
+      console.log("MOVING Down", index);
+      if (this.survey && this.survey.questions) {
+        let item = this.survey.questions[index];
+        let next = this.survey.questions[index + 1];
+
+        let prevOrd = next.ORD;
+        next.ORD = item.ORD;
+        item.ORD = prevOrd;
+
+        await this.saveQuestionOrder(item);
+        await this.saveQuestionOrder(next);
+      }
+    },
+
+    async saveQuestionOrder(question: { QID?: number }) {
+      if (this.survey) {
+        await api
+          .secureCall("put", `${ADMIN_SURVEY_URL}/${this.survey.SID}/question/${question.QID}/order`, question)
+          .then(async (resp) => {
+            await this.loadSurveys();
+            this.selectById(this.survey?.SID || 0);
+          })
+          .catch();
+      }
+    },
+
     async saveQuestion(question: { QID?: number }) {
       if (this.survey) {
         if (question.QID) {
