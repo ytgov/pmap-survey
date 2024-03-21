@@ -251,7 +251,7 @@ export default {
       await this.getParticipants(this.batch.survey);
     },
     async deleteClick(participantId: any) {
-      this.$refs.confirm.show(
+      (this.$refs.confirm as any).show(
         "Delete this participant?",
         "Click confirm below to delete the selected participant.",
         async () => {
@@ -261,7 +261,7 @@ export default {
       );
     },
     async emailClick(participantId: any) {
-      this.$refs.confirm.show(
+      (this.$refs.confirm as any).show(
         "Send email to this participant?",
         "Click confirm below to send a single email using the supplied token. This will use the email format defined in the emailer for this survey. Please ensure it is setup before proceeding.",
         async () => {
