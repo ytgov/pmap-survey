@@ -6,7 +6,7 @@ import { EmailService, UserService } from "../services";
 import { recordSentDate } from "./integration-router";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { DB_SCHEMA } from "../config";
-import { uniq } from "lodash";
+import { sortBy, uniq } from "lodash";
 
 export const adminSurveyRouter = express.Router();
 adminSurveyRouter.use(checkJwt, loadUser);
@@ -30,8 +30,14 @@ adminSurveyRouter.get("/", async (req: Request, res: Response) => {
   let allConditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA);
 
   for (let item of list) {
-    item.questions = allQuestions.filter((q) => q.SID == item.SID);
-    item.choices = allChoices.filter((c) => c.SID == item.SID);
+    item.questions = sortBy(
+      allQuestions.filter((q) => q.SID == item.SID),
+      "ORD"
+    );
+    item.choices = sortBy(
+      allChoices.filter((c) => c.SID == item.SID),
+      "TITLE"
+    );
     item.responses = allResponses.filter((r) => r.SID == item.SID);
     item.choices.map((c: any) => (c.choices = JSON.parse(c.SELECTION_JSON)));
 
