@@ -1,6 +1,7 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import { createRouter, createWebHistory, RouteLocation, RouteRecordRaw } from "vue-router";
 
 import adminRoutes from "@/modules/administration/router";
+import { authGuard, useAuth0 } from "@auth0/auth0-vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -22,6 +23,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/survey/:token",
         component: () => import("@/views/Survey.vue"),
+      },
+      {
+        path: "/survey-agent/:token",
+        component: () => import("@/views/AuthenticatedSurvey.vue"),
+        beforeEnter: requireLogin,
       },
       {
         path: "/preview/:token",
@@ -48,6 +54,21 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/NotFound.vue"),
   },
 ];
+
+import { AuthHelper } from "@/plugins/auth";
+
+async function requireLogin(to: RouteLocation): Promise<boolean | string> {
+  let auth = AuthHelper;
+  let hasAuth = await authGuard(to);
+
+  console.log("LOADING", auth.isLoading);
+
+  if (hasAuth) {
+    return true;
+  }
+
+  return "/survey/not-found";
+}
 
 export const router = createRouter({
   history: createWebHistory(),

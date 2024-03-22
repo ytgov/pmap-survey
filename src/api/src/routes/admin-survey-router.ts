@@ -266,7 +266,13 @@ adminSurveyRouter.post("/:SID/resend/:TOKEN", async (req: Request, res: Response
   let emailer = new EmailService();
 
   for (let p of query) {
-    await emailer.sendEmail(p.EMAIL, p.TOKEN, survey.EMAIL_SUBJECT, survey.EMAIL_BODY, survey.FROM_EMAIL);
+    await emailer.sendEmail(
+      p.EMAIL,
+      p.TOKEN,
+      survey.EMAIL_SUBJECT ?? "",
+      survey.EMAIL_BODY ?? "",
+      survey.FROM_EMAIL ?? ""
+    );
   }
 
   return res.json({ data: `Sent ${query.length} emails` });
