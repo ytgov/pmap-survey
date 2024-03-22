@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { SURVEY_URL } from "@/urls";
 import { useApiStore } from "./ApiStore";
+import { intersection, uniq } from "lodash";
 
 export const useSurveyStore = defineStore("survey", {
   state: () => ({
@@ -78,12 +79,15 @@ export const useSurveyStore = defineStore("survey", {
         q.isVisible = true;
         q.checkConditions = () => {
           let newVisible = true;
+          let parentIds = uniq(q.conditions.map((p: any) => p.CQID));
+          let parentMatches = [];
 
           for (let cond of q.conditions) {
             let parentQuestion = value.questions.find((q: any) => q.QID == cond.CQID);
 
             if (parentQuestion && parentQuestion.answer) {
-              if (parentQuestion.answer == cond.TVALUE) {
+              if (`${parentQuestion.answer}` == `${cond.TVALUE}`) {
+                parentMatches.push(parentQuestion.QID);
               } else {
                 newVisible = false;
               }
@@ -91,7 +95,9 @@ export const useSurveyStore = defineStore("survey", {
               newVisible = false;
             }
           }
-          return newVisible;
+
+          let intersect = intersection(parentIds, parentMatches);
+          return parentIds.length == intersect.length;
         };
       }
 
