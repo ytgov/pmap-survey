@@ -215,6 +215,7 @@ interface Survey {
   EMAIL_SUBJECT?: string;
   EMAIL_BODY?: string;
   FROM_EMAIL?: string;
+  ALLOW_AUDIT: number;
   questions?: Question[];
   choices?: any[];
   responses?: any[];

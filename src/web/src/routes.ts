@@ -61,8 +61,6 @@ async function requireLogin(to: RouteLocation): Promise<boolean | string> {
   let auth = AuthHelper;
   let hasAuth = await authGuard(to);
 
-  console.log("LOADING", auth.isLoading);
-
   if (hasAuth) {
     return true;
   }

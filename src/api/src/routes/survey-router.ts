@@ -78,6 +78,10 @@ surveyRouter.get(
       let choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: participant.SID });
       let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: participant.SID }).orderBy("ORD");
 
+      if (survey.ALLOW_AUDIT != 1) {
+        return res.status(404).send();
+      }
+
       for (let choice of choices) {
         choice.choices = JSON.parse(choice.SELECTION_JSON);
       }

@@ -78,22 +78,24 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
 });
 
 adminSurveyRouter.post("/", async (req: Request, res: Response) => {
-  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL } = req.body;
+  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT } =
+    req.body;
   let newItem = await db("SURVEY")
     .withSchema(DB_SCHEMA)
-    .insert({ CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL })
+    .insert({ CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT })
     .returning("*");
   res.json({ data: newItem[0] });
 });
 
 adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL } = req.body;
+  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT } =
+    req.body;
 
   await db("SURVEY")
     .withSchema(DB_SCHEMA)
     .where({ SID })
-    .update({ CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL });
+    .update({ CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT });
 
   res.json({ data: "success" });
 });
