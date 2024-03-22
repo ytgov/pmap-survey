@@ -21,16 +21,23 @@ adminSurveyRouter.get("/", async (req: Request, res: Response) => {
     list = await db("SURVEY").withSchema(DB_SCHEMA).whereIn("SID", surveys);
   } else list = await db("SURVEY").withSchema(DB_SCHEMA);
 
-  for (let item of list) {
-    item.questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: item.SID }).orderBy("ORD");
-    item.choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: item.SID }).orderBy("TITLE");
-    item.responses = await db("PARTICIPANT")
-      .withSchema(DB_SCHEMA)
-      .innerJoin("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
-      .where({ SID: item.SID })
-      .whereNotNull("RESPONSE_DATE");
+  let allQuestions = await db("QUESTION").withSchema(DB_SCHEMA).orderBy("SID", "ORD");
+  let allChoices = await db("JSON_DEF").withSchema(DB_SCHEMA).orderBy("SID", "TITLE");
+  let allResponses = await db("PARTICIPANT")
+    .withSchema(DB_SCHEMA)
+    .innerJoin("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .whereNotNull("RESPONSE_DATE");
+  let allConditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA);
 
+  for (let item of list) {
+    item.questions = allQuestions.filter((q) => q.SID == item.SID);
+    item.choices = allChoices.filter((c) => c.SID == item.SID);
+    item.responses = allResponses.filter((r) => r.SID == item.SID);
     item.choices.map((c: any) => (c.choices = JSON.parse(c.SELECTION_JSON)));
+
+    for (let q of item.questions) {
+      q.conditions = allConditions.filter((c) => c.QID == q.QID);
+    }
   }
 
   res.json({ data: list });
@@ -141,6 +148,20 @@ adminSurveyRouter.put("/:SID/question/:QID/order", async (req: Request, res: Res
   let { ORD } = req.body;
 
   await db("QUESTION").withSchema(DB_SCHEMA).where({ QID }).update({ ORD });
+  res.json({ data: "success" });
+});
+
+adminSurveyRouter.put("/:SID/question/:QID/conditions", async (req: Request, res: Response) => {
+  let { QID } = req.params;
+  let { conditions } = req.body;
+
+  await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID }).delete();
+
+  for (let cond of conditions) {
+    delete cond.COND_ID;
+    await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).insert(cond);
+  }
+
   res.json({ data: "success" });
 });
 

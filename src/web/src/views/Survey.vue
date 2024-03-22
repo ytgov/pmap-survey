@@ -30,7 +30,7 @@
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-7">
           <div v-for="(question, idx) of questionGroups" :key="idx">
-            <question-renderer :index="idx" :question="question" @answerChanged="checkAllValid"></question-renderer>
+            <question-renderer :index="getQuestionNumber(question)" :question="question" @answerChanged="checkAllValid"></question-renderer>
           </div>
 
           <div v-if="survey.survey.CONTACT_QUESTION">
@@ -123,6 +123,7 @@ export default {
       let v = true;
 
       for (let q of this.survey.questions) {
+        q.isVisible = q.checkConditions();
         let qv = q.isValid();
         v = v && qv;
       }
@@ -155,6 +156,16 @@ export default {
             console.log("ERROR", msg);
           });
       }
+    },
+    getQuestionNumber(question) {
+      let index = 0;
+      for (let q of this.survey.questions) {
+        if (q.QID == question.QID) return index;
+
+        if (q.isVisible) index++;
+      }
+
+      return index;
     },
   },
 };

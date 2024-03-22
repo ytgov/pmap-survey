@@ -37,6 +37,7 @@ surveyRouter.get(
       }
 
       for (let q of questions) {
+        q.conditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID: q.QID });
         if (q.JSON_ID) {
           q.choices = choices.find((c) => c.JSON_ID == q.JSON_ID)?.choices;
         }
@@ -68,6 +69,7 @@ surveyRouter.get(
       let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: token }).orderBy("ORD");
 
       for (let q of questions) {
+        q.conditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID: q.QID });
         if (q.JSON_ID) {
           q.choices = choices.find((c) => c.JSON_ID == q.JSON_ID)?.choices;
         }

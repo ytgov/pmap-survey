@@ -177,6 +177,22 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
           .catch();
       }
     },
+
+    async saveQuestionConditions(question: { QID: number; conditions: any[] }) {
+      let conditions = question.conditions;
+
+      if (this.survey) {
+        await api
+          .secureCall("put", `${ADMIN_SURVEY_URL}/${this.survey.SID}/question/${question.QID}/conditions`, {
+            conditions,
+          })
+          .then(async (resp) => {
+            await this.loadSurveys();
+            this.selectById(this.survey?.SID || 0);
+          })
+          .catch();
+      }
+    },
   },
 });
 

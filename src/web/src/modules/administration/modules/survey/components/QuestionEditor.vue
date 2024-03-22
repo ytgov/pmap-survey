@@ -5,16 +5,25 @@
       color="primary"
       icon="mdi-chevron-up"
       size="x-small"
-      class="float-right ml-1"
+      class="float-right ml-1 my-0"
       :disabled="index == 0"></v-btn>
     <v-btn
       @click.stop="moveDown(index)"
       color="primary"
       icon="mdi-chevron-down"
       size="x-small"
-      class="float-right"
+      class="float-right ml-1 my-0"
       :disabled="index >= survey.questions.length - 1"></v-btn>
-    <v-list-item-title>Question {{ index + 1 }}: ({{ question.TYPE }})</v-list-item-title>
+    <v-btn
+      @click.stop="editConditionsClick(index)"
+      color="yg_moss"
+      icon="mdi-timeline-question-outline"
+      size="x-small"
+      class="float-right ml-1 my-0"
+      title="Edit conditions"></v-btn>
+    <v-list-item-title
+      >Question {{ index + 1 }}: ({{ question.TYPE }}) - {{ question.conditions.length }} conditions</v-list-item-title
+    >
     <v-list-item-subtitle>{{ question.ASK }}</v-list-item-subtitle>
   </v-list-item>
 
@@ -76,6 +85,57 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+
+  <v-dialog v-model="conditionsVisible" persistent max-width="800">
+    <v-card v-if="question">
+      <v-toolbar color="primary" variant="dark" title="Condition Editor">
+        <v-spacer></v-spacer>
+        <v-btn icon @click="conditionsVisible = false" color="white"><v-icon>mdi-close</v-icon></v-btn>
+      </v-toolbar>
+      <v-card-text>
+        <div v-for="(condition, cidx) of question.conditions">
+          <v-row>
+            <v-col>
+              <v-select
+                v-model="condition.CQID"
+                label="Question"
+                :items="otherQuestions"
+                item-title="ASK"
+                item-value="QID" />
+            </v-col>
+
+            <v-col>
+              <v-text-field v-model="condition.TVALUE" label="Value" />
+            </v-col>
+            <v-col>
+              <div class="d-flex">
+                <v-select v-model="condition.LOGIC" label="Logic" :items="['AND', 'OR']" />
+                <v-btn
+                  class="ml-2 mt-2"
+                  size="x-small"
+                  @click="deleteConditionClick(cidx)"
+                  :disabled="disabled || !canSaveCondition"
+                  color="warning"
+                  icon="mdi-delete-outline"></v-btn>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
+
+        <v-btn color="info" @click="addConditionClick" :disabled="disabled || otherQuestions.length == 0"
+          >Add Condition</v-btn
+        >
+
+        <div class="d-flex mb-2">
+          <v-btn color="primary" class="mt-5" @click="saveConditionClick" :disabled="disabled">Save</v-btn>
+          <v-spacer />
+          <v-btn color="warning" variant="tonal" class="mt-5" @click="conditionsVisible = false" :disabled="disabled"
+            >close</v-btn
+          >
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -86,7 +146,7 @@ import QuestionChoices from "./QuestionChoices.vue";
 export default {
   props: ["question", "index", "disabled"],
   components: { QuestionChoices },
-  data: () => ({ visible: false }),
+  data: () => ({ visible: false, conditionsVisible: false }),
   computed: {
     ...mapState(useAdminSurveyStore, ["survey", "questionTypes", "groupOptions", "saveQuestion", "deleteQuestion"]),
     canSave() {
@@ -102,9 +162,15 @@ export default {
 
       return true;
     },
+    canSaveCondition() {
+      return true;
+    },
+    otherQuestions() {
+      return this.survey.questions.filter((q) => q.QID != this.question.QID && q.ORD <= this.question.ORD);
+    },
   },
   methods: {
-    ...mapActions(useAdminSurveyStore, ["moveUp", "moveDown"]),
+    ...mapActions(useAdminSurveyStore, ["moveUp", "moveDown", "saveQuestionConditions"]),
     showEditor() {
       this.visible = true;
     },
@@ -118,6 +184,26 @@ export default {
     deleteClick() {
       this.deleteQuestion(this.question);
       this.visible = false;
+    },
+    editConditionsClick(index) {
+      this.question.conditions = this.question.conditions || [];
+      this.conditionsVisible = true;
+    },
+    async saveConditionClick() {
+      await this.saveQuestionConditions(this.question);
+      this.conditionsVisible = false;
+    },
+    deleteConditionClick(cidx) {
+      this.question.conditions.splice(cidx, 1);
+    },
+    addConditionClick() {
+      this.question.conditions.push({
+        COND_ID: 0,
+        QID: this.question.QID,
+        CQID: this.otherQuestions[0]?.QID ?? null,
+        TVALUE: "",
+        LOGIC: "AND",
+      });
     },
   },
 };

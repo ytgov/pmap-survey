@@ -99,10 +99,10 @@
             </tr>
 
             <tr v-for="sub of question.subQuestions">
-              <th style="text-align: left">
+              <th style="text-align: left" v-if="sub.isVisible">
                 {{ sub.ASK }}
               </th>
-              <td v-for="ch of sub.choices">
+              <td v-for="ch of sub.choices" v-if="sub.isVisible">
                 <v-checkbox
                   class="my-0 mx-auto"
                   v-model="sub.answer"
