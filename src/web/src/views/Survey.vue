@@ -13,7 +13,8 @@
     <div v-if="!moveOn">
       <v-card class="default">
         <v-card-text>
-          <div class="markdown"
+          <div
+            class="markdown"
             v-html="renderMarkdown(survey.survey.PAGE_INTRO).output"
             v-if="renderMarkdown(survey.survey.PAGE_INTRO).isMarkdown"></div>
           <p v-else>{{ survey.survey.PAGE_INTRO }}</p>
@@ -30,7 +31,11 @@
       <div class="row">
         <div class="col-sm-12 col-md-9 col-lg-7">
           <div v-for="(question, idx) of questionGroups" :key="idx">
-            <question-renderer :index="getQuestionNumber(question)" :question="question" @answerChanged="checkAllValid"></question-renderer>
+            <question-renderer
+              :index="getQuestionNumber(question)"
+              :question="question"
+              @answerChanged="checkAllValid"
+              v-if="question.isVisible"></question-renderer>
           </div>
 
           <div v-if="survey.survey.CONTACT_QUESTION">
