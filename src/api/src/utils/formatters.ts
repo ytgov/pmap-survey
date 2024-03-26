@@ -23,8 +23,10 @@ export function CleanInteger(input: any): number {
 }
 
 export function RenderMarkdown(input: string): { output: string; isMarkdown: boolean } {
-  let containsNewlines = input.includes("\\n");
+  let containsNewlines = RegExp(/.*\n/g).test(input)
   let containsHash = input.includes("#");
+
+  console.log(input, containsNewlines);
 
   if (containsNewlines || containsHash) {
     return {

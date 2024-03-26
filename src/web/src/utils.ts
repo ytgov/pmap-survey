@@ -23,7 +23,7 @@ export function FormatYesNo(input: any): string {
 }
 
 export function RenderMarkdown(input: string): { output: string; isMarkdown: boolean } {
-  let containsNewlines = input.includes("\\n");
+  let containsNewlines = RegExp(/.*\n/g).test(input)
   let containsHash = input.includes("#");
 
   if (containsNewlines || containsHash) {
