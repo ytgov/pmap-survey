@@ -67,12 +67,28 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
     .first();
 
   let tokenList = new Array<string>();
+  let allConditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA);
 
   for (let question of survey.questions) {
     question.responses = await db("RESPONSE_LINE")
       .withSchema(DB_SCHEMA)
       .where({ QID: question.QID })
       .select("NVALUE", "TVALUE");
+    question.conditions = allConditions.filter((c) => c.QID == question.QID);
+
+    let parentIds = uniq(question.conditions.map((p: any) => p.CQID));
+    let matchGroups = [];
+
+    for (let parent of parentIds) {
+      let match = survey.questions.find((q: any) => q.QID == parent);
+      let ask = match ? match.ASK : parent;
+
+      let matches = question.conditions.filter((q: any) => q.CQID == parent);
+
+      matchGroups.push(`${ask} = ${matches.map((c: any) => c.TVALUE).join(" OR ")}`);
+    }
+
+    question.conditionText = matchGroups.join(" AND ");
 
     question.responseCount = question.responses.length;
     tokenList.concat(uniq(survey.questions.map((s: any) => s.TOKEN)));

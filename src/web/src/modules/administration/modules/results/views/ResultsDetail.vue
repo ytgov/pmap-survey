@@ -86,6 +86,10 @@
               {{ question.responseCount }} Responses
             </div>
           </div>
+
+          <div v-if="question.conditions.length > 0" class="mt-2 text-warning">
+            Conditional based on: {{ question.conditionText }}
+          </div>
         </v-card-text>
       </v-card>
     </div>
