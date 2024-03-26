@@ -39,5 +39,6 @@ RUN npm run build
 WORKDIR /home/node/app
 
 COPY src/api/src/templates/* /home/node/app/dist/templates/
+COPY --chown=node:node src/api/src/web/*.png /home/node/app/dist/web/
 
 CMD ["node", "./dist/index.js"]
