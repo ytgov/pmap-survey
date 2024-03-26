@@ -40,7 +40,7 @@
         <v-text-field label="Email from" v-model="survey.FROM_EMAIL" persistent-hint :hint="fromLabel" />
       </v-col>
       <v-col cols="12" md="4">
-        <v-checkbox label="Allow on-half audit" v-model="survey.ALLOW_AUDIT" :false-value="0" :true-value="1" />
+        <v-checkbox label="Allow on-behalf audit" v-model="survey.ALLOW_AUDIT" :false-value="0" :true-value="1" />
       </v-col>
     </v-row>
 
