@@ -26,19 +26,33 @@
       @update:model-value="surveyChange"
       item-title="NAME"
       item-value="SID"></v-select>
-    <v-select label="Recipient Type" :items="participantTypeOptions" v-model="email.recipientType" />
-    <v-text-field v-model="email.subject" label="Subject" density="comfortable" variant="outlined"></v-text-field>
-    <v-textarea v-model="email.body" label="Email body" density="comfortable" variant="outlined" rows="5"></v-textarea>
 
-    <ul>
-      <li>Use <b>``SURVEY_URL``</b> for link to Survey page</li>
-    </ul>
-    {{ emailValid }}
-    <div class="d-flex">
-      <v-btn color="primary" :disabled="!emailValid" @click="sendTestClick">Send Test</v-btn>
-      <v-spacer></v-spacer>
-      <v-btn color="warning" :disabled="!emailValid" @click="sendEmailClick">Send to Participants</v-btn>
+    <div v-if="survey">
+      <v-select label="Recipient Type" :items="participantTypeOptions" v-model="email.recipientType" />
+      <v-text-field v-model="email.subject" label="Subject" density="comfortable" variant="outlined"></v-text-field>
+      <v-textarea
+        v-model="email.body"
+        label="Email body"
+        density="comfortable"
+        variant="outlined"
+        rows="5"></v-textarea>
+
+      <ul>
+        <li>Use <b>``SURVEY_URL``</b> for link to Survey page (will display token to user)</li>
+        <li>Use Markdown sytax like <b>[Click here](``SURVEY_URL``)</b> to make it show as a link 'Click here'</li>
+        <li>
+          Use HTML syntax like <b>&lt;a href="``SURVEY_URL``"&gt;Click here&lt;/a&gt;</b> to make it show as a link
+          'Click here'
+        </li>
+      </ul>
+
+      <div class="d-flex">
+        <v-btn color="primary" :disabled="!emailValid" @click="sendTestClick">Send Test</v-btn>
+        <v-spacer></v-spacer>
+        <v-btn color="warning" :disabled="!emailValid" @click="sendEmailClick">Send to Participants</v-btn>
+      </div>
     </div>
+    <div v-else class="text-warning ml-2">* Choose a survey above to continue</div>
   </base-card>
 </template>
 
