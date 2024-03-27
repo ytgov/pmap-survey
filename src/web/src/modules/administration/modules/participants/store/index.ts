@@ -15,27 +15,17 @@ export const useParticipantsStore = defineStore("participants", {
     participants: new Array<any>(),
   }),
   getters: {
-    responseCount(state) {
-      return 122;
-    },
     batchIsValid(state) {
       return state.batch.survey && state.batch.addresses && state.batch.addresses.length > 0;
-    },
-    opinionators(state) {
-      if (state.participants && state.participants.length > 0)
-        return state.participants.filter((p) => p.IS_RESPONDER == 1);
-      return [];
-    },
-    raters(state) {
-      if (state.participants && state.participants.length > 0) return state.participants.filter((p) => p.IS_RATER == 1);
-      return [];
     },
   },
   actions: {
     async initialize() {},
     async loadResponses() {},
 
-    parse(): { valid: string[]; invalid: string[] } {
+    parse(strict: boolean = false): { valid: string[]; invalid: string[] } {
+      this.batch.addresses = [];
+
       let results = { valid: new Array<string>(), invalid: new Array<string>() };
 
       if (this.batch && this.batch.participants) {
@@ -50,7 +40,14 @@ export const useParticipantsStore = defineStore("participants", {
         }
       }
 
-      this.batch.addresses = results.valid;
+      if (strict) {
+        if (results.invalid.length == 0) this.batch.addresses = results.valid;
+        else {
+          m.notify({ text: "This file has invalid email addresses", variant: "error" });
+        }
+      } else {
+        this.batch.addresses = results.valid;
+      }
 
       return results;
     },

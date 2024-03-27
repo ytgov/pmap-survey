@@ -104,6 +104,16 @@
             density="comfortable"
             accept="text/csv"
             label="Choose a CSV to import"></v-file-input>
+
+          <div v-if="csvFile && csvFile.length > 0">
+            <v-label class="mb-3">
+              This CSV parser assumes:<br />
+              1) The first row in the file contains headers - it is skipped during parsing <br />
+              2) The first header is always EMAIL <br />
+              3) Any additional headers are demographics and match existing values
+            </v-label>
+          </div>
+
           <v-textarea
             v-model="batch.participants"
             variant="outlined"
@@ -130,6 +140,10 @@ import { useParticipantsStore } from "../store";
 import { useAdminSurveyStore } from "../../survey/store";
 import moment from "moment";
 import { parse as csvParser } from "csv-parse/browser/esm";
+
+import { useNotificationStore } from "@/store/NotificationStore";
+
+const notify = useNotificationStore();
 
 export default {
   components: { ConfirmDialog },
@@ -221,12 +235,24 @@ export default {
             parser.end();
 
             let headers = records.shift();
+
+            if (headers[0] && headers[0].toLowerCase() != "email") {
+              console.log("THIS FILE NEEDS HEADERS");
+
+              notify.notify({
+                text: "This CSV File doesn't have the EMAIL header row",
+                icon: "mdi-thumb-down",
+                variant: "error",
+              });
+              return;
+            }
+
             let emails = records.map((r) => r[0]);
 
             this.batch.fileData = { headers, records };
             this.batch.participants = emails.join(", ");
 
-            let items = await this.parse();
+            let items = await this.parse(true);
             this.parseMessage = `${items.valid.length} valid email address and ${items.invalid.length} invalid`;
           };
 
