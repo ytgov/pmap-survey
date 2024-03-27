@@ -35,6 +35,7 @@
     <!-- fill-height causes the main content to fill the entire page -->
     <v-container fluid class="page-wrapper">
       <router-view></router-view>
+      <Notifications></Notifications>
     </v-container>
   </v-main>
 
@@ -50,10 +51,11 @@
 import { useUserStore } from "@/store/UserStore";
 import { useNotificationStore } from "@/store/NotificationStore";
 import { mapState, mapActions, mapWritableState } from "pinia";
+import Notifications from "@/components/Notifications";
 
 export default {
   name: "Default",
-
+  components: { Notifications },
   data() {
     return {
       isAuthenticated: this.$auth0.isAuthenticated,

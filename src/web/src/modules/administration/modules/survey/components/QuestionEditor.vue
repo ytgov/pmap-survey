@@ -57,24 +57,48 @@
           </v-col>
 
           <v-col v-if="question.TYPE == 'select'">
-            <question-choices :question="question"></question-choices>
+            <v-select
+              v-model="question.JSON_ID"
+              label="Choice list"
+              :items="survey.choices"
+              item-value="JSON_ID"
+              clearable
+              item-title="TITLE" />
           </v-col>
           <v-col v-if="question.TYPE == 'matrix_question'">
             <v-select
               v-model="question.GROUP_ID"
               label="Group"
-              hide-details
               :items="groupOptions"
               item-value="QID"
               item-title="ASK" />
-            <question-choices :question="question"></question-choices>
+
+            <v-select
+              v-model="question.JSON_ID"
+              label="List"
+              :items="survey.choices"
+              item-value="JSON_ID"
+              clearable
+              item-title="TITLE" />
           </v-col>
           <v-col v-if="question.TYPE == 'multi-select'">
             <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" hide-details />
-            <question-choices :question="question"></question-choices>
+            <v-select
+              v-model="question.JSON_ID"
+              label="List"
+              :items="survey.choices"
+              item-value="JSON_ID"
+              clearable
+              item-title="TITLE" />
           </v-col>
           <v-col v-if="question.TYPE == 'range'">
-            <question-choices :question="question"></question-choices>
+            <v-select
+              v-model="question.JSON_ID"
+              label="List"
+              :items="survey.choices"
+              item-value="JSON_ID"
+              clearable
+              item-title="TITLE" />
           </v-col>
         </v-row>
         <div class="d-flex mb-2">
@@ -93,8 +117,10 @@
         <v-btn icon @click="conditionsVisible = false" color="white"><v-icon>mdi-close</v-icon></v-btn>
       </v-toolbar>
       <v-card-text>
+        <p class="mb-3">Show this question when...</p>
+
         <div v-for="(condition, cidx) of question.conditions">
-          <v-row>
+          <v-row no-gutters>
             <v-col>
               <v-select
                 v-model="condition.CQID"
@@ -105,11 +131,9 @@
             </v-col>
 
             <v-col>
-              <v-text-field v-model="condition.TVALUE" label="Value" />
-            </v-col>
-            <v-col>
               <div class="d-flex">
-                <v-select v-model="condition.LOGIC" label="Logic" :items="['AND', 'OR']" />
+                <div class="pt-3 px-3">Equals</div>
+                <v-text-field v-model="condition.TVALUE" label="Value" />
                 <v-btn
                   class="ml-2 mt-2"
                   size="x-small"
@@ -141,11 +165,9 @@
 <script>
 import { mapActions, mapState } from "pinia";
 import { useAdminSurveyStore } from "../store";
-import QuestionChoices from "./QuestionChoices.vue";
 
 export default {
   props: ["question", "index", "disabled"],
-  components: { QuestionChoices },
   data: () => ({ visible: false, conditionsVisible: false }),
   computed: {
     ...mapState(useAdminSurveyStore, ["survey", "questionTypes", "groupOptions", "saveQuestion", "deleteQuestion"]),
@@ -156,8 +178,7 @@ export default {
 
       let optionTypes = ["select", "multi-select", "matrix_question", "range"];
       if (optionTypes.includes(this.question.TYPE)) {
-        if (!this.question.choiceTitle || this.question.choiceTitle.length == 0) return false;
-        if (!this.question.choices || this.question.choices.length == 0) return false;
+        if (!this.question.JSON_ID) return false;
       }
 
       return true;

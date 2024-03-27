@@ -167,7 +167,7 @@ export default {
       for (let q of this.survey.questions) {
         if (q.QID == question.QID) return index;
 
-        if (q.isVisible) index++;
+        if (q.isVisible && q.TYPE != "matrix_question") index++;
       }
 
       return index;

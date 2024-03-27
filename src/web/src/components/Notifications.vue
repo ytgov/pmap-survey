@@ -6,9 +6,9 @@
 </template>
 
 <script>
-import { mapState } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useNotificationStore } from "@/store/NotificationStore";
-import { isEmpty } from "lodash";
+import { isEmpty, isString } from "lodash";
 
 export default {
   name: "Home",
@@ -25,10 +25,18 @@ export default {
     message(newVal, oldVal) {
       if (!isEmpty(newVal.text)) {
         this.showAPIMessages({ messages: [newVal] });
+      } else if (isString(newVal)) {
+        this.show("success", "mdi-thumb-up", newVal);
+      }
+    },
+    visible(newVal, oldVal) {
+      if (newVal == false) {
+        this.clear();
       }
     },
   },
   methods: {
+    ...mapActions(useNotificationStore, ["clear"]),
     show(color, icon, message) {
       this.color = color;
       this.icon = icon;

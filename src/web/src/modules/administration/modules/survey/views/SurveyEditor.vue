@@ -89,33 +89,63 @@
               :index="idx"
               :disabled="survey.responses && survey.responses.length > 0"></question-editor>
             <v-divider />
-          </div> </v-list
-      ></v-col>
+          </div>
+        </v-list>
+      </v-col>
       <v-col>
-        <h2>Choices</h2>
-
+        <div class="d-flex">
+          <h2>Choice Lists</h2>
+          <v-spacer />
+          <v-btn
+            @click="addChoiceClick"
+            color="info"
+            class="mt-1 float-right"
+            size="small"
+            :disabled="survey.responses && survey.responses.length > 0"
+            >Add Choice List</v-btn
+          >
+        </div>
         <v-divider />
 
         <v-list variant="flat">
           <div v-for="(choice, idx) of survey.choices">
-            <v-list-item> {{ choice.TITLE }}: {{ choice.choices.length }} options </v-list-item>
+            <v-list-item @click="choicesClick(choice)"
+              ><v-btn
+                @click.stop="deleteChoiceClick(choice)"
+                color="warning"
+                icon="mdi-delete-outline"
+                size="x-small"
+                class="float-right ml-1 my-0"
+                :disabled="index == 0"></v-btn>
+              {{ choice.TITLE }} - {{ choice.choices.length }} choices
+            </v-list-item>
             <v-divider />
           </div> </v-list
       ></v-col>
     </v-row>
   </base-card>
+  <ChoicesEditor
+    ref="choices"
+    v-if="survey"
+    :survey="survey"
+    :disabled="survey.responses && survey.responses.length > 0"></ChoicesEditor>
+  <ConfirmDialog ref="confirm"></ConfirmDialog>
+  <Notifications ref="notify"></Notifications>
 </template>
 
 <script lang="ts">
 import { mapActions, mapState } from "pinia";
 import { useAdminSurveyStore } from "../store";
 import QuestionEditor from "../components/QuestionEditor.vue";
+import ChoicesEditor from "../components/ChoicesEditor.vue";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
+import Notifications from "@/components/Notifications.vue";
 
 export default {
   data: () => ({
     fromLabel: `FORMAT: "Name" <EMAIL.ADDRESS>`,
   }),
-  components: { QuestionEditor },
+  components: { QuestionEditor, ConfirmDialog, ChoicesEditor },
   computed: {
     ...mapState(useAdminSurveyStore, ["survey"]),
 
@@ -152,6 +182,8 @@ export default {
       "create",
       "addQuestion",
       "delete",
+      "selectChoice",
+      "deleteChoices",
     ]),
     close() {
       this.$router.push("/administration/surveys");
@@ -159,6 +191,10 @@ export default {
     },
     addQuestionClick() {
       this.addQuestion();
+    },
+    addChoiceClick() {
+      this.selectChoice({ TITLE: "New List", choices: [], SID: this.survey.SID });
+      this.$refs.choices.show();
     },
     async saveClick() {
       if (this.survey && this.survey.SID) {
@@ -172,12 +208,43 @@ export default {
       }
     },
     async deleteClick() {
-      this.delete().then(() => {
-        this.close();
-      });
+      (this.$refs.confirm as any).show(
+        "Delete this survey?",
+        "Click confirm below to delete this survey. This action cannot be undone.",
+        async () => {
+          await this.delete().then(() => {
+            this.close();
+          });
+        },
+        () => {}
+      );
     },
     openPreview() {
       if (this.survey) window.open(`/preview/${this.survey.SID}`);
+    },
+    choicesClick(item) {
+      this.selectChoice(item);
+      this.$refs.choices.show();
+    },
+    async deleteChoiceClick(item) {
+      console.log("DELETE", item.JSON_ID);
+
+      const inUseChoices = this.survey.questions.map((q) => q.JSON_ID);
+
+      if (inUseChoices.includes(item.JSON_ID)) {
+        this.$refs.notify.showError("This item is in use and cannot be deleted");
+        return;
+      }
+      (this.$refs.confirm as any).show(
+        "Delete this choice list?",
+        "Click confirm below to delete this choice list. This action cannot be undone.",
+        async () => {
+          await this.deleteChoices(item).then(() => {});
+        },
+        () => {}
+      );
+
+      console.log();
     },
   },
 };

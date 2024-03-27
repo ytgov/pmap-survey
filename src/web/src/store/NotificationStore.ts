@@ -16,5 +16,13 @@ export const useNotificationStore = defineStore("notifications", {
       this.message = message;
       this.showNotification = true;
     },
+    clear() {
+      this.message = {
+        status_code: 0,
+        text: "",
+        icon: "mdi-information",
+        variant: "primary",
+      };
+    },
   },
 });

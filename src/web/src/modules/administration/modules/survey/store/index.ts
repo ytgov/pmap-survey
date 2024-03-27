@@ -4,6 +4,7 @@ import { useNotificationStore } from "@/store/NotificationStore";
 import { useApiStore } from "@/store/ApiStore";
 import { useUserStore } from "@/store/UserStore";
 import { ADMIN_SURVEY_URL } from "@/urls";
+import { clone, cloneDeep } from "lodash";
 
 let notify = useNotificationStore();
 let api = useApiStore();
@@ -15,6 +16,7 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
     isLoading: false,
 
     questionTypes: [],
+    selectedChoices: {},
   }),
   getters: {
     surveyCount(state) {
@@ -50,6 +52,7 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
         .secureCall("post", ADMIN_SURVEY_URL, this.survey)
         .then(async (resp) => {
           await this.loadSurveys();
+          notify.notify("Survey Created");
           return resp.data;
         })
         .catch();
@@ -60,7 +63,8 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
           .secureCall("put", `${ADMIN_SURVEY_URL}/${this.survey.SID}`, this.survey)
           .then(async (resp) => {
             await this.loadSurveys();
-            notify.notify("Success");
+            this.selectById(this.survey?.SID || 0);
+            notify.notify("Survey Saved");
           })
           .catch();
       }
@@ -71,12 +75,32 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
           .secureCall("delete", `${ADMIN_SURVEY_URL}/${this.survey.SID}`, this.survey)
           .then(async (resp) => {
             await this.loadSurveys();
+            notify.notify("Survey Removed");
           })
           .catch();
       }
     },
-    select(item: any) {
+    async select(item: any) {
       this.survey = item;
+
+      if (this.survey) {
+        let needsSave = false;
+
+        let index = 1;
+        for (let question of this.survey.questions || []) {
+          if (question.ORD != index) {
+            question.ORD = index;
+            needsSave = true;
+            await this.saveQuestionOrder(question);
+          }
+
+          index++;
+        }
+
+        if (needsSave) {
+          notify.notify("Question Order Repaired");
+        }
+      }
     },
     selectById(id: number) {
       let item = this.surveys.find((s) => s.SID == id);
@@ -105,7 +129,6 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
     },
 
     async moveUp(index: number) {
-      console.log("MOVING UP", index);
       if (this.survey && this.survey.questions) {
         let item = this.survey.questions[index];
         let prev = this.survey.questions[index - 1];
@@ -116,10 +139,13 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
 
         await this.saveQuestionOrder(item);
         await this.saveQuestionOrder(prev);
+
+        await this.loadSurveys();
+        this.selectById(this.survey?.SID || 0);
       }
     },
+
     async moveDown(index: number) {
-      console.log("MOVING Down", index);
       if (this.survey && this.survey.questions) {
         let item = this.survey.questions[index];
         let next = this.survey.questions[index + 1];
@@ -130,6 +156,9 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
 
         await this.saveQuestionOrder(item);
         await this.saveQuestionOrder(next);
+
+        await this.loadSurveys();
+        this.selectById(this.survey?.SID || 0);
       }
     },
 
@@ -137,10 +166,7 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
       if (this.survey) {
         await api
           .secureCall("put", `${ADMIN_SURVEY_URL}/${this.survey.SID}/question/${question.QID}/order`, question)
-          .then(async (resp) => {
-            await this.loadSurveys();
-            this.selectById(this.survey?.SID || 0);
-          })
+          .then(async (resp) => {})
           .catch();
       }
     },
@@ -153,6 +179,7 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
             .then(async (resp) => {
               await this.loadSurveys();
               this.selectById(this.survey?.SID || 0);
+              notify.notify("Question Saved");
             })
             .catch();
         } else {
@@ -161,11 +188,13 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
             .then(async (resp) => {
               await this.loadSurveys();
               this.selectById(this.survey?.SID || 0);
+              notify.notify("Question Added");
             })
             .catch();
         }
       }
     },
+
     async deleteQuestion(question: { QID: number }) {
       if (this.survey) {
         await api
@@ -173,6 +202,7 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
           .then(async (resp) => {
             await this.loadSurveys();
             this.selectById(this.survey?.SID || 0);
+            notify.notify("Question Removed");
           })
           .catch();
       }
@@ -189,6 +219,39 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
           .then(async (resp) => {
             await this.loadSurveys();
             this.selectById(this.survey?.SID || 0);
+            notify.notify("Conditions Saved");
+          })
+          .catch();
+      }
+    },
+
+    selectChoice(choices: any) {
+      this.selectedChoices = cloneDeep(choices);
+    },
+
+    async saveSurveyChoices() {
+      if (this.survey) {
+        await api
+          .secureCall("put", `${ADMIN_SURVEY_URL}/${this.survey.SID}/choices`, {
+            choices: this.selectedChoices,
+          })
+          .then(async (resp) => {
+            await this.loadSurveys();
+            this.selectById(this.survey?.SID || 0);
+            notify.notify("Choice List Saved");
+          })
+          .catch();
+      }
+    },
+
+    async deleteChoices(item: any) {
+      if (this.survey) {
+        await api
+          .secureCall("delete", `${ADMIN_SURVEY_URL}/${this.survey.SID}/choices/${item.JSON_ID}`)
+          .then(async (resp) => {
+            await this.loadSurveys();
+            this.selectById(this.survey?.SID || 0);
+            notify.notify("Choice List Removed");
           })
           .catch();
       }
@@ -201,6 +264,7 @@ interface AdminSurveyState {
   survey: Survey | undefined;
   isLoading: boolean;
   questionTypes: string[];
+  selectedChoices: any;
 }
 
 interface Survey {

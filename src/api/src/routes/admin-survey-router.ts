@@ -114,10 +114,42 @@ adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
   let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT } =
     req.body;
 
-  await db("SURVEY")
-    .withSchema(DB_SCHEMA)
-    .where({ SID })
-    .update({ CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT });
+  await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({
+    CONTACT_EMAIL,
+    CONTACT_QUESTION,
+    DESCRIPTION,
+    NAME,
+    PAGE_INTRO,
+    PAGE_TITLE,
+    FROM_EMAIL,
+    ALLOW_AUDIT,
+  });
+
+  res.json({ data: "success" });
+});
+
+adminSurveyRouter.put("/:SID/choices", async (req: Request, res: Response) => {
+  let { SID } = req.params;
+  let { choices } = req.body;
+  const JSON_ID = choices.JSON_ID;
+
+  if (JSON_ID) {
+    await db("JSON_DEF")
+      .withSchema(DB_SCHEMA)
+      .where({ JSON_ID })
+      .update({ TITLE: choices.TITLE, SELECTION_JSON: JSON.stringify(choices.choices) });
+  } else {
+    await db("JSON_DEF")
+      .withSchema(DB_SCHEMA)
+      .insert({ TITLE: choices.TITLE, SELECTION_JSON: JSON.stringify(choices.choices), SID });
+  }
+  res.json({ data: "success" });
+});
+
+adminSurveyRouter.delete("/:SID/choices/:JSON_ID", async (req: Request, res: Response) => {
+  let { SID, JSON_ID } = req.params;
+
+  await db("JSON_DEF").withSchema(DB_SCHEMA).where({ JSON_ID }).delete();
 
   res.json({ data: "success" });
 });
@@ -130,6 +162,12 @@ adminSurveyRouter.delete("/:SID/", async (req: Request, res: Response) => {
   if (hasParticipants.length > 0) {
     res.json({ data: "HAS Participatns" });
   } else {
+    await db("Q_CONDITION_TBL")
+      .withSchema(DB_SCHEMA)
+      .innerJoin("QUESTION", "QUESTION.QID", "Q_CONDITION_TBL.QID")
+      .where({ "QUESTION.SID": SID })
+      .delete();
+
     await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID }).delete();
     await db("QUESTION").withSchema(DB_SCHEMA).where({ SID }).delete();
     await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).delete();
@@ -144,9 +182,9 @@ adminSurveyRouter.get("/question-types", async (req: Request, res: Response) => 
 
 adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, choices, choiceTitle } = req.body;
+  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT } = req.body;
 
-  if (JSON_ID == -1) {
+  /* if (JSON_ID == -1) {
     JSON_ID = null;
 
     let json = await db("JSON_DEF")
@@ -160,7 +198,7 @@ adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => 
       .where({ JSON_ID })
       .update({ TITLE: choiceTitle, SELECTION_JSON: JSON.stringify(choices) });
   }
-
+ */
   await db("QUESTION")
     .withSchema(DB_SCHEMA)
     .insert({ SID, ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT });
@@ -191,9 +229,9 @@ adminSurveyRouter.put("/:SID/question/:QID/conditions", async (req: Request, res
 
 adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response) => {
   let { SID, QID } = req.params;
-  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, choices, choiceTitle } = req.body;
+  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT } = req.body;
 
-  if (JSON_ID == -1) {
+  /*  if (JSON_ID == -1) {
     JSON_ID = null;
     let json = await db("JSON_DEF")
       .withSchema(DB_SCHEMA)
@@ -205,7 +243,7 @@ adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response)
       .withSchema(DB_SCHEMA)
       .where({ JSON_ID })
       .update({ TITLE: choiceTitle, SELECTION_JSON: JSON.stringify(choices) });
-  }
+  } */
 
   await db("QUESTION")
     .withSchema(DB_SCHEMA)
@@ -220,6 +258,8 @@ adminSurveyRouter.delete(
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     let { QID } = req.params;
+    await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID }).delete();
+    await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ CQID: QID }).delete();
     await db("QUESTION").withSchema(DB_SCHEMA).where({ QID }).delete();
     res.json({ data: "success" });
   }
