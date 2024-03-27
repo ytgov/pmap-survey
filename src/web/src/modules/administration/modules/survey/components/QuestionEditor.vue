@@ -133,7 +133,15 @@
             <v-col>
               <div class="d-flex">
                 <div class="pt-3 px-3">Equals</div>
-                <v-text-field v-model="condition.TVALUE" label="Value" />
+
+                <v-select
+                  v-if="getChoicesFor(condition.CQID).length > 0"
+                  :items="getChoicesFor(condition.CQID)"
+                  v-model="condition.TVALUE"
+                  label="Value" />
+
+                <v-text-field v-else v-model="condition.TVALUE" label="Value" />
+
                 <v-btn
                   class="ml-2 mt-2"
                   size="x-small"
@@ -225,6 +233,21 @@ export default {
         TVALUE: "",
         LOGIC: "AND",
       });
+    },
+    getChoicesFor(question) {
+      if (this.survey) {
+        let parent = this.survey.questions.find((q) => q.QID == question);
+
+        if (parent && parent.JSON_ID) {
+          let choices = this.survey.choices.find((c) => c.JSON_ID == parent.JSON_ID);
+
+          return choices.choices.map(c => c.val);
+        } else if (parent.TYPE == "boolean") {
+          return ["Yes", "No"];
+        }
+      }
+
+      return [];
     },
   },
 };
