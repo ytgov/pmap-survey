@@ -66,6 +66,15 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
     .groupBy("SID")
     .first();
 
+  if (!survey.stats) {
+    survey.stats = {
+      tokenCount: "0",
+      sentCount: "0",
+      resentCount: "0",
+      responseCount: "0",
+    };
+  }
+
   let tokenList = new Array<string>();
   let allConditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA);
 
