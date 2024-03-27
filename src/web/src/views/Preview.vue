@@ -73,6 +73,7 @@ export default {
     surveyId: "",
     moveOn: false,
     allValid: false,
+    contactMe: false,
   }),
   computed: {
     ...mapState(useSurveyStore, ["survey"]),
