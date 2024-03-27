@@ -14,7 +14,6 @@
           :readonly="disabled"
           class="mb-3"
           persistent-hint />
-          {{ disa }}
 
         <div v-for="(choice, idx) of selectedChoices.choices">
           <v-row>
@@ -52,7 +51,7 @@ import { useAdminSurveyStore } from "../store";
 
 export default {
   props: ["survey", "disabled"],
-  data: () => ({ visible: false, otherNames: [] }),
+  data: () => ({ visible: false, otherNames: [] as string[] }),
   computed: {
     ...mapState(useAdminSurveyStore, ["survey", "selectedChoices"]),
     canSave() {
@@ -66,12 +65,12 @@ export default {
     ...mapActions(useAdminSurveyStore, ["saveSurveyChoices"]),
     show() {
       this.otherNames = this.survey.choices
-        .filter((n) => this.selectedChoices.JSON_ID != n.JSON_ID)
-        .map((c) => c.TITLE);
+        .filter((n: any) => this.selectedChoices.JSON_ID != n.JSON_ID)
+        .map((c: any) => c.TITLE);
       this.visible = true;
     },
 
-    removeClick(idx) {
+    removeClick(idx: number) {
       this.selectedChoices.choices.splice(idx, 1);
     },
 

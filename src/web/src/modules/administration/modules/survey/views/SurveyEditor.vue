@@ -115,8 +115,7 @@
                 color="warning"
                 icon="mdi-delete-outline"
                 size="x-small"
-                class="float-right ml-1 my-0"
-                :disabled="index == 0"></v-btn>
+                class="float-right ml-1 my-0"></v-btn>
               {{ choice.TITLE }} - {{ choice.choices.length }} choices
             </v-list-item>
             <v-divider />
@@ -193,8 +192,10 @@ export default {
       this.addQuestion();
     },
     addChoiceClick() {
-      this.selectChoice({ TITLE: "New List", choices: [], SID: this.survey.SID });
-      this.$refs.choices.show();
+      if (this.survey) {
+        this.selectChoice({ TITLE: "New List", choices: [], SID: this.survey.SID });
+        (this.$refs.choices as any).show();
+      }
     },
     async saveClick() {
       if (this.survey && this.survey.SID) {
@@ -222,29 +223,27 @@ export default {
     openPreview() {
       if (this.survey) window.open(`/preview/${this.survey.SID}`);
     },
-    choicesClick(item) {
+    choicesClick(item: any) {
       this.selectChoice(item);
-      this.$refs.choices.show();
+      (this.$refs.choices as any).show();
     },
-    async deleteChoiceClick(item) {
-      console.log("DELETE", item.JSON_ID);
+    async deleteChoiceClick(item: any) {
+      if (this.survey && this.survey.questions) {
+        const inUseChoices = this.survey.questions.map((q) => q.JSON_ID);
 
-      const inUseChoices = this.survey.questions.map((q) => q.JSON_ID);
-
-      if (inUseChoices.includes(item.JSON_ID)) {
-        this.$refs.notify.showError("This item is in use and cannot be deleted");
-        return;
+        if (inUseChoices.includes(item.JSON_ID)) {
+          (this.$refs.notify as any).showError("This item is in use and cannot be deleted");
+          return;
+        }
+        (this.$refs.confirm as any).show(
+          "Delete this choice list?",
+          "Click confirm below to delete this choice list. This action cannot be undone.",
+          async () => {
+            await this.deleteChoices(item).then(() => {});
+          },
+          () => {}
+        );
       }
-      (this.$refs.confirm as any).show(
-        "Delete this choice list?",
-        "Click confirm below to delete this choice list. This action cannot be undone.",
-        async () => {
-          await this.deleteChoices(item).then(() => {});
-        },
-        () => {}
-      );
-
-      console.log();
     },
   },
 };

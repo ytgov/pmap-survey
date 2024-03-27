@@ -51,7 +51,7 @@
 import { useUserStore } from "@/store/UserStore";
 import { useNotificationStore } from "@/store/NotificationStore";
 import { mapState, mapActions, mapWritableState } from "pinia";
-import Notifications from "@/components/Notifications";
+import Notifications from "@/components/Notifications.vue";
 
 export default {
   name: "Default",
