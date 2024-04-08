@@ -26,9 +26,11 @@
                 v-if="question.isValid() && question.OPTIONAL == 0"
                 >mdi-check-bold</v-icon
               >
+              <span class="d-none">{{ question.answer }}</span>
             </div>
           </v-col>
         </v-row>
+
         <div v-if="question.TYPE == 'boolean'">
           <v-radio-group v-model="question.answer" hide-details>
             <v-radio label="Yes" value="Yes" class="pt-1"></v-radio>
@@ -115,9 +117,46 @@
             </tr>
           </table>
         </div>
+
+        <div v-else-if="question.TYPE == 'ranking'">
+          <v-label
+            >Select items on the left to move them to the ordered list on the right. To remove items from the ranking,
+            click them.</v-label
+          >
+          <v-row class="mt-3">
+            <v-col>
+              <h3>Available options:</h3>
+              <div>
+                <div
+                  v-for="option of options.filter((o) => !(question.answer || '').split(',').includes(o.val))"
+                  @click="addChoiceClick(option)"
+                  class="rankingOption">
+                  {{ option.descr }}
+                </div>
+              </div>
+            </v-col>
+            <v-col>
+              <h3>
+                Ranked options:
+                <small v-if="question.SELECT_LIMIT">Please choose your top {{ question.SELECT_LIMIT }}</small
+                >:
+              </h3>
+
+              <div>
+                <div
+                  v-for="(item, index) of (question.answer || '').split(',').filter((f) => f)"
+                  @click="removeChoiceClick(item)"
+                  class="rankingOption">
+                  {{ index + 1 }}. {{ item }}
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
         <div v-else-if="question.TYPE != 'text'">
           {{ question }}
         </div>
+
         <!--  <hr />
         {{ question }} -->
       </v-card-text>
@@ -127,7 +166,7 @@
 
 <script>
 import { RenderMarkdown } from "@/utils";
-import { isArray } from "lodash";
+import { isArray, uniq } from "lodash";
 import { nextTick } from "vue";
 
 export default {
@@ -221,6 +260,30 @@ export default {
         }
       }
     },
+    addChoiceClick(item) {
+      let items = (this.question.answer ?? "").split(",");
+      items = items.filter((i) => i);
+      items = uniq(items);
+
+      if (this.question.SELECT_LIMIT) {
+        const limit = parseInt(this.question.SELECT_LIMIT);
+        if (items.length >= limit) {
+          return;
+        }
+      }
+
+      if (items.includes(item.val)) return;
+
+      items.push(item.val);
+      this.question.answer = items.join(",");
+      this.$emit("answerChanged", this.question.answer);
+    },
+    removeChoiceClick(item) {
+      let items = (this.question.answer ?? "").split(",");
+      items = items.filter((i) => i && i != item);
+      this.question.answer = items.join(",");
+      this.$emit("answerChanged", this.question.answer);
+    },
   },
 };
 </script>
@@ -247,5 +310,14 @@ table.matrix th {
   text-align: center;
   font-weight: 400;
   font-size: 0.95rem;
+}
+
+.rankingOption {
+  border: 1px #999 solid;
+  border-radius: 4px;
+  padding: 5px 10px;
+  margin-bottom: 5px;
+  background-color: white;
+  cursor: pointer;
 }
 </style>

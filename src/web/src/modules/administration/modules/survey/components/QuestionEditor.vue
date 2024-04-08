@@ -81,8 +81,34 @@
               clearable
               item-title="TITLE" />
           </v-col>
+          <v-col v-if="question.TYPE == 'quadrant'">
+            <v-select
+              v-model="question.GROUP_ID"
+              label="Group"
+              :items="groupOptions"
+              item-value="QID"
+              item-title="ASK" />
+
+            <v-select
+              v-model="question.JSON_ID"
+              label="List"
+              :items="survey.choices"
+              item-value="JSON_ID"
+              clearable
+              item-title="TITLE" />
+          </v-col>
           <v-col v-if="question.TYPE == 'multi-select'">
-            <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" hide-details />
+            <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" />
+            <v-select
+              v-model="question.JSON_ID"
+              label="List"
+              :items="survey.choices"
+              item-value="JSON_ID"
+              clearable
+              item-title="TITLE" />
+          </v-col>
+          <v-col v-if="question.TYPE == 'ranking'">
+            <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" />
             <v-select
               v-model="question.JSON_ID"
               label="List"

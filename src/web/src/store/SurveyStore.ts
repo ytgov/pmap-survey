@@ -68,6 +68,17 @@ export const useSurveyStore = defineStore("survey", {
             return true;
           }
 
+          if (q.TYPE == "ranking") {
+            let items = (q.answer ?? "").split(",").filter((i: string) => i);
+
+            if (q.SELECT_LIMIT) {
+              const limit = parseInt(q.SELECT_LIMIT);
+              if (items.length < limit) return false;
+            }
+
+            return items.length > 0;
+          }
+
           if (q.TYPE == "matrix_question") {
             return q.answer && q.answer != false;
           }
