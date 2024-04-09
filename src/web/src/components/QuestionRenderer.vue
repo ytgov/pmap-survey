@@ -26,7 +26,10 @@
                 v-if="question.isValid() && question.OPTIONAL == 0"
                 >mdi-check-bold</v-icon
               >
-              <span class="d-none">{{ question.answer }}</span>
+              <span class="d-none"
+                >{{ question.answer }}
+                <span v-if="question.subQuestions" v-for="q of question.subQuestions">{{ q.answer }}</span></span
+              >
             </div>
           </v-col>
         </v-row>
@@ -119,8 +122,8 @@
         </div>
 
         <div v-else-if="question.TYPE == 'ranking'">
-          <v-label
-            >Select items on the left to move them to the ordered list on the right. To remove items from the ranking,
+          <v-label style="text-overflow: inherit; overflow: visible; white-space: inherit"
+            >Select items on the left to move them to the ranked list on the right. To remove items from the ranking,
             click them.</v-label
           >
           <v-row class="mt-3">
@@ -153,6 +156,11 @@
             </v-col>
           </v-row>
         </div>
+
+        <div v-else-if="question.TYPE == 'quadrant_title'">
+          <QuadrantRenderer :question="question" :subUpdated="subUpdated"></QuadrantRenderer>
+        </div>
+
         <div v-else-if="question.TYPE != 'text'">
           {{ question }}
         </div>
@@ -165,12 +173,14 @@
 </template>
 
 <script>
+import QuadrantRenderer from "./QuadrantRenderer.vue";
 import { RenderMarkdown } from "@/utils";
 import { isArray, uniq } from "lodash";
 import { nextTick } from "vue";
 
 export default {
   name: "Home",
+  components: { QuadrantRenderer },
   props: ["index", "question"],
   computed: {
     options: function () {
