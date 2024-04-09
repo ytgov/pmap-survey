@@ -84,7 +84,6 @@ export default {
     },
     questionGroups() {
       let list = [];
-      const specialTypes = ["matrix_question", "title_question"];
 
       if (this.survey.questions) {
         let lastTitle = null;
@@ -95,12 +94,16 @@ export default {
             list.push(question);
           } else if (question.TYPE == "matrix_question") {
             if (lastTitle) lastTitle.subQuestions.push(question);
+          } else if (question.TYPE == "quadrant_title") {
+            question.subQuestions = [];
+            lastTitle = question;
+            list.push(question);
+          } else if (question.TYPE == "quadrant") {
+            if (lastTitle) lastTitle.subQuestions.push(question);
           } else {
             list.push(question);
           }
         }
-
-        //return this.survey.questions;
       }
       return list;
     },
@@ -143,6 +146,8 @@ export default {
         }
 
         console.log("SUBMIT", qs);
+
+        localStorage.clear();
 
         alert("Submitting does nothing on preview");
       }

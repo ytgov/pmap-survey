@@ -85,7 +85,7 @@
             <v-select
               v-model="question.GROUP_ID"
               label="Group"
-              :items="groupOptions"
+              :items="quadrantOptions"
               item-value="QID"
               item-title="ASK" />
 
@@ -204,10 +204,20 @@ export default {
   props: ["question", "index", "disabled"],
   data: () => ({ visible: false, conditionsVisible: false }),
   computed: {
-    ...mapState(useAdminSurveyStore, ["survey", "questionTypes", "groupOptions", "saveQuestion", "deleteQuestion"]),
+    ...mapState(useAdminSurveyStore, [
+      "survey",
+      "questionTypes",
+      "groupOptions",
+      "quadrantOptions",
+      "saveQuestion",
+      "deleteQuestion",
+    ]),
     canSave() {
       if (this.question.TYPE == "matrix_question") {
         if (!this.question.GROUP_ID) return false;
+      }
+      if (this.question.TYPE == "quadrant") {
+        if (!this.question.GROUP_ID || !this.question.JSON_ID) return false;
       }
 
       let optionTypes = ["select", "multi-select", "matrix_question", "range"];
@@ -267,7 +277,7 @@ export default {
         if (parent && parent.JSON_ID) {
           let choices = this.survey.choices.find((c) => c.JSON_ID == parent.JSON_ID);
 
-          return choices.choices.map(c => c.val);
+          return choices.choices.map((c) => c.val);
         } else if (parent.TYPE == "boolean") {
           return ["Yes", "No"];
         }

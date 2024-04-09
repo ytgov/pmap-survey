@@ -32,6 +32,10 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
       if (state.survey) return state.survey.questions?.filter((q) => q.TYPE == "title_question");
       return [];
     },
+    quadrantOptions(state) {
+      if (state.survey) return state.survey.questions?.filter((q) => q.TYPE == "quadrant_title");
+      return [];
+    },
   },
   actions: {
     async initialize() {},
