@@ -130,10 +130,7 @@
             <v-col>
               <h3>Available options:</h3>
               <div>
-                <div
-                  v-for="option of options.filter((o) => !(question.answer || '').split(',').includes(o.val))"
-                  @click="addChoiceClick(option)"
-                  class="rankingOption">
+                <div v-for="option of availableOptions" @click="addChoiceClick(option)" class="rankingOption">
                   {{ option.descr }}
                 </div>
               </div>
@@ -146,11 +143,8 @@
               </h3>
 
               <div>
-                <div
-                  v-for="(item, index) of (question.answer || '').split(',').filter((f) => f)"
-                  @click="removeChoiceClick(item)"
-                  class="rankingOption">
-                  {{ index + 1 }}. {{ item }}
+                <div v-for="(item, index) of selectedOptions" @click="removeChoiceClick(item)" class="rankingOption">
+                  {{ index + 1 }}. {{ item.descr }}
                 </div>
               </div>
             </v-col>
@@ -215,6 +209,21 @@ export default {
     },
     storageID() {
       return `${this.question.QID}_ANSWER`;
+    },
+    availableOptions() {
+      if (this.question && this.question.answer) {
+        let selectedVals = this.selectedOptions.map((o) => o.val);
+        return this.question.choices.filter((o) => !selectedVals.includes(o.val));
+      }
+      return this.question.choices || [];
+    },
+    selectedOptions() {
+      if (this.question && this.question.answer) {
+        let answers = (this.question.answer ?? "").split(",");
+        return this.question.choices.filter((c) => answers.includes(c.val));
+      }
+
+      return [];
     },
   },
   mounted() {
@@ -290,7 +299,9 @@ export default {
     },
     removeChoiceClick(item) {
       let items = (this.question.answer ?? "").split(",");
-      items = items.filter((i) => i && i != item);
+      items = items.filter((i) => i && i != item.val);
+
+      console.log("");
       this.question.answer = items.join(",");
       this.$emit("answerChanged", this.question.answer);
     },
