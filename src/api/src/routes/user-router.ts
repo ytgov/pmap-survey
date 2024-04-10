@@ -74,8 +74,6 @@ userRouter.put(
         await db.setSurveysByEmail(email, surveys);
       }
 
-      console.log("SURVEYS", surveys);
-
       return res.json({
         messages: [{ variant: "success", text: "User saved" }],
       });

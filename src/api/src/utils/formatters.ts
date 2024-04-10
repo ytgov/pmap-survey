@@ -26,8 +26,6 @@ export function RenderMarkdown(input: string): { output: string; isMarkdown: boo
   let containsNewlines = RegExp(/.*\n/g).test(input)
   let containsHash = input.includes("#");
 
-  console.log(input, containsNewlines);
-
   if (containsNewlines || containsHash) {
     return {
       output: markdownit({

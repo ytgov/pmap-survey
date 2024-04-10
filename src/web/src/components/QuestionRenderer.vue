@@ -301,7 +301,6 @@ export default {
       let items = (this.question.answer ?? "").split(",");
       items = items.filter((i) => i && i != item.val);
 
-      console.log("");
       this.question.answer = items.join(",");
       this.$emit("answerChanged", this.question.answer);
     },

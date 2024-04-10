@@ -118,7 +118,6 @@ export default {
     });
 
     let agentEmail = AuthHelper.user.value.email;
-    console.log("AGENT", agentEmail);
   },
   methods: {
     ...mapActions(useSurveyStore, ["loadAgentSurvey"]),

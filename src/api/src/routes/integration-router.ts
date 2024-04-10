@@ -25,9 +25,6 @@ integrationRouter.get("/emailer/:surveyId", async (req: Request, res: Response) 
   for (let p of participants) {
     let resp = await emailer.sendSurveyEmail(p, survey);
     await recordSentDate(p);
-
-    // try and capture the status of the SMTP call
-    console.log(resp);
   }
 
   res.json({ data: { survey, participant_count: participants.length, participants } });
@@ -54,7 +51,6 @@ integrationRouter.get("/emailer/:surveyId/preview", async (req: Request, res: Re
     //let resp = await emailer.sendSurveyEmail(p, survey);
     //await recordSentDate(p);
     // try and capture the status of the SMTP call
-    //console.log(resp);
   }
 
   res.json({ data: { survey, participant_count: participants.length, participants } });
@@ -67,7 +63,6 @@ integrationRouter.get("/suppress/:token", async (req: Request, res: Response) =>
   let value = -1;
   let resp = await db.raw(`BEGIN ${DB_SCHEMA}.UPDATE_SUPRESSION(?, ?, ?); END;`, [token, "D", value]);
 
-  console.log(resp);
   // Participant successfully removed from survey or Participant not found in database
 
   res.send("Participant successfully removed from survey");
