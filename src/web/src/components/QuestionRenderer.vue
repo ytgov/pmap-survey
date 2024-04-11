@@ -216,12 +216,14 @@ export default {
     selectedOptions() {
       if (this.question && this.question.answer) {
         let answers = (this.question.answer ?? "").split(",");
-
-        console.log("AVAILABLEW", this.question.choices, "NOT", answers);
-
         this.availableOptions = this.question.choices.filter((o) => !answers.includes(`${o.val}`));
 
-        return this.question.choices.filter((c) => answers.includes(`${c.val}`));
+        let list = [];
+        for (let answer of answers) {
+          list.push(this.question.choices.find((c) => `${c.val}` == answer));
+        }
+
+        return list;
       }
 
       this.availableOptions = this.question.choices || [];
@@ -283,23 +285,17 @@ export default {
     addChoiceClick(item) {
       let items = (this.question.answer ?? "").split(",");
       items = items.filter((i) => i);
-      ///items = uniq(items);
-
-      console.log("EXISTIN", items);
 
       if (this.question.SELECT_LIMIT) {
         const limit = parseInt(this.question.SELECT_LIMIT);
         if (items.length >= limit) {
-          console.log("OVER LIMIT");
           return;
         }
       }
 
       const newVal = `${item.val}`;
-      console.log("ADDING ITEM", newVal);
 
       if (items.includes(newVal)) {
-        console.log("ALREDY THER");
         return;
       }
 
@@ -311,7 +307,6 @@ export default {
       const newVal = `${item.val}`;
       let items = (this.question.answer ?? "").split(",");
       items = items.filter((i) => i && i != newVal);
-      console.log("EXISTIN", items);
 
       this.question.answer = items.join(",");
       this.$emit("answerChanged", this.question.answer);
