@@ -284,16 +284,21 @@ export default {
       items = items.filter((i) => i);
       items = uniq(items);
 
+      console.log("EXISTIN", items);
+
       if (this.question.SELECT_LIMIT) {
         const limit = parseInt(this.question.SELECT_LIMIT);
         if (items.length >= limit) {
+          console.log("OVER LIMIT");
           return;
         }
       }
 
       const newVal = `${item.val}`;
+      console.log("ADDING ITEM", newVal);
 
       if (items.includes(newVal)) {
+        console.log("ALREDY THER");
         return;
       }
 
@@ -305,6 +310,7 @@ export default {
       const newVal = `${item.val}`;
       let items = (this.question.answer ?? "").split(",");
       items = items.filter((i) => i && i != newVal);
+      console.log("EXISTIN", items);
 
       this.question.answer = items.join(",");
       this.$emit("answerChanged", this.question.answer);
