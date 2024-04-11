@@ -169,7 +169,7 @@
 <script>
 import QuadrantRenderer from "./QuadrantRenderer.vue";
 import { RenderMarkdown } from "@/utils";
-import { isArray, uniq } from "lodash";
+import { isArray } from "lodash";
 import { nextTick } from "vue";
 
 export default {
@@ -283,7 +283,7 @@ export default {
     addChoiceClick(item) {
       let items = (this.question.answer ?? "").split(",");
       items = items.filter((i) => i);
-      items = uniq(items);
+      ///items = uniq(items);
 
       console.log("EXISTIN", items);
 
