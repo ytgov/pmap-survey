@@ -213,6 +213,9 @@ export default {
     availableOptions() {
       if (this.question && this.question.answer) {
         let selectedVals = this.selectedOptions.map((o) => o.val);
+
+        console.log("AVAILABLEW", this.question.choices, "NOT", selectedVals);
+
         return this.question.choices.filter((o) => !selectedVals.includes(`${o.val}`));
       }
       return this.question.choices || [];
