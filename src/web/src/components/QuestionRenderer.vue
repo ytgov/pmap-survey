@@ -176,6 +176,9 @@ export default {
   name: "Home",
   components: { QuadrantRenderer },
   props: ["index", "question"],
+  data: () => ({
+    availableOptions: [],
+  }),
   computed: {
     options: function () {
       return this.question.choices || [];
@@ -210,22 +213,18 @@ export default {
     storageID() {
       return `${this.question.QID}_ANSWER`;
     },
-    availableOptions() {
-      if (this.question && this.question.answer) {
-        let selectedVals = this.selectedOptions.map((o) => o.val);
-
-        console.log("AVAILABLEW", this.question.choices, "NOT", selectedVals);
-
-        return this.question.choices.filter((o) => !selectedVals.includes(`${o.val}`));
-      }
-      return this.question.choices || [];
-    },
     selectedOptions() {
       if (this.question && this.question.answer) {
         let answers = (this.question.answer ?? "").split(",");
+
+        console.log("AVAILABLEW", this.question.choices, "NOT", answers);
+
+        this.availableOptions = this.question.choices.filter((o) => !answers.includes(`${o.val}`));
+
         return this.question.choices.filter((c) => answers.includes(`${c.val}`));
       }
 
+      this.availableOptions = this.question.choices || [];
       return [];
     },
   },
@@ -254,7 +253,6 @@ export default {
       this.$emit("answerChanged", nval);
     },
   },
-  data: () => ({}),
   methods: {
     subUpdated(subQ) {
       localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
