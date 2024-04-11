@@ -213,14 +213,14 @@ export default {
     availableOptions() {
       if (this.question && this.question.answer) {
         let selectedVals = this.selectedOptions.map((o) => o.val);
-        return this.question.choices.filter((o) => !selectedVals.includes(o.val));
+        return this.question.choices.filter((o) => !selectedVals.includes(`${o.val}`));
       }
       return this.question.choices || [];
     },
     selectedOptions() {
       if (this.question && this.question.answer) {
         let answers = (this.question.answer ?? "").split(",");
-        return this.question.choices.filter((c) => answers.includes(c.val));
+        return this.question.choices.filter((c) => answers.includes(`${c.val}`));
       }
 
       return [];
@@ -291,15 +291,20 @@ export default {
         }
       }
 
-      if (items.includes(item.val)) return;
+      const newVal = `${item.val}`;
 
-      items.push(item.val);
+      if (items.includes(newVal)) {
+        return;
+      }
+
+      items.push(newVal);
       this.question.answer = items.join(",");
       this.$emit("answerChanged", this.question.answer);
     },
     removeChoiceClick(item) {
+      const newVal = `${item.val}`;
       let items = (this.question.answer ?? "").split(",");
-      items = items.filter((i) => i && i != item.val);
+      items = items.filter((i) => i && i != newVal);
 
       this.question.answer = items.join(",");
       this.$emit("answerChanged", this.question.answer);
