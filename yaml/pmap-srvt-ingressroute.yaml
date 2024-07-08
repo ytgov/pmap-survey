@@ -21,13 +21,7 @@ spec:
         - name: pmap-srvt
           port: 3000
           weight: 10
-    - kind: Rule
-      #match requests to this domain
-      match: Host(`pmap-srvt.gov.yk.ca`)
-      services:
-        - name: pmap-srvt
-          port: 3000
-          weight: 10
+
 
 
   tls:
