@@ -18,16 +18,20 @@ export const checkJwt = jwt({
 
   // Validate the audience and the issuer.
   audience: AUTH0_AUDIENCE,
-  issuer: [`${AUTH0_DOMAIN}/`],
+  issuer: `${AUTH0_DOMAIN}/`,
   algorithms: ["RS256"],
 });
 
 export async function loadUser(req: Request, res: Response, next: NextFunction) {
   const db = new UserService();
 
+  console.log("loadUser");
+
   let sub = req.auth.sub;
   const token = req.headers.authorization || "";
   let u = await db.getBySub(sub);
+
+  console.log("loadUser1", u);
 
   if (u) {
     req.user = { ...req.auth, ...u };
@@ -37,6 +41,8 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
   await axios
     .get(`${AUTH0_DOMAIN}/userinfo`, { headers: { authorization: token } })
     .then(async (resp: any) => {
+      console.log("loadUser2", resp);
+
       if (resp.data && resp.data.sub) {
         let email = resp.data.email;
         let first_name = resp.data.given_name;
@@ -44,6 +50,8 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
         sub = resp.data.sub;
 
         let u = await db.getBySub(sub);
+
+        console.log("loadUser3", u);
 
         if (u) {
           req.user = { ...req.auth, ...u };
@@ -67,7 +75,9 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
             return next();
           }
 
-          /*  u = await db.create({
+          console.log("loadUser4", u);
+
+          u = await db.create({
             EMAIL: email,
             USER_ID: sub,
             STATUS: UserStatus.INACTIVE,
@@ -77,7 +87,7 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
             IS_ADMIN: "N",
             ROLE: "",
           });
-          req.user = { ...req.user, ...u }; */
+          req.user = { ...req.user, ...u };
         }
       } else {
         console.log("Payload from Auth0 is strange or failed for", req.auth);
