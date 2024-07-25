@@ -25,9 +25,13 @@ export const checkJwt = jwt({
 export async function loadUser(req: Request, res: Response, next: NextFunction) {
   const db = new UserService();
 
+  console.log("loadUser");
+
   let sub = req.auth.sub;
   const token = req.headers.authorization || "";
   let u = await db.getBySub(sub);
+
+  console.log("loadUser1", u);
 
   if (u) {
     req.user = { ...req.auth, ...u };
@@ -37,6 +41,8 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
   await axios
     .get(`${AUTH0_DOMAIN}/userinfo`, { headers: { authorization: token } })
     .then(async (resp: any) => {
+      console.log("loadUser2", resp.data);
+
       if (resp.data && resp.data.sub) {
         let email = resp.data.email;
         let first_name = resp.data.given_name;
@@ -44,6 +50,8 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
         sub = resp.data.sub;
 
         let u = await db.getBySub(sub);
+
+        console.log("loadUser3", u);
 
         if (u) {
           req.user = { ...req.auth, ...u };
@@ -54,6 +62,8 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
           if (e && e.USER_ID == "SUB_MISSING") {
             req.user = { ...req.auth, ...e };
+
+            console.log("loadUser4", e);
 
             await db.update(email, {
               USER_ID: sub,
@@ -66,6 +76,17 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
             return next();
           }
+
+          console.log("loadUser4", {
+            EMAIL: email,
+            USER_ID: sub,
+            STATUS: UserStatus.INACTIVE,
+            FIRST_NAME: first_name,
+            LAST_NAME: last_name,
+            CREATE_DATE: new Date(),
+            IS_ADMIN: "N",
+            ROLE: "",
+          });
 
           u = await db.create({
             EMAIL: email,
