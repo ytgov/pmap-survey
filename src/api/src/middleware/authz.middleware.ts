@@ -98,16 +98,22 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
             IS_ADMIN: "N",
             ROLE: "",
           });
+
+          console.log("AFTER CREATE");
           req.user = { ...req.user, ...u };
         }
       } else {
         console.log("Payload from Auth0 is strange or failed for", req.auth);
       }
 
+      console.log("AFTER All", req.user);
+
       if (!req.user) {
         // the user doesn't exist in the database yet, therefore not authorize
         return res.status(401).send("Not Authorized");
       }
+
+      console.log("FINAL")
 
       next();
     })
