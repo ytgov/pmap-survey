@@ -99,15 +99,17 @@
         <div v-else-if="question.TYPE == 'title_question'">
           <table class="matrix" v-if="question.subQuestions.length > 0 && question.subQuestions[0].choices">
             <tr>
-              <td></td>
-              <th v-for="ch of question.subQuestions[0].choices">{{ ch.descr }}</th>
+              <td style="width: 50%; border-right: 1px #32323233 solid"></td>
+              <th v-for="ch of question.subQuestions[0].choices" :style="'width:' + 50 / question.subQuestions[0].choices.length + '%'">
+                {{ ch.descr }}
+              </th>
             </tr>
 
             <tr v-for="sub of question.subQuestions">
-              <th style="text-align: left" v-if="sub.isVisible">
+              <th style="text-align: left; width: 50%; border-right: 1px #32323233 solid" v-if="sub.isVisible">
                 {{ sub.ASK }}
               </th>
-              <td v-for="ch of sub.choices" v-if="sub.isVisible">
+              <td v-for="ch of sub.choices" v-if="sub.isVisible" :style="'width:' + 50 / sub.choices.length + '%'">
                 <v-checkbox
                   class="my-0 mx-auto"
                   v-model="sub.answer"
