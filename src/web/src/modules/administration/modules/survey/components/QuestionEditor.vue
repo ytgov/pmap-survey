@@ -57,6 +57,7 @@
           </v-col>
 
           <v-col v-if="question.TYPE == 'select'">
+            <v-select v-model="question.RENDER_AS" label="Render as" :items="['Select','Radio']" />
             <v-select
               v-model="question.JSON_ID"
               label="Choice list"
@@ -98,6 +99,8 @@
               item-title="TITLE" />
           </v-col>
           <v-col v-if="question.TYPE == 'multi-select'">
+            <v-select v-model="question.RENDER_AS" label="Render as" :items="['Select','Radio']" />
+            <v-text-field v-model="question.SELECT_MIN" label="Select minimum" />
             <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" />
             <v-select
               v-model="question.JSON_ID"
@@ -108,6 +111,7 @@
               item-title="TITLE" />
           </v-col>
           <v-col v-if="question.TYPE == 'ranking'">
+            <v-text-field v-model="question.SELECT_MIN" label="Select minimum" />
             <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" />
             <v-select
               v-model="question.JSON_ID"
