@@ -23,7 +23,7 @@
                 class="float-right"
                 style="width: 40px"
                 title="Question complete"
-                v-if="question.isValid() && question.OPTIONAL == 0"
+                v-if="question.showCheck() && question.OPTIONAL == 0"
                 >mdi-check-bold</v-icon
               >
               <span class="d-none"
@@ -100,7 +100,9 @@
           <table class="matrix" v-if="question.subQuestions.length > 0 && question.subQuestions[0].choices">
             <tr>
               <td style="width: 50%; border-right: 1px #32323233 solid"></td>
-              <th v-for="ch of question.subQuestions[0].choices" :style="'width:' + 50 / question.subQuestions[0].choices.length + '%'">
+              <th
+                v-for="ch of question.subQuestions[0].choices"
+                :style="'width:' + 50 / question.subQuestions[0].choices.length + '%'">
                 {{ ch.descr }}
               </th>
             </tr>
@@ -110,14 +112,15 @@
                 {{ sub.ASK }}
               </th>
               <td v-for="ch of sub.choices" v-if="sub.isVisible" :style="'width:' + 50 / sub.choices.length + '%'">
-                <v-checkbox
-                  class="my-0 mx-auto"
-                  v-model="sub.answer"
-                  hide-details
-                  :value="ch.val"
-                  density="compact"
-                  @update:model-value="subUpdated(sub)"
-                  style="width: 30px" />
+                <v-radio-group v-model="sub.answer" hide-details class="mb-3"
+                  ><v-radio
+                    class="my-0 mx-auto"
+                    hide-details
+                    :value="ch.val"
+                    density="compact"
+                    @update:model-value="subUpdated(sub)"
+                    style="width: 30px"
+                /></v-radio-group>
               </td>
             </tr>
           </table>
@@ -232,7 +235,7 @@ export default {
       return [];
     },
   },
-  mounted() {
+  created() {
     let val = localStorage.getItem(this.storageID);
     let value = JSON.parse(val);
     let q = this.question;
@@ -252,7 +255,7 @@ export default {
     });
   },
   watch: {
-    "question.answer": function (nval) {
+    "question.answer": function (nval, oval) {
       localStorage.setItem(this.storageID, JSON.stringify({ value: nval }));
       this.$emit("answerChanged", nval);
     },

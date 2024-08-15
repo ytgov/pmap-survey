@@ -71,12 +71,8 @@ export const useSurveyStore = defineStore("survey", {
           if (q.TYPE == "ranking") {
             let items = (q.answer ?? "").split(",").filter((i: string) => i);
 
-            if (q.SELECT_LIMIT) {
-              const limit = parseInt(q.SELECT_LIMIT);
-              if (items.length < limit) return false;
-            }
-
-            return items.length > 0;
+            let min = parseInt(q.SELECT_MIN ?? "1");
+            return items.length >= min;
           }
 
           if (q.TYPE == "matrix_question") {
@@ -86,6 +82,9 @@ export const useSurveyStore = defineStore("survey", {
           let trimAnswer = `${q.answer}`.replace("null", "").trim();
           if (trimAnswer && trimAnswer.length > 0) return true;
           return false;
+        };
+        q.showCheck = () => {
+          return q.isValid() && q.isVisible;
         };
         q.isVisible = true;
         q.checkConditions = () => {
@@ -108,6 +107,7 @@ export const useSurveyStore = defineStore("survey", {
           }
 
           let intersect = intersection(parentIds, parentMatches);
+
           return parentIds.length == intersect.length;
         };
       }

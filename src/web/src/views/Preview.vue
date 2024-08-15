@@ -3,7 +3,7 @@
     <SurveyHeader v-model="moveOn" />
 
     <div v-if="moveOn">
-      <QuestionsRenderer v-model="allValid"/>
+      <QuestionsRenderer v-model="allValid" />
 
       <ContactQuestionRenderer v-model="contactMe" />
 
@@ -14,6 +14,7 @@
       </span>
     </div>
   </div>
+  <Loader v-model="isLoading" />
 </template>
 
 <script>
@@ -30,15 +31,20 @@ export default {
     contactMe: false,
   }),
   computed: {
-    ...mapState(useSurveyStore, ["survey"]),
+    ...mapState(useSurveyStore, ["survey", "isLoading"]),
   },
   mounted() {
+    this.isLoading = true;
     this.surveyId = this.$route.params.token;
-    
-    this.loadSurveyPreview(this.surveyId).catch((msg) => {
-      console.log("ERROR ON SURVEY GET: ", msg);
-      this.$router.push(`/survey/not-found`);
-    });
+
+    this.loadSurveyPreview(this.surveyId)
+      .then(() => {
+        this.isLoading = false;
+      })
+      .catch((msg) => {
+        console.log("ERROR ON SURVEY GET: ", msg);
+        this.$router.push(`/survey/not-found`);
+      });
   },
   methods: {
     ...mapActions(useSurveyStore, ["loadSurveyPreview"]),

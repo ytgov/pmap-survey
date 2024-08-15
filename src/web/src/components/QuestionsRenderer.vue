@@ -7,7 +7,7 @@
           :index="idx"
           :question="question"
           @answerChanged="checkAllValid"
-          v-if="question.isVisible"></question-renderer>
+          :class="{ 'd-none': !question.isVisible }"></question-renderer>
       </div>
     </div>
   </div>
@@ -56,6 +56,11 @@ function checkAllValid() {
 
   for (let q of survey.value.questions) {
     q.isVisible = q.checkConditions();
+
+    if (!q.isVisible) {
+      q.answer = null;
+    }
+
     let qv = q.isValid();
     v = v && qv;
   }

@@ -1,5 +1,9 @@
 <template>
-  <div v-if="survey && survey.survey">
+  <div v-if="isLoading">
+    <v-skeleton-loader type="heading, subtitle, image"></v-skeleton-loader>
+  </div>
+
+  <div v-else-if="survey && survey.survey">
     <h1>{{ survey.survey.PAGE_TITLE }}</h1>
     <div
       class="markdown"
@@ -31,7 +35,7 @@ import { useSurveyStore } from "@/store/SurveyStore";
 import { RenderMarkdown } from "@/utils";
 
 const surveyStore = useSurveyStore();
-const { survey } = storeToRefs(surveyStore);
+const { survey, isLoading } = storeToRefs(surveyStore);
 
 const props = defineProps(["modelValue"]);
 const emit = defineEmits(["update:modelValue"]);
@@ -40,3 +44,12 @@ function renderMarkdown(input) {
   return RenderMarkdown(input);
 }
 </script>
+
+<style>
+.v-skeleton-loader__bone.v-skeleton-loader__heading {
+  margin-left: 0px !important;
+}
+.v-skeleton-loader__bone.v-skeleton-loader__text {
+  margin-left: 0px !important;
+}
+</style>
