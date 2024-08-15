@@ -140,33 +140,7 @@
         </div>
 
         <div v-else-if="question.TYPE == 'ranking'">
-          <v-label style="text-overflow: inherit; overflow: visible; white-space: inherit"
-            >Select items on the left to move them to the ranked list on the right. To remove items from the ranking,
-            click them.</v-label
-          >
-          <v-row class="mt-3">
-            <v-col>
-              <h3>Available options:</h3>
-              <div>
-                <div v-for="option of availableOptions" @click="addChoiceClick(option)" class="rankingOption">
-                  {{ option.descr }}
-                </div>
-              </div>
-            </v-col>
-            <v-col>
-              <h3>
-                Ranked options:
-                <small v-if="question.SELECT_LIMIT">Please choose your top {{ question.SELECT_LIMIT }}</small
-                >:
-              </h3>
-
-              <div>
-                <div v-for="(item, index) of selectedOptions" @click="removeChoiceClick(item)" class="rankingOption">
-                  {{ index + 1 }}. {{ item.descr }}
-                </div>
-              </div>
-            </v-col>
-          </v-row>
+          <RankingRenderer :question="question" />
         </div>
 
         <div v-else-if="question.TYPE == 'quadrant_title'">
@@ -185,18 +159,17 @@
 </template>
 
 <script>
-import QuadrantRenderer from "./QuadrantRenderer.vue";
-import { RenderMarkdown } from "@/utils";
 import { isArray } from "lodash";
 import { nextTick } from "vue";
+import { RenderMarkdown } from "@/utils";
+import RankingRenderer from "./RankingRenderer.vue";
+import QuadrantRenderer from "./QuadrantRenderer.vue";
 
 export default {
   name: "Home",
-  components: { QuadrantRenderer },
+  components: { QuadrantRenderer, RankingRenderer },
   props: ["index", "question"],
-  data: () => ({
-    availableOptions: [],
-  }),
+  data: () => ({}),
   computed: {
     options: function () {
       return this.question.choices || [];
@@ -231,22 +204,6 @@ export default {
     storageID() {
       return `${this.question.QID}_ANSWER`;
     },
-    selectedOptions() {
-      if (this.question && this.question.answer) {
-        let answers = (this.question.answer ?? "").split(",");
-        this.availableOptions = this.question.choices.filter((o) => !answers.includes(`${o.val}`));
-
-        let list = [];
-        for (let answer of answers) {
-          list.push(this.question.choices.find((c) => `${c.val}` == answer));
-        }
-
-        return list;
-      }
-
-      this.availableOptions = this.question.choices || [];
-      return [];
-    },
   },
   created() {
     let val = localStorage.getItem(this.storageID);
@@ -279,14 +236,6 @@ export default {
       this.$emit("answerChanged", subQ.answer);
     },
 
-    checkCustom() {
-      if (this.selectedOption && this.selectedOption.allow_custom && this.selectedOption.allow_custom == "true") {
-        this.showCustomField = true;
-      } else {
-        this.showCustomField = false;
-        this.question.answer_text = "";
-      }
-    },
     renderMarkdown(input) {
       return RenderMarkdown(input);
     },
@@ -299,35 +248,6 @@ export default {
           }
         }
       }
-    },
-    addChoiceClick(item) {
-      let items = (this.question.answer ?? "").split(",");
-      items = items.filter((i) => i);
-
-      if (this.question.SELECT_LIMIT) {
-        const limit = parseInt(this.question.SELECT_LIMIT);
-        if (items.length >= limit) {
-          return;
-        }
-      }
-
-      const newVal = `${item.val}`;
-
-      if (items.includes(newVal)) {
-        return;
-      }
-
-      items.push(newVal);
-      this.question.answer = items.join(",");
-      this.$emit("answerChanged", this.question.answer);
-    },
-    removeChoiceClick(item) {
-      const newVal = `${item.val}`;
-      let items = (this.question.answer ?? "").split(",");
-      items = items.filter((i) => i && i != newVal);
-
-      this.question.answer = items.join(",");
-      this.$emit("answerChanged", this.question.answer);
     },
   },
 };

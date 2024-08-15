@@ -34,17 +34,12 @@ export default {
     ...mapState(useSurveyStore, ["survey", "isLoading"]),
   },
   mounted() {
-    this.isLoading = true;
     this.surveyId = this.$route.params.token;
 
-    this.loadSurveyPreview(this.surveyId)
-      .then(() => {
-        this.isLoading = false;
-      })
-      .catch((msg) => {
-        console.log("ERROR ON SURVEY GET: ", msg);
-        this.$router.push(`/survey/not-found`);
-      });
+    this.loadSurveyPreview(this.surveyId).catch((msg) => {
+      console.log("ERROR ON SURVEY GET: ", msg);
+      this.$router.push(`/survey/not-found`);
+    });
   },
   methods: {
     ...mapActions(useSurveyStore, ["loadSurveyPreview"]),
