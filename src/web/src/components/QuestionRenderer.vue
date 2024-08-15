@@ -12,7 +12,7 @@
               <h3>{{ question.ASK }}</h3>
             </div>
             <h3 v-else>
-              Question {{ index + 1 }}: {{ question.ASK }} ------ {{ question.RENDER_AS }} : {{ question.TYPE }}
+              Question {{ index + 1 }}: {{ question.ASK }}
               <span v-if="question.OPTIONAL == 0" class="text-error">*</span>
             </h3>
           </v-col>
