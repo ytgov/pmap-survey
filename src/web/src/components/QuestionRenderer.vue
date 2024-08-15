@@ -12,7 +12,7 @@
               <h3>{{ question.ASK }}</h3>
             </div>
             <h3 v-else>
-              Question {{ index + 1 }}: {{ question.ASK }}
+              Question {{ index + 1 }}: {{ question.ASK }} ------ {{ question.RENDER_AS }} : {{ question.TYPE }}
               <span v-if="question.OPTIONAL == 0" class="text-error">*</span>
             </h3>
           </v-col>
@@ -53,13 +53,26 @@
 
         <div v-else-if="question.TYPE == 'multi-select'">
           <v-autocomplete
+            v-if="question.RENDER_AS == 'Radio'"
+            class="mt-4"
+            clearable
+            hide-details
+            multiple
+            @update:model-value="limiter"
+            v-model="question.answer"
+            :items="options"
+            :item-title="'descr'"
+            :item-value="'val'"></v-autocomplete>
+          <v-autocomplete
+            v-else
             class="mt-4"
             clearable
             hide-selected
             hide-details
+            chips
             multiple
             small-chips
-            deletable-chips
+            closable-chips
             @update:model-value="limiter"
             v-model="question.answer"
             :items="options"
@@ -69,15 +82,15 @@
 
         <div v-else-if="question.TYPE == 'select'">
           <v-select
+            v-if="question.RENDER_AS == 'Select' || (!question.RENDER_AS && options.length >= 7)"
             v-model="question.answer"
             :items="options"
             :item-title="'descr'"
             :item-value="'val'"
             hide-details
-            class="mt-4"
-            v-if="options.length >= 7"></v-select>
+            class="mt-4"></v-select>
 
-          <v-radio-group v-model="question.answer" hide-details v-if="options.length < 7">
+          <v-radio-group v-model="question.answer" hide-details v-else>
             <v-radio
               :label="item.descr"
               :value="`${item.val}`"
