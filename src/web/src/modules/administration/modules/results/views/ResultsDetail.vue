@@ -134,7 +134,7 @@ export default {
   async mounted() {
     if (!this.result) {
       await this.loadResults();
-      let SID = this.$route.params.SID;
+      let SID = this.$router.currentRoute.value.params.SID;
       this.select(parseInt(isArray(SID) ? SID[0] : SID));
     }
   },

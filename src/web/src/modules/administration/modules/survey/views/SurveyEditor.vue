@@ -168,7 +168,8 @@ export default {
   async mounted() {
     if (!this.survey) {
       await this.loadSurveys();
-      this.selectById(parseInt(this.$route.params.SID as string));
+      const route = this.$router.currentRoute.value
+      this.selectById(parseInt(route.params.SID as string));
     }
   },
   methods: {

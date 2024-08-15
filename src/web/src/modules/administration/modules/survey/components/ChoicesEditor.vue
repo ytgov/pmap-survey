@@ -50,7 +50,7 @@ import { mapActions, mapState } from "pinia";
 import { useAdminSurveyStore } from "../store";
 
 export default {
-  props: ["survey", "disabled"],
+  props: ["disabled"],
   data: () => ({ visible: false, otherNames: [] as string[] }),
   computed: {
     ...mapState(useAdminSurveyStore, ["survey", "selectedChoices"]),
@@ -64,10 +64,12 @@ export default {
   methods: {
     ...mapActions(useAdminSurveyStore, ["saveSurveyChoices"]),
     show() {
-      this.otherNames = this.survey.choices
-        .filter((n: any) => this.selectedChoices.JSON_ID != n.JSON_ID)
-        .map((c: any) => c.TITLE);
-      this.visible = true;
+      if (this.survey && this.survey.choices) {
+        this.otherNames = this.survey.choices
+          .filter((n: any) => this.selectedChoices.JSON_ID != n.JSON_ID)
+          .map((c: any) => c.TITLE);
+        this.visible = true;
+      }
     },
 
     removeClick(idx: number) {
