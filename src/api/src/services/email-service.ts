@@ -15,7 +15,7 @@ export class EmailService {
     else this.TRANSPORT = nodemailer.createTransport(MAIL_CONFIG_DEV as TransportOptions);
   }
 
-  async sendSurveyEmail(participant: any, survey: any): Promise<any> {
+/*   async sendSurveyEmail(participant: any, survey: any): Promise<any> {
     return this.sendEmail(
       participant.EMAIL,
       participant.TOKEN,
@@ -23,7 +23,7 @@ export class EmailService {
       survey.DESCRIPTION,
       survey.FROM_EMAIL
     );
-  }
+  } */
 
   async sendEmail(
     toEmail: string,

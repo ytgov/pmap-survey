@@ -22,8 +22,11 @@ integrationRouter.get("/emailer/:surveyId", async (req: Request, res: Response) 
 
   let emailer = new EmailService();
 
+  const subject = survey.EMAIL_SUBJECT ?? "Survey Link";
+  const body = survey.EMAIL_BODY ?? "Survey";
+
   for (let p of participants) {
-    let resp = await emailer.sendSurveyEmail(p, survey);
+    await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body, survey.FROM_EMAIL);
     await recordSentDate(p);
   }
 
@@ -45,13 +48,11 @@ integrationRouter.get("/emailer/:surveyId/preview", async (req: Request, res: Re
     .whereNull("RESENT_DATE")
     .select("EMAIL", "PARTICIPANT.TOKEN");
 
-  let emailer = new EmailService();
-
-  for (let p of participants) {
+  /* for (let p of participants) {
     //let resp = await emailer.sendSurveyEmail(p, survey);
     //await recordSentDate(p);
     // try and capture the status of the SMTP call
-  }
+  } */
 
   res.json({ data: { survey, participant_count: participants.length, participants } });
 });
