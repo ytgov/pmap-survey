@@ -54,7 +54,15 @@
         :disabled="survey.responses && survey.responses.length > 0"
         >Save</v-btn
       >
-      <v-btn color="yg_sun" variant="outlined" @click="close">Close</v-btn>
+      <v-btn color="yg_sun" class="mr-5" variant="outlined" @click="close">Close</v-btn>
+
+      <v-btn v-if="survey.STATUS != 'Hidden'" color="error" variant="outlined" @click="setHiddenSurveyClick"
+        >Hide</v-btn
+      >
+      <v-btn v-if="survey.STATUS == 'Hidden'" color="success" variant="outlined" @click="setActiveSurveyClick"
+        >Un-hide</v-btn
+      >
+
       <span class="mt-5 ml-4 text-warning" v-if="survey.responses && survey.responses.length > 0"
         >This survey has respones and cannot be edited</span
       >
@@ -143,6 +151,7 @@ import Notifications from "@/components/Notifications.vue";
 export default {
   data: () => ({
     fromLabel: `FORMAT: "Name" <EMAIL.ADDRESS>`,
+    statusOptions: ["Active", "Hidden"],
   }),
   components: { QuestionEditor, ConfirmDialog, ChoicesEditor },
   computed: {
@@ -168,7 +177,7 @@ export default {
   async mounted() {
     if (!this.survey) {
       await this.loadSurveys();
-      const route = this.$router.currentRoute.value
+      const route = this.$router.currentRoute.value;
       this.selectById(parseInt(route.params.SID as string));
     }
   },
@@ -209,6 +218,24 @@ export default {
         });
       }
     },
+
+    async setHiddenSurveyClick() {
+      if (this.survey && this.survey.SID) {
+        this.survey.STATUS = "Hidden";
+        this.update().then(() => {
+          //this.close();
+        });
+      }
+    },
+    async setActiveSurveyClick() {
+      if (this.survey && this.survey.SID) {
+        this.survey.STATUS = "Active";
+        this.update().then(() => {
+          //this.close();
+        });
+      }
+    },
+
     async deleteClick() {
       (this.$refs.confirm as any).show(
         "Delete this survey?",

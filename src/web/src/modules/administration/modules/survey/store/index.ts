@@ -36,6 +36,12 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
       if (state.survey) return state.survey.questions?.filter((q) => q.TYPE == "quadrant_title");
       return [];
     },
+    activeSurveys(state) {
+      if (state && state.surveys) return state.surveys.filter((s) => s.STATUS != "Hidden");
+    },
+    hiddenSurveys(state) {
+      if (state && state.surveys) return state.surveys.filter((s) => s.STATUS == "Hidden");
+    },
   },
   actions: {
     async initialize() {},
@@ -284,6 +290,7 @@ interface Survey {
   EMAIL_BODY?: string;
   FROM_EMAIL?: string;
   ALLOW_AUDIT: number;
+  STATUS: string;
   questions?: Question[];
   choices?: any[];
   responses?: any[];

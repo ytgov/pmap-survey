@@ -19,7 +19,7 @@ export const useAdminResultsStore = defineStore("adminResults", {
       await api
         .secureCall("get", ADMIN_SURVEY_URL)
         .then((resp) => {
-          this.results = resp.data;
+          this.results = resp.data.filter((r: any) => r.STATUS != "Hidden");
         })
         .catch();
 

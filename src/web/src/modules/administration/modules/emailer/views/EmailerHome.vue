@@ -75,7 +75,7 @@ export default {
     recipientType: "SEND",
   }),
   computed: {
-    ...mapState(useAdminSurveyStore, ["surveys"]),
+    ...mapState(useAdminSurveyStore, { surveys: "activeSurveys" }),
     ...mapState(useEmailerStore, ["emailValid"]),
     ...mapWritableState(useEmailerStore, ["survey", "email"]),
     ...mapState(useParticipantsStore, ["participants"]),

@@ -99,7 +99,7 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
 
     question.conditionText = matchGroups.join(" AND ");
 
-    console.log("QUERY", question)
+    console.log("QUERY", question);
 
     question.responseCount = question.responses.length;
     tokenList.concat(uniq(survey.questions.map((s: any) => s.TOKEN)));
@@ -122,7 +122,7 @@ adminSurveyRouter.post("/", async (req: Request, res: Response) => {
 
 adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT } =
+  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT, STATUS } =
     req.body;
 
   await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({
@@ -134,6 +134,7 @@ adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
     PAGE_TITLE,
     FROM_EMAIL,
     ALLOW_AUDIT,
+    STATUS,
   });
 
   res.json({ data: "success" });
@@ -171,8 +172,10 @@ adminSurveyRouter.delete("/:SID/", async (req: Request, res: Response) => {
   let hasParticipants = await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ SID });
 
   if (hasParticipants.length > 0) {
-    res.json({ data: "HAS Participatns" });
-  } else {
+    return res.json({ data: "HAS Participatns" });
+  }
+
+  try {
     await db("Q_CONDITION_TBL")
       .withSchema(DB_SCHEMA)
       .innerJoin("QUESTION", "QUESTION.QID", "Q_CONDITION_TBL.QID")
@@ -182,7 +185,10 @@ adminSurveyRouter.delete("/:SID/", async (req: Request, res: Response) => {
     await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID }).delete();
     await db("QUESTION").withSchema(DB_SCHEMA).where({ SID }).delete();
     await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).delete();
-    res.json({ data: "success" });
+    return res.json({ data: "success" });
+  } catch (err) {
+    console.log("ERROR DELETING SURVEY", err);
+    return res.json({ data: err });
   }
 });
 

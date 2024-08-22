@@ -182,7 +182,7 @@ export default {
   computed: {
     ...mapWritableState(useParticipantsStore, ["batch"]),
     ...mapState(useParticipantsStore, ["isLoading", "batchIsValid", "participants"]),
-    ...mapState(useAdminSurveyStore, ["surveys"]),
+    ...mapState(useAdminSurveyStore, { surveys: "activeSurveys" }),
 
     items() {
       return [];

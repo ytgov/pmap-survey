@@ -25,7 +25,17 @@
         hide-details
         append-inner-icon="mdi-magnify"
         density="compact"
-        class="ml-2"></v-text-field>
+        class="ml-2" />
+
+      <v-select
+        v-if="user.IS_ADMIN == 'Y'"
+        v-model="showHidden"
+        label="Search"
+        :items="['Active', 'Hidden']"
+        class="ml-3"
+        single-line
+        density="compact"
+        hide-details />
     </template>
     <template v-slot:right>
       <v-btn
@@ -39,7 +49,7 @@
       >
     </template>
 
-    <v-data-table :search="search" :headers="headers" :items="surveys" :loading="isLoading" @click:row="rowClick">
+    <v-data-table :search="search" :headers="headers" :items="surveysList" :loading="isLoading" @click:row="rowClick">
     </v-data-table>
   </base-card>
 </template>
@@ -58,9 +68,10 @@ export default {
       { title: "Responses", key: "responses.length" },
     ],
     search: "",
+    showHidden: "Active",
   }),
   computed: {
-    ...mapState(useAdminSurveyStore, ["surveys", "isLoading"]),
+    ...mapState(useAdminSurveyStore, ["surveys", "hiddenSurveys", "activeSurveys", "isLoading"]),
     ...mapState(useUserStore, ["user"]),
     breadcrumbs() {
       return [
@@ -72,6 +83,14 @@ export default {
           title: "Surveys",
         },
       ];
+    },
+
+    surveysList() {
+      if (this.showHidden == "Hidden") {
+        return this.hiddenSurveys;
+      }
+
+      return this.activeSurveys;
     },
   },
   async mounted() {
