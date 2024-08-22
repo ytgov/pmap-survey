@@ -35,7 +35,6 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia";
 import { useAdminResultsStore } from "../store";
-import { clone } from "lodash";
 import { useUserStore } from "@/store/UserStore";
 
 export default {
