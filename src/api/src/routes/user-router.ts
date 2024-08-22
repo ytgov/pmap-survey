@@ -8,7 +8,6 @@ export const userRouter = express.Router();
 const db = new UserService();
 
 userRouter.get("/me", async (req: Request, res: Response) => {
-  console.log("/me")
   return res.json({ data: { ...req.user, surveys: await db.getSurveysByEmail(req.user.EMAIL) } });
 });
 

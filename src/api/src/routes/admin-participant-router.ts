@@ -54,7 +54,7 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
         demographicInsert.push({ TOKEN: token, DEMOGRAPHIC: demo, NVALUE: nval, TVALUE: tval });
       }
 
-      await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
+      await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey, CREATE_DATE: new Date() });
       await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: email });
       await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).insert(demographicInsert);
     }
@@ -71,7 +71,7 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
       if (existingList.includes(address)) continue;
 
       let token = makeToken(prefix);
-      await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey });
+      await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey, CREATE_DATE: new Date() });
       await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: address });
     }
   }
@@ -82,9 +82,27 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
 adminParticipantRouter.delete("/:TOKEN", async (req: Request, res: Response) => {
   let { TOKEN } = req.params;
 
-  await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
-  await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
   await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
+  await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
+  await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ TOKEN }).delete();
+
+  res.json({ data: {} });
+});
+
+adminParticipantRouter.delete("/:SID/stale", async (req: Request, res: Response) => {
+  let { SID } = req.params;
+
+  let staleOnes = await await db("PARTICIPANT")
+    .withSchema(DB_SCHEMA)
+    .innerJoin("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+    .whereNull("RESPONSE_DATE")
+    .where({ SID });
+
+  for (const stale of staleOnes) {
+    await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).delete();
+    await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).delete();
+    await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).delete();
+  }
 
   res.json({ data: {} });
 });

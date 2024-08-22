@@ -108,6 +108,17 @@ export const useParticipantsStore = defineStore("participants", {
         .catch();
     },
 
+    async deleteStaleParticipants(surveyId: number) {
+
+      await api
+        .secureCall("delete", `${PARTICIPANT_URL}/${surveyId}/stale`)
+        .then(async (resp) => {
+          this.getParticipants(surveyId);
+          m.notify({ variant: "success", text: "Participants removed" });
+        })
+        .catch();
+    },
+
     async manualSend(surveyId: number, id: number) {
       await api
         .secureCall("post", `${ADMIN_SURVEY_URL}/${surveyId}/resend/${id}`)

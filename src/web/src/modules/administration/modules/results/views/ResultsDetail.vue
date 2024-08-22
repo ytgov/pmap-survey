@@ -19,7 +19,7 @@
   <base-card showHeader="" heading="" elevation="0" v-if="result">
     <v-row class="mb-1">
       <v-col cols="12" md="3">
-        <v-card elevation="3" color="#F2760C66" to="/administration/users">
+        <v-card elevation="3" color="#F2760C66">
           <v-card-text style="text-align: right">
             <v-icon
               class="float-left"
@@ -32,7 +32,7 @@
         </v-card>
       </v-col>
       <v-col>
-        <v-card elevation="3" color="#F2760C66" to="/administration/users">
+        <v-card elevation="3" color="#F2760C66">
           <v-card-text style="text-align: right">
             <v-icon
               class="float-left"
@@ -45,7 +45,7 @@
         </v-card>
       </v-col>
       <v-col>
-        <v-card elevation="3" color="#F2760C66" to="/administration/users">
+        <v-card elevation="3" color="#F2760C66">
           <v-card-text style="text-align: right">
             <v-icon
               class="float-left"
@@ -58,7 +58,7 @@
         </v-card>
       </v-col>
       <v-col>
-        <v-card elevation="3" color="#F2760C66" to="/administration/users">
+        <v-card elevation="3" color="#F2760C66">
           <v-card-text style="text-align: right">
             <v-icon
               class="float-left"

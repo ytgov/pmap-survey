@@ -73,6 +73,9 @@
         {{ trimToken(item.TOKEN) }}
       </template>
 
+      <template v-slot:item.CREATE_DATE="{ item }">
+        {{ formatDate(item.CREATE_DATE) }}
+      </template>
       <template v-slot:item.SENT_DATE="{ item }">
         {{ formatDate(item.SENT_DATE) }}
       </template>
@@ -83,6 +86,17 @@
         {{ formatDate(item.RESPONSE_DATE) }}
       </template>
     </v-data-table>
+
+    <v-btn
+      v-if="participants && participants.length > 0"
+      color="warning"
+      variant="text"
+      size="small"
+      @click="deleteNoResponseClick">
+      <v-icon class="mr-2">mdi-delete</v-icon>
+      Clear all who haven't responded
+    </v-btn>
+
     <ConfirmDialog ref="confirm"></ConfirmDialog>
 
     <v-dialog v-model="visible" persistent max-width="700">
@@ -153,6 +167,7 @@ export default {
       { title: "", key: "actions", width: "60px" },
       { title: "Token", key: "TOKEN" },
       { title: "Email", key: "EMAIL" },
+      { title: "Create Date", key: "CREATE_DATE" },
       { title: "Sent Date", key: "SENT_DATE" },
       { title: "Resent Date", key: "RESENT_DATE" },
       { title: "Response Date", key: "RESPONSE_DATE" },
@@ -200,6 +215,7 @@ export default {
       "create",
       "getParticipants",
       "deleteParticipant",
+      "deleteStaleParticipants",
       "unselect",
       "manualSend",
     ]),
@@ -286,6 +302,18 @@ export default {
         () => {}
       );
     },
+
+    deleteNoResponseClick() {
+      (this.$refs.confirm as any).show(
+        "Delete stale participants?",
+        "Click confirm below to delete all participants who have not yet responsed.",
+        async () => {
+          await this.deleteStaleParticipants(this.batch.survey);
+        },
+        () => {}
+      );
+    },
+
     async emailClick(participantId: any) {
       (this.$refs.confirm as any).show(
         "Send email to this participant?",
