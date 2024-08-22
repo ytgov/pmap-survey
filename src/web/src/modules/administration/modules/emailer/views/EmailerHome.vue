@@ -110,7 +110,7 @@ export default {
       return this.viableParticipants.filter((p) => p.SENT_DATE && !p.RESENT_DATE);
     },
     selectedSurvey() {
-      if (this.survey) {
+      if (this.survey && this.surveys) {
         return this.surveys.find((s) => s.SID == this.survey);
       }
 
