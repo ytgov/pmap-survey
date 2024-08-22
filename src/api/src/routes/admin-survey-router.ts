@@ -98,9 +98,6 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
     }
 
     question.conditionText = matchGroups.join(" AND ");
-
-    console.log("QUERY", question);
-
     question.responseCount = question.responses.length;
     tokenList.concat(uniq(survey.questions.map((s: any) => s.TOKEN)));
   }
