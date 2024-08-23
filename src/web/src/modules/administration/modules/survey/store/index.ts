@@ -81,11 +81,17 @@ export const useAdminSurveyStore = defineStore("adminSurvey", {
     },
     async delete() {
       if (this.survey) {
-        await api
+        return await api
           .secureCall("delete", `${ADMIN_SURVEY_URL}/${this.survey.SID}`, this.survey)
           .then(async (resp) => {
-            await this.loadSurveys();
-            notify.notify("Survey Removed");
+            if (resp.error) {
+              notify.notify({ variant: "error", text: `Delete failed - ${resp.error}` });
+              return false;
+            } else {
+              await this.loadSurveys();
+              notify.notify("Survey Removed");
+              return true;
+            }
           })
           .catch();
       }

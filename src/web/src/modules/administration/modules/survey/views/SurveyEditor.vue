@@ -241,8 +241,8 @@ export default {
         "Delete this survey?",
         "Click confirm below to delete this survey. This action cannot be undone.",
         async () => {
-          await this.delete().then(() => {
-            this.close();
+          await this.delete().then((resp) => {
+            if (resp) this.close();
           });
         },
         () => {}

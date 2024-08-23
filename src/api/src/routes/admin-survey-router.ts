@@ -169,7 +169,7 @@ adminSurveyRouter.delete("/:SID/", async (req: Request, res: Response) => {
   let hasParticipants = await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ SID });
 
   if (hasParticipants.length > 0) {
-    return res.json({ data: "HAS Participatns" });
+    return res.json({ error: "This survey has participants" });
   }
 
   try {
