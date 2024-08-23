@@ -99,9 +99,7 @@ adminParticipantRouter.delete("/:SID/stale", async (req: Request, res: Response)
     .where({ SID });
 
   for (const stale of staleOnes) {
-    await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).delete();
-    await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).delete();
-    await db("PARTICIPANT").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).delete();
+    await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN: stale.TOKEN }).update({ EMAIL: null });
   }
 
   res.json({ data: {} });
