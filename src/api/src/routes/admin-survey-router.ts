@@ -173,11 +173,11 @@ adminSurveyRouter.delete("/:SID/", async (req: Request, res: Response) => {
   }
 
   try {
-    await db("Q_CONDITION_TBL")
-      .withSchema(DB_SCHEMA)
-      .innerJoin("QUESTION", "QUESTION.QID", "Q_CONDITION_TBL.QID")
-      .where({ "QUESTION.SID": SID })
-      .delete();
+    const questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID }).select("QID");
+
+    for (const question of questions) {
+      await db("Q_CONDITION_TBL").where({ QID: question.QID }).delete();
+    }
 
     await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID }).delete();
     await db("QUESTION").withSchema(DB_SCHEMA).where({ SID }).delete();
