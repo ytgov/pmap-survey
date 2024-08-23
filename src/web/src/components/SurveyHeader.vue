@@ -22,7 +22,7 @@
           v-if="renderMarkdown(survey.survey.PAGE_INTRO).isMarkdown"></div>
         <p v-else>{{ survey.survey.PAGE_INTRO }}</p>
 
-        <v-btn @click="emit('update:modelValue', true)" large color="primary">Continue to Survey</v-btn>
+        <v-btn @click="moveOnClick" large color="primary">Continue to Survey</v-btn>
       </v-card-text>
     </v-card>
   </div>
@@ -42,6 +42,10 @@ const emit = defineEmits(["update:modelValue"]);
 
 function renderMarkdown(input) {
   return RenderMarkdown(input);
+}
+
+function moveOnClick() {
+  emit("update:modelValue", true);
 }
 </script>
 
