@@ -64,7 +64,7 @@
       >
 
       <span class="mt-5 ml-4 text-warning" v-if="survey.responses && survey.responses.length > 0"
-        >This survey has respones and cannot be edited</span
+        >This survey has responses and cannot be edited</span
       >
       <v-spacer></v-spacer>
       <v-btn color="error" variant="tonal" @click="deleteClick">Delete</v-btn>
