@@ -4,7 +4,7 @@
     <div class="col-sm-12 col-md-9 col-lg-7">
       <div v-for="(question, idx) of questionGroups" :key="idx">
         <question-renderer
-          :index="idx"
+          :index="question.questionIndex"
           :question="question"
           @answerChanged="checkAllValid"
           :class="{ 'd-none': !question.isVisible }"></question-renderer>
@@ -30,21 +30,28 @@ const questionGroups = computed(() => {
 
   if (survey.value.questions) {
     let lastTitle = null;
+    let index = 0;
+
     for (let question of survey.value.questions) {
       if (question.TYPE == "title_question") {
         question.subQuestions = [];
         lastTitle = question;
+        question.questionIndex = index;
         list.push(question);
       } else if (question.TYPE == "matrix_question") {
         if (lastTitle) lastTitle.subQuestions.push(question);
       } else if (question.TYPE == "quadrant_title") {
         question.subQuestions = [];
         lastTitle = question;
+        question.questionIndex = index;
         list.push(question);
+        index++;
       } else if (question.TYPE == "quadrant") {
         if (lastTitle) lastTitle.subQuestions.push(question);
       } else {
+        question.questionIndex = index;
         list.push(question);
+        index++;
       }
     }
   }
