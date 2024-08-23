@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { reverse } from "lodash";
+import { cloneDeep, reverse } from "lodash";
 
 export default {
   props: ["question", "subUpdated"],
@@ -57,7 +57,8 @@ export default {
     },
     yOptions() {
       if (this.yAxis) {
-        return reverse(this.yAxis.choices);
+        let c = cloneDeep(this.yAxis.choices);
+        return reverse(c);
       }
       return [];
     },
@@ -80,7 +81,7 @@ export default {
       return `${(this.xAxis.choices.length + 1) * 50 + 51}px`;
     },
     blockHeight() {
-      return `${(this.yAxis.choices.length) * 50}px`;
+      return `${this.yAxis.choices.length * 50}px`;
     },
     selectedValue() {
       if (this.xAxis && this.yAxis) {
