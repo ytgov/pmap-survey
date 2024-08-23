@@ -57,7 +57,7 @@
           </v-col>
 
           <v-col v-if="question.TYPE == 'select'">
-            <v-select v-model="question.RENDER_AS" label="Render as" :items="['Select','Radio']" />
+            <v-select v-model="question.RENDER_AS" label="Render as" :items="['Select', 'Radio']" />
             <v-select
               v-model="question.JSON_ID"
               label="Choice list"
@@ -65,6 +65,8 @@
               item-value="JSON_ID"
               clearable
               item-title="TITLE" />
+
+            <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
           <v-col v-if="question.TYPE == 'matrix_question'">
             <v-select
@@ -81,6 +83,7 @@
               item-value="JSON_ID"
               clearable
               item-title="TITLE" />
+            <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
           <v-col v-if="question.TYPE == 'quadrant'">
             <v-select
@@ -97,9 +100,10 @@
               item-value="JSON_ID"
               clearable
               item-title="TITLE" />
+            <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
           <v-col v-if="question.TYPE == 'multi-select'">
-            <v-select v-model="question.RENDER_AS" label="Render as" :items="['Select','Radio']" />
+            <v-select v-model="question.RENDER_AS" label="Render as" :items="['Select', 'Radio']" />
             <v-text-field v-model="question.SELECT_MIN" label="Select minimum" />
             <v-text-field v-model="question.SELECT_LIMIT" label="Select limit" />
             <v-select
@@ -109,6 +113,7 @@
               item-value="JSON_ID"
               clearable
               item-title="TITLE" />
+            <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
           <v-col v-if="question.TYPE == 'ranking'">
             <v-text-field v-model="question.SELECT_MIN" label="Select minimum" />
@@ -120,6 +125,7 @@
               item-value="JSON_ID"
               clearable
               item-title="TITLE" />
+            <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
           <v-col v-if="question.TYPE == 'range'">
             <v-select
@@ -129,6 +135,7 @@
               item-value="JSON_ID"
               clearable
               item-title="TITLE" />
+            <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
         </v-row>
         <div class="d-flex mb-2">
@@ -139,6 +146,12 @@
       </v-card-text>
     </v-card>
   </v-dialog>
+
+  <ChoicesEditor
+    ref="choices"
+    v-if="survey"
+    :survey="survey"
+    :disabled="survey.responses && survey.responses.length > 0"></ChoicesEditor>
 
   <v-dialog v-model="conditionsVisible" persistent max-width="800">
     <v-card v-if="question">
@@ -203,9 +216,11 @@
 <script>
 import { mapActions, mapState } from "pinia";
 import { useAdminSurveyStore } from "../store";
+import ChoicesEditor from "./ChoicesEditor.vue";
 
 export default {
   props: ["question", "index", "disabled"],
+  components: { ChoicesEditor },
   data: () => ({ visible: false, conditionsVisible: false }),
   computed: {
     ...mapState(useAdminSurveyStore, [
@@ -239,7 +254,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(useAdminSurveyStore, ["moveUp", "moveDown", "saveQuestionConditions"]),
+    ...mapActions(useAdminSurveyStore, ["moveUp", "moveDown", "saveQuestionConditions", "selectChoice"]),
     showEditor() {
       this.visible = true;
     },
@@ -254,6 +269,14 @@ export default {
       this.deleteQuestion(this.question);
       this.visible = false;
     },
+
+    showChoicesClick() {
+      if (this.survey) {
+        this.selectChoice({ TITLE: "New List", choices: [], SID: this.survey.SID });
+        this.$refs.choices.show();
+      }
+    },
+
     editConditionsClick(index) {
       this.question.conditions = this.question.conditions || [];
       this.conditionsVisible = true;

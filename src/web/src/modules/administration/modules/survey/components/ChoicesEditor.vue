@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="visible" persistent max-width="800">
+  <v-dialog v-model="visible" persistent max-width="700">
     <v-card v-if="survey">
       <v-toolbar color="primary" variant="dark" title="Choices Editor">
         <v-spacer></v-spacer>
