@@ -81,7 +81,7 @@ async function requireAccess(to: RouteLocation): Promise<boolean | string> {
 
   let user = await waitForUserToLoad();
 
-  if (!user) return "/NotAuthorized?Requires-User";
+  if (!user || !user.sub) return "/NotAuthorized?Requires-User";
 
   if (user.STATUS != "Active") return "/NotAuthorized?Requires-Active";
 
