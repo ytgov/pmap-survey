@@ -81,6 +81,8 @@ async function requireAccess(to: RouteLocation): Promise<boolean | string> {
 
   let user = await waitForUserToLoad();
 
+  if (!user) return "/NotAuthorized?Requires-User";
+
   if (user.STATUS != "Active") return "/NotAuthorized?Requires-Active";
 
   if (to.meta && to.meta.allow_admin && user.IS_ADMIN == "Y") return true;
