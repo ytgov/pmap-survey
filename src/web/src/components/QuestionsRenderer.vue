@@ -33,28 +33,42 @@ const questionGroups = computed(() => {
     let index = 0;
 
     for (let question of survey.value.questions) {
+      console.log("Q", index, question.isVisible);
+
       if (question.TYPE == "title_question") {
         question.subQuestions = [];
         lastTitle = question;
-        question.questionIndex = index;
+
+        if (question.isVisible) {
+          question.questionIndex = index;
+          index++;
+        }
+
         list.push(question);
-        index++;
       } else if (question.TYPE == "matrix_question") {
         if (lastTitle) lastTitle.subQuestions.push(question);
       } else if (question.TYPE == "quadrant_title") {
         question.subQuestions = [];
         lastTitle = question;
-        question.questionIndex = index;
+        
+        if (question.isVisible) {
+          question.questionIndex = index;
+          index++;
+        }
+
         list.push(question);
-        index++;
       } else if (question.TYPE == "quadrant") {
         if (lastTitle) lastTitle.subQuestions.push(question);
       } else if (question.TYPE == "text") {
         list.push(question);
       } else {
-        question.questionIndex = index;
+        
+        if (question.isVisible) {
+          question.questionIndex = index;
+          index++;
+        }
+        
         list.push(question);
-        index++;
       }
     }
   }

@@ -6,18 +6,7 @@ import { PROFILE_URL } from "@/urls";
 export const useUserStore = defineStore("user", {
   state: () => ({
     isLoading: true,
-    user: {
-      display_name: "",
-      first_name: "",
-      last_name: "",
-      email: "",
-      EMAIL: "",
-      ynet_id: "",
-      sub: "",
-      STATUS: "",
-      ROLE: "",
-      IS_ADMIN: "",
-    },
+    user: null as User | null,
   }),
   getters: {
     isAdmin(state) {
@@ -26,7 +15,7 @@ export const useUserStore = defineStore("user", {
   },
   actions: {
     async initialize() {
-      if (!this.user.sub) {
+      if (!this.user || !this.user.sub) {
         await this.loadCurrentUser();
         console.log("Initialized user store");
       }
@@ -40,9 +29,25 @@ export const useUserStore = defineStore("user", {
         .then((resp) => {
           this.user = resp.data;
         })
+        .catch(() => {
+          this.user = null;
+        })
         .finally(() => {
           this.isLoading = false;
         });
     },
   },
 });
+
+export type User = {
+  display_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  EMAIL: string;
+  ynet_id: string;
+  sub: string;
+  STATUS: string;
+  ROLE: string;
+  IS_ADMIN: string;
+};

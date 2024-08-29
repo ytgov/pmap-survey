@@ -1,6 +1,6 @@
 import { authGuard } from "@auth0/auth0-vue";
 import { RouteLocation } from "vue-router";
-import { useUserStore } from "@/store/UserStore";
+import { User, useUserStore } from "@/store/UserStore";
 
 const routes = [
   {
@@ -101,7 +101,7 @@ async function requireAccess(to: RouteLocation): Promise<boolean | string> {
   return true;
 }
 
-export async function waitForUserToLoad(): Promise<any> {
+export async function waitForUserToLoad(): Promise<User | null> {
   let u = useUserStore();
   await u.initialize();
   return u.user;
