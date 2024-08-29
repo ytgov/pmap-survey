@@ -38,6 +38,7 @@ const questionGroups = computed(() => {
         lastTitle = question;
         question.questionIndex = index;
         list.push(question);
+        index++;
       } else if (question.TYPE == "matrix_question") {
         if (lastTitle) lastTitle.subQuestions.push(question);
       } else if (question.TYPE == "quadrant_title") {
@@ -48,6 +49,8 @@ const questionGroups = computed(() => {
         index++;
       } else if (question.TYPE == "quadrant") {
         if (lastTitle) lastTitle.subQuestions.push(question);
+      } else if (question.TYPE == "text") {
+        list.push(question);
       } else {
         question.questionIndex = index;
         list.push(question);
