@@ -16,7 +16,7 @@
 
   <h1>Surveys</h1>
 
-  <base-card showHeader="t" heading="" elevation="0">
+  <base-card v-if="user" showHeader="t" heading="" elevation="0">
     <template v-slot:left>
       <v-text-field
         v-model="search"

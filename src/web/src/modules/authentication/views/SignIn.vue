@@ -50,7 +50,7 @@ const applicationSubtitle = "Public Service Commission";
 
 onMounted(async () => {
   let u = await waitForUserToLoad();
-  if (u.sub) router.push("/administration");
+  if (u && u.sub) router.push("/administration");
 });
 
 function loginClick() {

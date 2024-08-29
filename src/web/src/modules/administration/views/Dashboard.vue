@@ -58,7 +58,7 @@
         </v-card-text>
       </v-card>
     </v-col>
-    <v-col cols="12" md="4" v-if="user.IS_ADMIN == 'Y'">
+    <v-col cols="12" md="4" v-if="user && user.IS_ADMIN == 'Y'">
       <v-card elevation="3" color="#F2760C66" to="/administration/users">
         <v-card-text style="text-align: right">
           <v-icon
