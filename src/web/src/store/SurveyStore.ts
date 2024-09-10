@@ -84,7 +84,7 @@ export const useSurveyStore = defineStore("survey", {
           return false;
         };
         q.showCheck = () => {
-          return q.isValid() && q.isVisible;
+          return q.isValid() && q.isVisible && q.TYPE != "text";
         };
         q.isVisible = true;
         q.checkConditions = () => {
