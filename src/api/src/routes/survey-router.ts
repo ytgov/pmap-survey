@@ -161,7 +161,9 @@ surveyRouter.post(
           QID: id,
         };
 
-        if (typeof answer == "number") ans.NVALUE = answer;
+        let nvalTest = parseFloat(`${ans.NVALUE}`);
+
+        if (isFinite(nvalTest)) ans.NVALUE = answer;
         else if (Array.isArray(answer)) ans.TVALUE = JSON.stringify(answer);
         else ans.TVALUE = answer;
 
@@ -224,7 +226,9 @@ surveyRouter.post(
           QID: id,
         };
 
-        if (typeof answer == "number") ans.NVALUE = answer;
+        let nvalTest = parseFloat(`${ans.NVALUE}`);
+
+        if (isFinite(nvalTest)) ans.NVALUE = answer;
         else if (Array.isArray(answer)) ans.TVALUE = JSON.stringify(answer);
         else ans.TVALUE = answer;
 
