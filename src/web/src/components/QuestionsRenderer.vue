@@ -33,8 +33,6 @@ const questionGroups = computed(() => {
     let index = 0;
 
     for (let question of survey.value.questions) {
-      console.log("Q", index, question.isVisible);
-
       if (question.TYPE == "title_question") {
         question.subQuestions = [];
         lastTitle = question;
@@ -50,7 +48,7 @@ const questionGroups = computed(() => {
       } else if (question.TYPE == "quadrant_title") {
         question.subQuestions = [];
         lastTitle = question;
-        
+
         if (question.isVisible) {
           question.questionIndex = index;
           index++;
@@ -62,12 +60,11 @@ const questionGroups = computed(() => {
       } else if (question.TYPE == "text") {
         list.push(question);
       } else {
-        
         if (question.isVisible) {
           question.questionIndex = index;
           index++;
         }
-        
+
         list.push(question);
       }
     }
@@ -91,6 +88,8 @@ function checkAllValid() {
 
   emit("update:modelValue", v);
 }
+
+checkAllValid();
 </script>
 
 <style scoped>

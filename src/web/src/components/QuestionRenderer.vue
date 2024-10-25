@@ -159,7 +159,7 @@
 </template>
 
 <script>
-import { isArray } from "lodash";
+import { isArray, isNull } from "lodash";
 import { nextTick } from "vue";
 import { RenderMarkdown } from "@/utils";
 import RankingRenderer from "./RankingRenderer.vue";
@@ -216,23 +216,33 @@ export default {
         let sqVal = localStorage.getItem(subStorage);
         let sqValue = JSON.parse(sqVal);
 
-        if (sqValue) sq.answer = sqValue.value;
+        if (sqValue && sqValue.value) sq.answer = sqValue.value;
       }
     }
 
     nextTick(() => {
-      if (value) q.answer = value.value;
+      if (value && value.value) q.answer = value.value;
     });
   },
   watch: {
     "question.answer": function (nval, oval) {
-      localStorage.setItem(this.storageID, JSON.stringify({ value: nval }));
+      if (!isNull(nval) && nval != "") {
+        localStorage.setItem(this.storageID, JSON.stringify({ value: nval }));
+      } else {
+        localStorage.removeItem(this.storageID);
+      }
+
       this.$emit("answerChanged", nval);
     },
   },
   methods: {
     subUpdated(subQ) {
-      localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
+      if (!isNull(subQ.answer) && subQ.answer != "") {
+        localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
+      } else {
+        localStorage.removeItem(`${subQ.QID}_ANSWER`);
+      }
+
       this.$emit("answerChanged", subQ.answer);
     },
 
