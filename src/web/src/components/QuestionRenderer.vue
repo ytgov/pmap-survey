@@ -125,15 +125,9 @@
                 {{ sub.ASK }}
               </th>
               <td v-for="ch of sub.choices" v-if="sub.isVisible" :style="'width:' + 50 / sub.choices.length + '%'">
-                <v-radio-group v-model="sub.answer" hide-details class="mb-3"
-                  ><v-radio
-                    class="my-0 mx-auto"
-                    hide-details
-                    :value="ch.val"
-                    density="compact"
-                    @update:model-value="subUpdated(sub)"
-                    style="width: 30px"
-                /></v-radio-group>
+                <v-radio-group v-model="sub.answer" hide-details class="mb-3" @update:model-value="subUpdated(sub)">
+                  <v-radio class="my-0 mx-auto" hide-details :value="ch.val" density="compact" style="width: 30px" />
+                </v-radio-group>
               </td>
             </tr>
           </table>
