@@ -105,7 +105,7 @@ adminParticipantRouter.delete("/:SID/stale", async (req: Request, res: Response)
   res.json({ data: {} });
 });
 
-function makeToken(prefix: string) {
+export function makeToken(prefix: string) {
   const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
   const randomArray = Array.from({ length: 64 }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
 

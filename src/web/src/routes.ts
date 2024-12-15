@@ -30,6 +30,16 @@ const routes: Array<RouteRecordRaw> = [
         beforeEnter: requireLogin,
       },
       {
+        path: "/survey-manual/:token",
+        component: () => import("@/views/AuthenticatedManualSurvey.vue"),
+        beforeEnter: requireLogin,
+      },
+      {
+        path: "/manual-entry/:token",
+        component: () => import("@/views/AuthenticatedFullManualSurvey.vue"),
+        beforeEnter: requireLogin,
+      },
+      {
         path: "/preview/:token",
         component: () => import("@/views/Preview.vue"),
       },

@@ -41,6 +41,7 @@
     </template>
     <v-row>
       <v-col>
+        <v-btn @click="openManualEntry" color="warning" variant="tonal" :disabled="!batch.survey">Manual Entry</v-btn>
         <v-btn @click="openEditor" color="primary" variant="tonal" class="float-right" :disabled="!batch.survey"
           >Add Participants</v-btn
         >
@@ -66,6 +67,12 @@
             color="warning"
             size="x-small"
             @click="emailClick(item.TOKEN)"></v-btn>
+          <v-btn
+            icon="mdi-format-list-checkbox"
+            variant="tonal"
+            color="warning"
+            size="x-small"
+            @click="manualEntryClick(item.TOKEN)"></v-btn>
         </div>
       </template>
 
@@ -171,7 +178,7 @@ export default {
       { title: "Sent Date", key: "SENT_DATE" },
       { title: "Resent Date", key: "RESENT_DATE" },
       { title: "Response Date", key: "RESPONSE_DATE" },
-      { title: "", key: "email", width: "60px" },
+      { title: "", key: "email", width: "100px" },
     ],
     search: "",
     parseMessage: "",
@@ -324,6 +331,9 @@ export default {
         () => {}
       );
     },
+    async manualEntryClick(token: string) {
+      window.open(`/survey-manual/${token}`);
+    },
     formatDate(input: any) {
       if (input) return moment(input).format("YYYY-MM-DD @ hh:mm a");
       return "";
@@ -337,6 +347,10 @@ export default {
     },
     closeEditor() {
       this.visible = false;
+    },
+    openManualEntry() {
+      console.log(this.batch.survey);
+      window.open(`/manual-entry/${this.batch.survey}`);
     },
   },
 };

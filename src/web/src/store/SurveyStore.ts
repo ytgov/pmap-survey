@@ -39,6 +39,34 @@ export const useSurveyStore = defineStore("survey", {
         });
     },
 
+    async loadManualSurvey(id: any) {
+      this.isLoading = true;
+      let api = useApiStore();
+
+      await api
+        .call("get", `${SURVEY_URL}/${id}/manual`)
+        .then((resp) => {
+          this.setSurvey(resp.data);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+
+    async loadFullManualSurvey(id: any) {
+      this.isLoading = true;
+      let api = useApiStore();
+
+      await api
+        .call("get", `${SURVEY_URL}/${id}/manual-entry`)
+        .then((resp) => {
+          this.setSurvey(resp.data);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+
     async loadSurveyPreview(id: any) {
       this.isLoading = true;
       let api = useApiStore();

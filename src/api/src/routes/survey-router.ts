@@ -3,6 +3,7 @@ import { ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 import * as knex from "knex";
 import { DB_CONFIG, DB_SCHEMA } from "../config";
+import { makeToken } from "./admin-participant-router";
 
 export const surveyRouter = express.Router();
 
@@ -96,6 +97,85 @@ surveyRouter.get(
       return res.json({ data: { survey, questions } });
     }
 
+    res.status(404).send();
+  }
+);
+
+surveyRouter.get(
+  "/:token/manual",
+  [param("token").notEmpty()],
+  ReturnValidationErrors,
+  async (req: Request, res: Response) => {
+    const db = knex.knex(DB_CONFIG);
+    let { token } = req.params;
+
+    token = token.substring(0, 64);
+
+    let participant = await db("PARTICIPANT")
+      .withSchema(DB_SCHEMA)
+      .join("PARTICIPANT_DATA", "PARTICIPANT.TOKEN", "PARTICIPANT_DATA.TOKEN")
+      .where({ "PARTICIPANT.TOKEN": token })
+      .whereNotNull("EMAIL")
+      .select("PARTICIPANT.*")
+      .first()
+      .then((r) => r)
+      .catch((err) => {
+        console.log("DATABASE CONNECTION ERROR", err);
+        res.status(500).send(err);
+      });
+
+    if (participant) {
+      let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID: participant.SID }).first();
+      let choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: participant.SID });
+      let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: participant.SID }).orderBy("ORD");
+
+      for (let choice of choices) {
+        choice.choices = JSON.parse(choice.SELECTION_JSON);
+      }
+
+      for (let q of questions) {
+        q.conditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID: q.QID });
+        if (q.JSON_ID) {
+          q.choices = choices.find((c) => c.JSON_ID == q.JSON_ID)?.choices;
+        }
+      }
+
+      return res.json({ data: { survey, questions } });
+    }
+
+    res.status(404).send();
+  }
+);
+
+surveyRouter.get(
+  "/:token/manual-entry",
+  [param("token").notEmpty()],
+  ReturnValidationErrors,
+  async (req: Request, res: Response) => {
+    const db = knex.knex(DB_CONFIG);
+    let { token } = req.params;
+
+    let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID: token }).first();
+    let choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: token });
+
+    for (let choice of choices) {
+      choice.choices = JSON.parse(choice.SELECTION_JSON);
+    }
+
+    if (survey) {
+      let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: token }).orderBy("ORD");
+
+      for (let q of questions) {
+        q.conditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID: q.QID });
+        if (q.JSON_ID) {
+          q.choices = choices.find((c) => c.JSON_ID == q.JSON_ID)?.choices;
+        }
+      }
+
+      const demographics = await db("SURVEY_DEMOGRAPHIC").withSchema(DB_SCHEMA).where({ SID: token });
+
+      return res.json({ data: { survey, questions, demographics } });
+    }
     res.status(404).send();
   }
 );
@@ -195,6 +275,73 @@ surveyRouter.post(
     }
 
     res.status(404).send("Sorry, it appears that you have already completed this survey.");
+  }
+);
+
+surveyRouter.post(
+  "/:agentEmail/manual/:surveyId",
+  [param("surveyId").notEmpty()],
+  ReturnValidationErrors,
+  async (req: Request, res: Response) => {
+    const db = knex.knex(DB_CONFIG);
+    let { surveyId, agentEmail } = req.params;
+    let { questions, participant, demographics } = req.body;
+
+    const token = makeToken("ME");
+
+    let existingAddresses = await db("PARTICIPANT_DATA")
+      .withSchema(DB_SCHEMA)
+      .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
+      .where("PARTICIPANT.SID", surveyId)
+      .whereNotNull("EMAIL")
+      .select("EMAIL");
+
+    let existingList = existingAddresses.map((e) => e.EMAIL);
+    if (existingList.includes(participant)) {
+      return res
+        .status(400)
+        .json({ messages: [{ variant: "error", text: "This email address has already been used for this survey." }] });
+    }
+
+    await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: surveyId, CREATE_DATE: new Date() });
+    await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: null, RESPONSE_DATE: new Date() });
+
+    for (let question of questions) {
+      let id = question.QID;
+      let answer = question.answer;
+      let answer_text = question.answer_text;
+
+      let ans: any = {
+        TOKEN: token,
+        QID: id,
+      };
+
+      let nvalTest = parseFloat(`${ans.NVALUE}`);
+
+      if (isFinite(nvalTest)) ans.NVALUE = answer;
+      else if (Array.isArray(answer)) ans.TVALUE = JSON.stringify(answer);
+      else ans.TVALUE = answer;
+
+      if (answer_text && answer_text.length > 0) {
+        ans.TVALUE = answer_text;
+      }
+
+      await db("RESPONSE_LINE").withSchema(DB_SCHEMA).insert(ans);
+    }
+
+    if (demographics) {
+      for (let demo of demographics) {
+        await db("PARTICIPANT_DEMOGRAPHIC")
+          .withSchema(DB_SCHEMA)
+          .insert({ TOKEN: token, DEMOGRAPHIC: demo.DEMOGRAPHIC, TVALUE: demo.TVALUE });
+      }
+    }
+
+    await db("ONBEHALF_AUDIT")
+      .withSchema(DB_SCHEMA)
+      .insert({ TOKEN: token, ONBEHALF_USER: agentEmail, DATE_FILLED: new Date() });
+
+    return res.json({ data: {}, messages: [{ variant: "success" }] });
   }
 );
 
