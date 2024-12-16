@@ -1,13 +1,10 @@
 <template>
   <div class="hello" v-if="survey && survey.survey">
     <!-- SurveyHeader v-model="moveOn" /> -->
-    <h1>Survey Response Manual Entry</h1>
-    <v-card class="default">
-      <v-card-title>Participant Information</v-card-title>
+    <h1>{{ survey.survey.NAME }} : <small>Survey Response Manual Entry</small></h1>
+    <v-card v-if="survey.demographics && survey.demographics.length > 0" class="default">
       <v-card-text>
-        <v-text-field label="Participant email" v-model="participantEmail" />
-
-        <div v-if="survey.demographics && survey.demographics.length > 0">
+        <div>
           <h4 class="mb-3">Demographics</h4>
 
           <div v-for="demographic of survey.demographics">
@@ -40,19 +37,19 @@ import { mapActions, mapState } from "pinia";
 import { AuthHelper } from "@/plugins/auth";
 import { useSurveyStore } from "@/store/SurveyStore";
 import { SURVEY_URL } from "@/urls";
+import { useApiStore } from "@/store/ApiStore";
 
 export default {
   name: "Login",
   data: () => ({
     surveyId: "",
     allValid: false,
-    participantEmail: "",
   }),
   computed: {
     ...mapState(useSurveyStore, ["survey"]),
 
     allValidAndEmail() {
-      return this.allValid && this.participantEmail;
+      return this.allValid;
     },
   },
   mounted() {
@@ -83,10 +80,10 @@ export default {
 
         let agentEmail = AuthHelper.user.value?.email;
 
-        axios
-          .post(`${SURVEY_URL}/${agentEmail}/manual/${this.surveyId}`, {
+        const api = useApiStore();
+        api
+          .secureCall("POST", `${SURVEY_URL}/${agentEmail}/manual/${this.surveyId}`, {
             questions: qs,
-            participant: this.participantEmail,
             demographics: this.survey.demographics,
           })
           .then(() => {

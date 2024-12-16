@@ -25,6 +25,7 @@ import { mapActions, mapState } from "pinia";
 import { AuthHelper } from "@/plugins/auth";
 import { useSurveyStore } from "@/store/SurveyStore";
 import { SURVEY_URL } from "@/urls";
+import { useApiStore } from "@/store/ApiStore";
 
 export default {
   name: "Login",
@@ -65,8 +66,12 @@ export default {
 
         let agentEmail = AuthHelper.user.value?.email;
 
-        axios
-          .post(`${SURVEY_URL}/${agentEmail}/${this.surveyId}`, { questions: qs, contact: this.contactMe })
+        const api = useApiStore();
+        api
+          .secureCall("POST", `${SURVEY_URL}/${agentEmail}/${this.surveyId}`, {
+            questions: qs,
+            contact: this.contactMe,
+          })
           .then(() => {
             this.$router.push("/survey/complete");
           })

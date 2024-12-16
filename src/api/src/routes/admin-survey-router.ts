@@ -4,12 +4,10 @@ import { ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 import { EmailService, UserService } from "../services";
 import { recordSentDate } from "./integration-router";
-import { checkJwt, loadUser } from "../middleware/authz.middleware";
 import { DB_SCHEMA } from "../config";
 import { sortBy, uniq } from "lodash";
 
 export const adminSurveyRouter = express.Router();
-adminSurveyRouter.use(checkJwt, loadUser);
 
 const userService = new UserService();
 

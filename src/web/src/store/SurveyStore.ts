@@ -30,7 +30,7 @@ export const useSurveyStore = defineStore("survey", {
       let api = useApiStore();
 
       await api
-        .call("get", `${SURVEY_URL}/${id}/agent`)
+        .secureCall("get", `${SURVEY_URL}/${id}/agent`)
         .then((resp) => {
           this.setSurvey(resp.data);
         })
@@ -44,7 +44,7 @@ export const useSurveyStore = defineStore("survey", {
       let api = useApiStore();
 
       await api
-        .call("get", `${SURVEY_URL}/${id}/manual`)
+        .secureCall("get", `${SURVEY_URL}/${id}/manual`)
         .then((resp) => {
           this.setSurvey(resp.data);
         })
@@ -53,12 +53,14 @@ export const useSurveyStore = defineStore("survey", {
         });
     },
 
-    async loadFullManualSurvey(id: any) {
+    async loadFullManualSurvey(token: string) {
       this.isLoading = true;
       let api = useApiStore();
 
+      const id = token.replace(/[a-zA-Z]/g, "");
+
       await api
-        .call("get", `${SURVEY_URL}/${id}/manual-entry`)
+        .secureCall("get", `${SURVEY_URL}/${id}/manual-entry`)
         .then((resp) => {
           this.setSurvey(resp.data);
         })
@@ -72,7 +74,7 @@ export const useSurveyStore = defineStore("survey", {
       let api = useApiStore();
 
       await api
-        .call("get", `${SURVEY_URL}/${id}/preview`)
+        .secureCall("get", `${SURVEY_URL}/${id}/preview`)
         .then((resp) => {
           this.setSurvey(resp.data);
         })

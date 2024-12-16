@@ -349,8 +349,18 @@ export default {
       this.visible = false;
     },
     openManualEntry() {
-      console.log(this.batch.survey);
-      window.open(`/manual-entry/${this.batch.survey}`);
+      const token = this.makeToken(this.batch.survey);
+      window.open(`/manual-entry/${token}`);
+    },
+    makeToken(prefix: string) {
+      const chars = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
+      const randomArray = Array.from({ length: 64 }, (v, k) => chars[Math.floor(Math.random() * chars.length)]);
+
+      let location = Math.floor(Math.random() * 25);
+      let randomString = `${randomArray.join("")}`;
+      randomString = randomString.replace(/^_/, "");
+
+      return `${randomString.substring(0, location + 5)}${prefix}${randomString.substring(location + 6, 48)}`;
     },
   },
 };

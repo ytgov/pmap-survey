@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import { ReturnValidationErrors } from "../middleware";
+import { requiresAdmin, ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 import * as knex from "knex";
 import { DB_CONFIG, DB_SCHEMA } from "../config";
 import { makeToken } from "./admin-participant-router";
+import { checkJwt, loadUser } from "../middleware/authz.middleware";
 
 export const surveyRouter = express.Router();
 
@@ -53,12 +54,13 @@ surveyRouter.get(
 
 surveyRouter.get(
   "/:token/agent",
+  checkJwt,
+  loadUser,
   [param("token").notEmpty()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
-
     token = token.substring(0, 64);
 
     let participant = await db("PARTICIPANT")
@@ -103,12 +105,13 @@ surveyRouter.get(
 
 surveyRouter.get(
   "/:token/manual",
+  checkJwt,
+  loadUser,
   [param("token").notEmpty()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     const db = knex.knex(DB_CONFIG);
     let { token } = req.params;
-
     token = token.substring(0, 64);
 
     let participant = await db("PARTICIPANT")
@@ -149,6 +152,9 @@ surveyRouter.get(
 
 surveyRouter.get(
   "/:token/manual-entry",
+  checkJwt,
+  loadUser,
+  requiresAdmin,
   [param("token").notEmpty()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
@@ -213,6 +219,8 @@ surveyRouter.get(
 
 surveyRouter.post(
   "/:agentEmail/:token",
+  checkJwt,
+  loadUser,
   [param("token").notEmpty()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
@@ -280,28 +288,17 @@ surveyRouter.post(
 
 surveyRouter.post(
   "/:agentEmail/manual/:surveyId",
+  checkJwt,
+  loadUser,
+  requiresAdmin,
   [param("surveyId").notEmpty()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     const db = knex.knex(DB_CONFIG);
     let { surveyId, agentEmail } = req.params;
-    let { questions, participant, demographics } = req.body;
+    let { questions, demographics } = req.body;
 
     const token = makeToken("ME");
-
-    let existingAddresses = await db("PARTICIPANT_DATA")
-      .withSchema(DB_SCHEMA)
-      .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
-      .where("PARTICIPANT.SID", surveyId)
-      .whereNotNull("EMAIL")
-      .select("EMAIL");
-
-    let existingList = existingAddresses.map((e) => e.EMAIL);
-    if (existingList.includes(participant)) {
-      return res
-        .status(400)
-        .json({ messages: [{ variant: "error", text: "This email address has already been used for this survey." }] });
-    }
 
     await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: surveyId, CREATE_DATE: new Date() });
     await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: null, RESPONSE_DATE: new Date() });

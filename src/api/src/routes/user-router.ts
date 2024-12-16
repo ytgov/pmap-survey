@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { DirectoryService, UserService } from "../services";
 import { UserStatus } from "../data/models";
-import { ReturnValidationErrors } from "../middleware";
+import { requiresAdmin, ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 
 export const userRouter = express.Router();
@@ -11,7 +11,7 @@ userRouter.get("/me", async (req: Request, res: Response) => {
   return res.json({ data: { ...req.user, surveys: await db.getSurveysByEmail(req.user.EMAIL) } });
 });
 
-userRouter.get("/", async (req: Request, res: Response) => {
+userRouter.get("/", requiresAdmin, async (req: Request, res: Response) => {
   let list = await db.getAll();
 
   for (let l of list) {
@@ -23,7 +23,7 @@ userRouter.get("/", async (req: Request, res: Response) => {
   return res.json({ data: list });
 });
 
-userRouter.post("/", async (req: Request, res: Response) => {
+userRouter.post("/", requiresAdmin, async (req: Request, res: Response) => {
   let { user } = req.body;
 
   if (user) {
@@ -49,6 +49,7 @@ userRouter.post("/", async (req: Request, res: Response) => {
 
 userRouter.put(
   "/:email",
+  requiresAdmin,
   [param("email").notEmpty().isString()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
