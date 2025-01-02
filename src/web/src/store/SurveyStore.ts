@@ -74,7 +74,7 @@ export const useSurveyStore = defineStore("survey", {
       let api = useApiStore();
 
       await api
-        .secureCall("get", `${SURVEY_URL}/${id}/preview`)
+        .call("get", `${SURVEY_URL}/${id}/preview`)
         .then((resp) => {
           this.setSurvey(resp.data);
         })
