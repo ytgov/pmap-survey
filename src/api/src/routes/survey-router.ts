@@ -299,8 +299,9 @@ surveyRouter.post(
     let { questions, demographics } = req.body;
 
     const token = makeToken("ME");
+    const SID = surveyId.replace(/[a-zA-Z]/g, "");
 
-    await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: surveyId, CREATE_DATE: new Date() });
+    await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID, CREATE_DATE: new Date() });
     await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: null, RESPONSE_DATE: new Date() });
 
     for (let question of questions) {
