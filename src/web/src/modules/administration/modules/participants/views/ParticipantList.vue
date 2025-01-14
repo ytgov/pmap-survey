@@ -126,7 +126,7 @@
             accept="text/csv"
             label="Choose a CSV to import"></v-file-input>
 
-          <div v-if="csvFile && csvFile.length > 0">
+          <div v-if="csvFile">
             <v-label class="mb-3">
               This CSV parser assumes:<br />
               1) The first row in the file contains headers - it is skipped during parsing <br />
@@ -236,51 +236,48 @@ export default {
     },
     async parseClick() {
       if (this.csvFile) {
-        let file = this.csvFile;
-        if (file) {
-          var reader = new FileReader();
-          reader.onload = async (end) => {
-            const fileContent = end.target?.result;
-            const records = new Array<any>();
-            const parser = csvParser({ delimiter: "," });
+        var reader = new FileReader();
+        reader.onload = async (end) => {
+          const fileContent = end.target?.result;
+          const records = new Array<any>();
+          const parser = csvParser({ delimiter: "," });
 
-            parser.on("readable", () => {
-              let record;
-              while ((record = parser.read()) !== null) {
-                records.push(record);
-              }
-            });
-            parser.on("error", function (err) {
-              console.error(err.message);
-            });
-
-            parser.write(fileContent);
-            parser.end();
-
-            let headers = records.shift();
-
-            if (headers[0] && headers[0].toLowerCase() != "email") {
-              console.log("THIS FILE NEEDS HEADERS");
-
-              notify.notify({
-                text: "This CSV File doesn't have the EMAIL header row",
-                icon: "mdi-thumb-down",
-                variant: "error",
-              });
-              return;
+          parser.on("readable", () => {
+            let record;
+            while ((record = parser.read()) !== null) {
+              records.push(record);
             }
+          });
+          parser.on("error", function (err) {
+            console.error(err.message);
+          });
 
-            let emails = records.map((r) => r[0]);
+          parser.write(fileContent);
+          parser.end();
 
-            this.batch.fileData = { headers, records };
-            this.batch.participants = emails.join(", ");
+          let headers = records.shift();
 
-            let items = await this.parse(true);
-            this.parseMessage = `${items.valid.length} valid email address and ${items.invalid.length} invalid`;
-          };
+          if (headers[0] && headers[0].toLowerCase() != "email") {
+            console.log("THIS FILE NEEDS HEADERS");
 
-          reader.readAsText(file);
-        }
+            notify.notify({
+              text: "This CSV File doesn't have the EMAIL header row",
+              icon: "mdi-thumb-down",
+              variant: "error",
+            });
+            return;
+          }
+
+          let emails = records.map((r) => r[0]);
+
+          this.batch.fileData = { headers, records };
+          this.batch.participants = emails.join(", ");
+
+          let items = await this.parse(true);
+          this.parseMessage = `${items.valid.length} valid email address and ${items.invalid.length} invalid`;
+        };
+
+        reader.readAsText(this.csvFile);
       } else {
         this.batch.fileData = {};
         let items = await this.parse();
