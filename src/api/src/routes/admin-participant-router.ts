@@ -56,7 +56,8 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
 
       await db("PARTICIPANT").withSchema(DB_SCHEMA).insert({ TOKEN: token, SID: survey, CREATE_DATE: new Date() });
       await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).insert({ TOKEN: token, EMAIL: email });
-      await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).insert(demographicInsert);
+      if (demographicInsert.length > 0)
+        await db("PARTICIPANT_DEMOGRAPHIC").withSchema(DB_SCHEMA).insert(demographicInsert);
     }
   } else {
     for (let address of addresses) {

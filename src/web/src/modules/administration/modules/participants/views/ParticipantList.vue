@@ -183,7 +183,7 @@ export default {
     search: "",
     parseMessage: "",
     visible: false,
-    csvFile: [],
+    csvFile: null,
     parsedCsv: "",
   }),
   computed: {
@@ -235,8 +235,8 @@ export default {
       //this.selectUser(clone(thing.item.value));
     },
     async parseClick() {
-      if (this.csvFile && this.csvFile.length > 0) {
-        let file = this.csvFile[0];
+      if (this.csvFile) {
+        let file = this.csvFile;
         if (file) {
           var reader = new FileReader();
           reader.onload = async (end) => {
