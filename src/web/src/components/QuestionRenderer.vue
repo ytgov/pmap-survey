@@ -172,7 +172,7 @@ export default {
   props: ["index", "question"],
   data: () => ({
     limitLengthRule: (v) => {
-      if (v.length > 256) {
+      if (v.length > 255) {
         return "Max 256 characters";
       }
       return true;
