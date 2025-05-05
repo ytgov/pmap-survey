@@ -27,7 +27,7 @@ integrationRouter.get("/emailer/:surveyId", async (req: Request, res: Response) 
 
   for (let p of participants) {
     await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body, survey.FROM_EMAIL);
-    await recordSentDate(p);
+    await recordSentDate(p, db);
   }
 
   res.json({ data: { survey, participant_count: participants.length, participants } });
@@ -48,12 +48,6 @@ integrationRouter.get("/emailer/:surveyId/preview", async (req: Request, res: Re
     .whereNull("RESENT_DATE")
     .select("EMAIL", "PARTICIPANT.TOKEN");
 
-  /* for (let p of participants) {
-    //let resp = await emailer.sendSurveyEmail(p, survey);
-    //await recordSentDate(p);
-    // try and capture the status of the SMTP call
-  } */
-
   res.json({ data: { survey, participant_count: participants.length, participants } });
 });
 
@@ -69,8 +63,7 @@ integrationRouter.get("/suppress/:token", async (req: Request, res: Response) =>
   res.send("Participant successfully removed from survey");
 });
 
-export async function recordSentDate(participant: any): Promise<any> {
-  const db = knex.knex(DB_CONFIG);
+export async function recordSentDate(participant: any, db: knex.Knex): Promise<any> {
   let token = participant.TOKEN;
   let data = await db("PARTICIPANT_DATA").withSchema(DB_SCHEMA).where({ TOKEN: token }).first();
 

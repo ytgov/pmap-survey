@@ -319,7 +319,7 @@ adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) =
     for (let p of participants) {
       await emailer.sendEmail(p.EMAIL, p.TOKEN, subject, body, survey.FROM_EMAIL);
 
-      await recordSentDate(p);
+      await recordSentDate(p, db);
     }
     return res.json({ data: `Sent ${participants.length} emails` });
   }
