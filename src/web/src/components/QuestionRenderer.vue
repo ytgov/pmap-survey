@@ -106,13 +106,11 @@
         </div>
 
         <div v-else-if="question.TYPE == 'free-text'">
-          asdf
           <v-textarea
             v-model="question.answer"
             class="mt-4"
-            :counter="256"
-            :rules="[limitLengthRule]"
-            maxlength="256"
+            :counter="question.MAX_LENGTH ?? 256"
+            :maxlength="question.MAX_LENGTH ?? 256"
             persistent-counter></v-textarea>
         </div>
 
@@ -170,14 +168,7 @@ export default {
   name: "Home",
   components: { QuadrantRenderer, RankingRenderer },
   props: ["index", "question"],
-  data: () => ({
-    limitLengthRule: (v) => {
-      if (v.length > 255) {
-        return "Max 256 characters";
-      }
-      return true;
-    },
-  }),
+  data: () => ({}),
   computed: {
     options: function () {
       return this.question.choices || [];

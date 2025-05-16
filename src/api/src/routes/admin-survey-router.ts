@@ -194,7 +194,8 @@ adminSurveyRouter.get("/question-types", async (req: Request, res: Response) => 
 
 adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS } = req.body;
+  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH } =
+    req.body;
 
   /* if (JSON_ID == -1) {
     JSON_ID = null;
@@ -211,9 +212,20 @@ adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => 
       .update({ TITLE: choiceTitle, SELECTION_JSON: JSON.stringify(choices) });
   }
  */
-  await db("QUESTION")
-    .withSchema(DB_SCHEMA)
-    .insert({ SID, ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS });
+  await db("QUESTION").withSchema(DB_SCHEMA).insert({
+    SID,
+    ASK,
+    OPTIONAL,
+    ORD,
+    TYPE,
+    RANGE,
+    GROUP_ID,
+    JSON_ID,
+    SELECT_LIMIT,
+    SELECT_MIN,
+    RENDER_AS,
+    MAX_LENGTH,
+  });
   res.json({ data: "success" });
 });
 
@@ -241,7 +253,8 @@ adminSurveyRouter.put("/:SID/question/:QID/conditions", async (req: Request, res
 
 adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response) => {
   let { SID, QID } = req.params;
-  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS } = req.body;
+  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH } =
+    req.body;
 
   /*  if (JSON_ID == -1) {
     JSON_ID = null;
@@ -260,7 +273,7 @@ adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response)
   await db("QUESTION")
     .withSchema(DB_SCHEMA)
     .where({ QID })
-    .update({ ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS });
+    .update({ ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH });
   res.json({ data: "success" });
 });
 

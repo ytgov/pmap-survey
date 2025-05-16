@@ -137,6 +137,9 @@
               item-title="TITLE" />
             <v-btn @click="showChoicesClick" size="small" color="info">Add Choice List</v-btn>
           </v-col>
+          <v-col v-if="question.TYPE == 'free-text'" cols="4">
+            <v-text-field v-model="question.MAX_LENGTH" label="Maximum length" />
+          </v-col>
         </v-row>
         <div class="d-flex mb-2">
           <v-btn color="primary" class="mt-5" @click="saveClick" :disabled="disabled || !canSave">Save</v-btn>
