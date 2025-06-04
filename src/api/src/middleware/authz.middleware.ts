@@ -30,6 +30,7 @@ export async function loadUser(req: Request, res: Response, next: NextFunction) 
 
   if (u) {
     req.user = { ...req.auth, ...u };
+    req.user.surveys = await db.getSurveysByEmail(req.user.EMAIL);
     return next();
   }
 

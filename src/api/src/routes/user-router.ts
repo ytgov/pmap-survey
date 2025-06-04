@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { DirectoryService, UserService } from "../services";
 import { UserStatus } from "../data/models";
-import { requiresAdmin, ReturnValidationErrors } from "../middleware";
+import { requireAdminOrOwner, requiresAdmin, ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 
 export const userRouter = express.Router();
@@ -11,8 +11,12 @@ userRouter.get("/me", async (req: Request, res: Response) => {
   return res.json({ data: { ...req.user, surveys: await db.getSurveysByEmail(req.user.EMAIL) } });
 });
 
-userRouter.get("/", requiresAdmin, async (req: Request, res: Response) => {
+userRouter.get("/", requireAdminOrOwner, async (req: Request, res: Response) => {
   let list = await db.getAll();
+
+  if (req.user.IS_ADMIN == "N") {
+    return res.json({ data: [req.user] });
+  }
 
   for (let l of list) {
     l.display_name = `${l.FIRST_NAME} ${l.LAST_NAME}`;

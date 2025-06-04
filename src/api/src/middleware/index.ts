@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
+import { UserStatus } from "../data/models";
 
 export async function ReturnValidationErrors(req: Request, res: Response, next: NextFunction) {
   const errors = validationResult(req);
@@ -16,4 +17,10 @@ export async function requiresAdmin(req: Request, res: Response, next: NextFunct
 
   res.status(403).send("Unauthorized - You must be an Admin to access this resource.");
   return false;
+}
+
+export function requireAdminOrOwner(req: Request, res: Response, next: NextFunction) {
+  if ((req.user.IS_ADMIN == "N" && req.user.surveys.length == 0) || req.user.STATUS != UserStatus.ACTIVE)
+    return res.status(403).send("You aren't an admin or owner");
+  next();
 }
