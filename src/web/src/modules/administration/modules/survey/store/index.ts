@@ -296,6 +296,8 @@ interface Survey {
   EMAIL_BODY?: string;
   FROM_EMAIL?: string;
   ALLOW_AUDIT: number;
+  ALLOW_DEMOGRAPHIC_GROUP?: number;
+  ALLOW_AUTO_PARTICIPANT?: number;
   STATUS: string;
   questions?: Question[];
   choices?: any[];

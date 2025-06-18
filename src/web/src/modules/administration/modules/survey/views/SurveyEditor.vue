@@ -36,11 +36,25 @@
       <v-col cols="12" md="6">
         <v-text-field label="Contact question" v-model="survey.CONTACT_QUESTION" hide-details />
       </v-col>
-      <v-col cols="12" md="8">
+      <v-col cols="12" md="6">
         <v-text-field label="Email from" v-model="survey.FROM_EMAIL" persistent-hint :hint="fromLabel" />
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="2">
         <v-checkbox label="Allow on-behalf audit" v-model="survey.ALLOW_AUDIT" :false-value="0" :true-value="1" />
+      </v-col>
+      <v-col cols="12" md="2">
+        <v-checkbox
+          label="Allow demographic groups"
+          v-model="survey.ALLOW_DEMOGRAPHIC_GROUP"
+          :false-value="0"
+          :true-value="1" />
+      </v-col>
+      <v-col cols="12" md="2">
+        <v-checkbox
+          label="Allow auto-participants"
+          v-model="survey.ALLOW_AUTO_PARTICIPANT"
+          :false-value="0"
+          :true-value="1" />
       </v-col>
     </v-row>
 

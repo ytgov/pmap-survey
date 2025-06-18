@@ -106,19 +106,51 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
 });
 
 adminSurveyRouter.post("/", async (req: Request, res: Response) => {
-  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT } =
-    req.body;
+  let {
+    CONTACT_EMAIL,
+    CONTACT_QUESTION,
+    DESCRIPTION,
+    NAME,
+    PAGE_INTRO,
+    PAGE_TITLE,
+    FROM_EMAIL,
+    ALLOW_AUDIT,
+    ALLOW_AUTO_PARTICIPANT,
+    ALLOW_DEMOGRAPHIC_GROUP,
+  } = req.body;
   let newItem = await db("SURVEY")
     .withSchema(DB_SCHEMA)
-    .insert({ CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT })
+    .insert({
+      CONTACT_EMAIL,
+      CONTACT_QUESTION,
+      DESCRIPTION,
+      NAME,
+      PAGE_INTRO,
+      PAGE_TITLE,
+      FROM_EMAIL,
+      ALLOW_AUDIT,
+      ALLOW_AUTO_PARTICIPANT,
+      ALLOW_DEMOGRAPHIC_GROUP,
+    })
     .returning("*");
   res.json({ data: newItem[0] });
 });
 
 adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { CONTACT_EMAIL, CONTACT_QUESTION, DESCRIPTION, NAME, PAGE_INTRO, PAGE_TITLE, FROM_EMAIL, ALLOW_AUDIT, STATUS } =
-    req.body;
+  let {
+    CONTACT_EMAIL,
+    CONTACT_QUESTION,
+    DESCRIPTION,
+    NAME,
+    PAGE_INTRO,
+    PAGE_TITLE,
+    FROM_EMAIL,
+    ALLOW_AUDIT,
+    STATUS,
+    ALLOW_AUTO_PARTICIPANT,
+    ALLOW_DEMOGRAPHIC_GROUP,
+  } = req.body;
 
   await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({
     CONTACT_EMAIL,
@@ -130,6 +162,8 @@ adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
     FROM_EMAIL,
     ALLOW_AUDIT,
     STATUS,
+    ALLOW_AUTO_PARTICIPANT,
+    ALLOW_DEMOGRAPHIC_GROUP,
   });
 
   res.json({ data: "success" });
