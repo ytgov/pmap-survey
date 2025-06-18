@@ -4,7 +4,9 @@
     <!-- <v-img class="ml-0m pl-0" src="src/assets/yukon.svg" height="44" /> -->
     <v-app-bar-title class="pt-0 font-weight-bold" style="margin-left: -20px">{{ title }}</v-app-bar-title>
 
-    <template v-slot:append></template>
+    <template v-slot:append>
+      <v-btn color="primary" to="/sign-in">Admin Sign in </v-btn>
+    </template>
   </v-app-bar>
 
   <v-main>
