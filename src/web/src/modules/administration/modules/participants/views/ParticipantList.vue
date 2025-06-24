@@ -294,6 +294,10 @@ export default {
         });
     },
     async surveyChanged() {
+      const survey = this.surveys?.find((s) => s.SID === this.batch.survey);
+
+      console.log("Survey changed to: ", survey?.ALLOW_DEMOGRAPHIC_GROUP == 1);
+
       await this.getParticipants(this.batch.survey);
     },
     async deleteClick(participantId: any) {

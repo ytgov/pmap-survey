@@ -17,6 +17,7 @@
     "markdown-it": "^14.1.0",
     "moment": "^2.29.4",
     "pinia": "^2.2.1",
+    "qrcode-vue3": "^1.7.1",
     "vue": "^3.4.38",
     "vue-draggable-next": "^2.2.1",
     "vue-router": "^4.4.3",

@@ -32,6 +32,20 @@
     </v-col>
 
     <v-col cols="12" md="4" v-if="user">
+      <v-card elevation="3" color="#F2760C66" to="/administration/demographic-groups">
+        <v-card-text style="text-align: right">
+          <v-icon
+            class="float-left"
+            style="font-size: 90px; opacity: 25%; position: absolute; left: 10px; margin-top: -12px"
+            >mdi-folder-account-outline</v-icon
+          >
+          <div style="font-size: 52px; line-height: 52px">{{ groupCount }}</div>
+          <div>Demographic Groups</div>
+        </v-card-text>
+      </v-card>
+    </v-col>
+
+    <v-col cols="12" md="4" v-if="user">
       <v-card elevation="3" color="#F2760C66" to="/administration/results">
         <v-card-text style="text-align: right" color="white">
           <v-icon
@@ -85,6 +99,20 @@
         </v-card-text>
       </v-card>
     </v-col>
+
+    <v-col cols="12" md="4" v-if="user">
+      <v-card elevation="3" color="#F2760C66" to="/administration/survey-links">
+        <v-card-text style="text-align: right">
+          <v-icon
+            class="float-left"
+            style="font-size: 90px; opacity: 25%; position: absolute; left: 10px; margin-top: -12px"
+            >mdi-satellite-variant</v-icon
+          >
+          <div style="font-size: 52px; line-height: 52px">&nbsp</div>
+          <div>Sharable Survey Links</div>
+        </v-card-text>
+      </v-card>
+    </v-col>
   </v-row>
 
   <!-- <div v-if="mySurveys.length > 0">
@@ -103,6 +131,7 @@ import { mapActions, mapState } from "pinia";
 import { useUserAdminStore } from "../modules/users/store";
 import { useUserStore } from "@/store/UserStore";
 import { useAdminSurveyStore } from "@/modules/administration/modules/survey/store";
+import { useDemographicAdminStore } from "../modules/demographic-group/store";
 
 export default {
   name: "Dashboard",
@@ -112,15 +141,18 @@ export default {
   computed: {
     ...mapState(useAdminSurveyStore, ["surveyCount", "mySurveys"]),
     ...mapState(useUserAdminStore, ["userCount"]),
+    ...mapState(useDemographicAdminStore, ["groupCount"]),
     ...mapState(useUserStore, ["user"]),
   },
   async mounted() {
     await this.getAllUsers();
     await this.loadSurveys();
+    await this.getAllGroups();
   },
   methods: {
     ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
     ...mapActions(useUserAdminStore, ["getAllUsers"]),
+    ...mapActions(useDemographicAdminStore, ["getAllGroups"]),
   },
 };
 </script>

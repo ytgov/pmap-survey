@@ -71,6 +71,22 @@ const routes = [
           allow_admin: true,
         },
       },
+      {
+        path: "demographic-groups",
+        component: () => import("../modules/demographic-group/views/GroupList.vue"),
+        beforeEnter: requireAccess,
+        meta: {
+          allow_admin: true,
+        },
+      },
+      {
+        path: "survey-links",
+        component: () => import("../modules/survey-links/views/LinkList.vue"),
+        beforeEnter: requireAccess,
+        meta: {
+          allow_admin: true,
+        },
+      },
     ],
   },
 ];

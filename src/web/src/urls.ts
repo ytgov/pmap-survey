@@ -1,4 +1,3 @@
-
 import * as config from "./config";
 
 export const LOGIN_URL = `${config.apiBaseUrl}/api/auth/login`;
@@ -10,8 +9,8 @@ export const SURVEY_URL = `${config.apiBaseUrl}/api/survey`;
 export const USERS_URL = `${config.apiBaseUrl}/api/user`;
 
 // probably delete later
-export const ANSWER_URL = `${config.apiBaseUrl}/api/`
-export const PARTICIPANT_URL = `${config.apiBaseUrl}/api/admin/participant`
-
-
+export const ANSWER_URL = `${config.apiBaseUrl}/api/`;
+export const PARTICIPANT_URL = `${config.apiBaseUrl}/api/admin/participant`;
 export const ADMIN_SURVEY_URL = `${config.apiBaseUrl}/api/admin/survey`;
+export const GROUPS_URL = `${config.apiBaseUrl}/api/admin/demographic-group`;
+export const LINKS_URL = `${config.apiBaseUrl}/api/admin/survey-links`;
