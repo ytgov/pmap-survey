@@ -9,6 +9,39 @@ import { checkJwt, loadUser } from "../middleware/authz.middleware";
 export const surveyRouter = express.Router();
 
 surveyRouter.get(
+  "/survey-link/:token",
+  [param("token").notEmpty()],
+  ReturnValidationErrors,
+  async (req: Request, res: Response) => {
+    const db = knex.knex(DB_CONFIG);
+    let { token } = req.params;
+
+    let participant = await db("SURVEY_LINK").withSchema(DB_SCHEMA).where({ SL_TOKEN: token }).first();
+
+    if (participant) {
+      let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID: participant.SID }).first();
+      let choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: participant.SID });
+      let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: participant.SID }).orderBy("ORD");
+
+      for (let choice of choices) {
+        choice.choices = JSON.parse(choice.SELECTION_JSON);
+      }
+
+      for (let q of questions) {
+        q.conditions = await db("Q_CONDITION_TBL").withSchema(DB_SCHEMA).where({ QID: q.QID });
+        if (q.JSON_ID) {
+          q.choices = choices.find((c) => c.JSON_ID == q.JSON_ID)?.choices;
+        }
+      }
+
+      return res.json({ data: { survey, questions } });
+    }
+
+    res.status(404).send();
+  }
+);
+
+surveyRouter.get(
   "/:token",
   [param("token").notEmpty()],
   ReturnValidationErrors,
@@ -214,6 +247,77 @@ surveyRouter.get(
       return res.json({ data: { survey, questions } });
     }
     res.status(404).send();
+  }
+);
+
+surveyRouter.post(
+  "/survey-link/:token",
+  [param("token").notEmpty()],
+  ReturnValidationErrors,
+  async (req: Request, res: Response) => {
+    const db = knex.knex(DB_CONFIG);
+    let { token } = req.params;
+    let { questions, contact } = req.body;
+
+    const surveyLink = await db("SURVEY_LINK").withSchema(DB_SCHEMA).where({ SL_TOKEN: token }).first();
+
+    if (surveyLink) {
+      const newToken = makeToken(`DG.${surveyLink.ID}_`).substring(0, 64);
+
+      await db.transaction(async (trx) => {
+        if (surveyLink.DEMOGRAPHIC_GROUP_ID) {
+          const demographicValues = await trx("DEMOGRAPHIC_GROUP")
+            .withSchema(DB_SCHEMA)
+            .innerJoin(
+              "DEMOGRAPHIC_GROUP_VALUE",
+              "DEMOGRAPHIC_GROUP_VALUE.DEMOGRAPHIC_GROUP_ID",
+              "DEMOGRAPHIC_GROUP.ID"
+            )
+            .where({ "DEMOGRAPHIC_GROUP.ID": surveyLink.DEMOGRAPHIC_GROUP_ID });
+
+          for (let demo of demographicValues) {
+            await trx("PARTICIPANT_DEMOGRAPHIC")
+              .withSchema(DB_SCHEMA)
+              .insert({ TOKEN: newToken, DEMOGRAPHIC: demo.DEMOGRAPHIC, TVALUE: demo.TVALUE, NVALUE: demo.NVALUE });
+          }
+        }
+
+        for (let question of questions) {
+          let id = question.QID;
+          let answer = question.answer;
+          let answer_text = question.answer_text;
+
+          let ans: any = {
+            TOKEN: newToken,
+            QID: id,
+          };
+
+          let nvalTest = parseFloat(`${ans.NVALUE}`);
+
+          if (isFinite(nvalTest)) ans.NVALUE = answer;
+          else if (Array.isArray(answer)) ans.TVALUE = JSON.stringify(answer);
+          else ans.TVALUE = answer;
+
+          if (answer_text && answer_text.length > 0) {
+            ans.TVALUE = answer_text;
+          }
+
+          await trx("RESPONSE_LINE").withSchema(DB_SCHEMA).insert(ans);
+        }
+
+        await trx("PARTICIPANT")
+          .withSchema(DB_SCHEMA)
+          .insert({ TOKEN: newToken, SID: surveyLink.SID, CREATE_DATE: new Date() });
+
+        await db("PARTICIPANT_DATA")
+          .withSchema(DB_SCHEMA)
+          .insert({ TOKEN: newToken, EMAIL: null, RESPONSE_DATE: new Date() });
+      });
+
+      return res.json({ data: {}, messages: [{ variant: "success" }] });
+    }
+
+    res.status(404).send("Sorry, it appears that you have already completed this survey.");
   }
 );
 

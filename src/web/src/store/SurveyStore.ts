@@ -25,6 +25,20 @@ export const useSurveyStore = defineStore("survey", {
         });
     },
 
+    async loadSurveyLink(id: any) {
+      this.isLoading = true;
+      let api = useApiStore();
+
+      await api
+        .call("get", `${SURVEY_URL}/survey-link/${id}`)
+        .then((resp) => {
+          this.setSurvey(resp.data);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+
     async loadAgentSurvey(id: any) {
       this.isLoading = true;
       let api = useApiStore();
