@@ -82,14 +82,10 @@ export default {
 
       this.addLink(this.survey, this.demographicGroup).then((resp: any) => {
         if (resp && resp.error) {
-          if (this.onError) this.onError(resp.error[0]);
-
           this.survey = null;
           this.demographicGroup = null;
           return;
         }
-
-        if (this.onComplete) this.onComplete();
 
         this.doClose();
       });
