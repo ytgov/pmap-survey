@@ -265,6 +265,14 @@ surveyRouter.post(
       const newToken = makeToken(`DG.${surveyLink.ID}_`).substring(0, 64);
 
       await db.transaction(async (trx) => {
+        await trx("PARTICIPANT")
+          .withSchema(DB_SCHEMA)
+          .insert({ TOKEN: newToken, SID: surveyLink.SID, CREATE_DATE: new Date() });
+
+        await db("PARTICIPANT_DATA")
+          .withSchema(DB_SCHEMA)
+          .insert({ TOKEN: newToken, EMAIL: null, RESPONSE_DATE: new Date() });
+
         if (surveyLink.DEMOGRAPHIC_GROUP_ID) {
           const demographicValues = await trx("DEMOGRAPHIC_GROUP")
             .withSchema(DB_SCHEMA)
@@ -304,14 +312,6 @@ surveyRouter.post(
 
           await trx("RESPONSE_LINE").withSchema(DB_SCHEMA).insert(ans);
         }
-
-        await trx("PARTICIPANT")
-          .withSchema(DB_SCHEMA)
-          .insert({ TOKEN: newToken, SID: surveyLink.SID, CREATE_DATE: new Date() });
-
-        await db("PARTICIPANT_DATA")
-          .withSchema(DB_SCHEMA)
-          .insert({ TOKEN: newToken, EMAIL: null, RESPONSE_DATE: new Date() });
       });
 
       return res.json({ data: {}, messages: [{ variant: "success" }] });
