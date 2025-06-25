@@ -31,10 +31,9 @@
       <add-link />
     </template>
 
-    <v-data-table :search="search" :headers="headers" :items="items" :loading="isLoading" @click:row="rowClick">
-    </v-data-table>
+    <v-data-table :search="search" :headers="headers" :items="items" :loading="isLoading" @click:row="rowClick" />
 
-    <show-link></show-link>
+    <show-link />
   </base-card>
 </template>
 <script lang="ts">

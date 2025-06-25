@@ -45,7 +45,7 @@ export const useLinksAdminStore = defineStore("linksAdmin", {
     unselectLink() {
       this.selectedLink = undefined;
     },
-    async addLink(surveyId: number, groupId?: number | null) {
+    async addLink(surveyId: any, groupId?: any) {
       let api = useApiStore();
 
       return api.secureCall("post", LINKS_URL, { surveyId, groupId }).then(async (resp) => {
