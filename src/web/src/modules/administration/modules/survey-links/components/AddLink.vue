@@ -50,9 +50,7 @@ import { useDemographicAdminStore } from "@/modules/administration/modules/demog
 import { useAdminSurveyStore } from "../../survey/store";
 
 export default {
-  components: {},
-  name: "AddEmployee",
-  props: ["onComplete", "onError"],
+  name: "AddLink",
   data: () => ({
     survey: null as number | null,
     demographicGroup: null as number | null,

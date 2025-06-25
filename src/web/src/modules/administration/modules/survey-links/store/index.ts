@@ -45,25 +45,6 @@ export const useLinksAdminStore = defineStore("linksAdmin", {
     unselectLink() {
       this.selectedLink = undefined;
     },
-    async saveLink() {
-      this.isLoading = true;
-      let api = useApiStore();
-
-      if (this.selectedLink) {
-        await api
-          .secureCall("put", `${LINKS_URL}/${this.selectedLink.EMAIL}`, this.selectedLink)
-          .then((resp) => {
-            this.links = resp.data;
-            this.unselectLink();
-          })
-          .finally(() => {
-            this.isLoading = false;
-          });
-
-        m.notify({ text: "Link saved", variant: "success" });
-        this.loadLinks();
-      }
-    },
     async addLink(surveyId: number, groupId?: number | null) {
       let api = useApiStore();
 

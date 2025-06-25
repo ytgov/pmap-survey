@@ -4,7 +4,7 @@
       <template v-slot:default="{ isActive }">
         <v-card v-if="selectedLink">
           <v-toolbar color="info" density="comfortable">
-            <v-toolbar-title class="text-white" style="">Add Survey Link</v-toolbar-title>
+            <v-toolbar-title class="text-white">Survey Link</v-toolbar-title>
             <v-spacer> </v-spacer>
             <v-toolbar-items>
               <v-btn icon="mdi-close" @click="unselectLink"></v-btn>

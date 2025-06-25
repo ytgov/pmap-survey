@@ -28,7 +28,7 @@
         class="ml-2"></v-text-field>
     </template>
     <template v-slot:right>
-      <add-link></add-link>
+      <add-link />
     </template>
 
     <v-data-table :search="search" :headers="headers" :items="items" :loading="isLoading" @click:row="rowClick">
@@ -86,7 +86,7 @@ export default {
     async loadItems() {
       await this.loadLinks();
     },
-    rowClick(event: Event, thing: any) {
+    rowClick(event: MouseEvent, thing: any) {
       this.selectLink(clone(thing.item));
     },
   },
