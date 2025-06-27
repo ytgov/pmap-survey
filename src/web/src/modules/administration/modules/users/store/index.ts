@@ -93,7 +93,7 @@ export interface AppUser {
   display_name: string;
   IS_ADMIN: boolean;
   STATUS: string;
-  ROLE: string;
+  ROLE: string | null;
 
   surveys?: number[];
 }

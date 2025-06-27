@@ -1,8 +1,10 @@
 import express, { Request, Response } from "express";
 import { db } from "../data";
 import { DB_SCHEMA } from "../config";
+import { UserService } from "../services";
 
 export const adminSurveyLinkRouter = express.Router();
+const userService = new UserService();
 
 adminSurveyLinkRouter.get("/", async (req: Request, res: Response) => {
   let links = await db("SURVEY_LINK").withSchema(DB_SCHEMA).orderBy("SID", "DEMOGRAPHIC_GROUP_ID");
@@ -13,6 +15,10 @@ adminSurveyLinkRouter.get("/", async (req: Request, res: Response) => {
     item.group = allGroups.find((r) => r.ID == item.DEMOGRAPHIC_GROUP_ID);
     item.survey = allSurveys.find((s) => s.SID == item.SID);
   }
+
+  let surveys = await userService.getSurveysByEmail(req.user.EMAIL);
+
+  if (req.user.IS_ADMIN == "N") links = links.filter((link) => surveys.includes(link.SID));
 
   res.json({ data: links });
 });

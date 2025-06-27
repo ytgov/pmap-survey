@@ -39,7 +39,7 @@
     </template>
     <template v-slot:right>
       <v-btn
-        v-if="user.IS_ADMIN == 'Y'"
+        v-if="user.IS_ADMIN == 'Y' || user.ROLE == 'Owner'"
         color="primary"
         variant="tonal"
         size="small"

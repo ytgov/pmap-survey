@@ -3,7 +3,9 @@ import { db } from "../data";
 import { ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 import { DB_SCHEMA } from "../config";
+import { UserService } from "../services";
 
+const userService = new UserService();
 export const adminDemographicGroupRouter = express.Router();
 
 adminDemographicGroupRouter.get("/", async (req: Request, res: Response) => {
@@ -15,6 +17,10 @@ adminDemographicGroupRouter.get("/", async (req: Request, res: Response) => {
     item.values = allValues.filter((r) => r.DEMOGRAPHIC_GROUP_ID == item.ID);
     item.survey = allSurveys.find((s) => s.SID == item.SID);
   }
+
+  let surveys = await userService.getSurveysByEmail(req.user.EMAIL);
+
+  if (req.user.IS_ADMIN == "N") groups = groups.filter((link) => surveys.includes(link.SID));
 
   res.json({ data: groups });
 });

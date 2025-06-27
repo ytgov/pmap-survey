@@ -35,6 +35,7 @@
       <template v-slot:item.permissions="{ item }">
         <v-chip color="yg_moss" v-if="item.IS_ADMIN">Admin</v-chip>
         <v-chip color="yg_zinc" v-else-if="item.ROLE == 'Moderator'">Moderator</v-chip>
+        <v-chip color="yg_zinc" v-else-if="item.ROLE == 'Owner'">Owner</v-chip>
       </template>
     </v-data-table>
   </base-card>

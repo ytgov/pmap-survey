@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { db } from "../data";
-import { ReturnValidationErrors } from "../middleware";
+import { requireAdminOrOwner, ReturnValidationErrors } from "../middleware";
 import { param } from "express-validator";
 import { EmailService, UserService } from "../services";
 import { recordSentDate } from "./integration-router";
@@ -105,7 +105,7 @@ adminSurveyRouter.get("/results/:SID", async (req: Request, res: Response) => {
   res.json({ data: survey });
 });
 
-adminSurveyRouter.post("/", async (req: Request, res: Response) => {
+adminSurveyRouter.post("/", requireAdminOrOwner, async (req: Request, res: Response) => {
   let {
     CONTACT_EMAIL,
     CONTACT_QUESTION,
@@ -118,6 +118,7 @@ adminSurveyRouter.post("/", async (req: Request, res: Response) => {
     ALLOW_AUTO_PARTICIPANT,
     ALLOW_DEMOGRAPHIC_GROUP,
   } = req.body;
+
   let newItem = await db("SURVEY")
     .withSchema(DB_SCHEMA)
     .insert({
@@ -133,6 +134,13 @@ adminSurveyRouter.post("/", async (req: Request, res: Response) => {
       ALLOW_DEMOGRAPHIC_GROUP,
     })
     .returning("*");
+
+    console.log("USER", req.user.ROLE);
+
+    if (req.user.)
+
+  await db("SURVEY_USER").withSchema(DB_SCHEMA).insert({ EMAIL: req.user.EMAIL, SID: newItem[0].SID });
+
   res.json({ data: newItem[0] });
 });
 
