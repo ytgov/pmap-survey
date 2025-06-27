@@ -135,11 +135,8 @@ adminSurveyRouter.post("/", requireAdminOrOwner, async (req: Request, res: Respo
     })
     .returning("*");
 
-    console.log("USER", req.user.ROLE);
-
-    if (req.user.)
-
-  await db("SURVEY_USER").withSchema(DB_SCHEMA).insert({ EMAIL: req.user.EMAIL, SID: newItem[0].SID });
+  if (req.user.IS_ADMIN == "N")
+    await db("SURVEY_USER").withSchema(DB_SCHEMA).insert({ EMAIL: req.user.EMAIL, SID: newItem[0].SID });
 
   res.json({ data: newItem[0] });
 });
