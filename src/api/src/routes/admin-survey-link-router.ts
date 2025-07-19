@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { db } from "../data";
 import { DB_SCHEMA } from "../config";
 import { UserService } from "../services";
+import { InsertableDate } from "../utils/formatters";
 
 export const adminSurveyLinkRouter = express.Router();
 const userService = new UserService();
@@ -38,7 +39,7 @@ adminSurveyLinkRouter.post("/", async (req: Request, res: Response) => {
       SID: surveyId,
       DEMOGRAPHIC_GROUP_ID: groupId,
       SL_TOKEN: makeToken(),
-      END_DATE: endDate,
+      END_DATE: InsertableDate(endDate),
     })
     .returning("*");
   res.json({ data: newItem[0] });
