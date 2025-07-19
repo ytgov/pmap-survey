@@ -55,7 +55,7 @@ export function InsertableDate(input: string | null) {
     if (isD.isValid()) date = isD.toDate();
 
     if (DB_CLIENT == "oracledb") {
-      return knex.raw(`TO_TIMESTAMP('${moment(date).format("yyyy-MM-dd HH:mm:ss")}', 'YYYY-MM-DD HH24:MI:SS')`);
+      return knex.raw(`TO_TIMESTAMP('${moment(date).format("yyyy-MM-DD HH:mm:ss")}', 'YYYY-MM-DD HH24:MI:SS')`);
     }
 
     return date;
