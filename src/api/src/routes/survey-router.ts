@@ -5,6 +5,7 @@ import * as knex from "knex";
 import { DB_CONFIG, DB_SCHEMA } from "../config";
 import { makeToken } from "./admin-participant-router";
 import { checkJwt, loadUser } from "../middleware/authz.middleware";
+import { isNil } from "lodash";
 
 export const surveyRouter = express.Router();
 
@@ -19,6 +20,11 @@ surveyRouter.get(
     let participant = await db("SURVEY_LINK").withSchema(DB_SCHEMA).where({ SL_TOKEN: token }).first();
 
     if (participant) {
+      if (!isNil(participant.END_DATE)) {
+        const isExpired = new Date(participant.END_DATE) < new Date();
+        if (isExpired) return res.status(404).send();
+      }
+
       let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID: participant.SID }).first();
       let choices = await db("JSON_DEF").withSchema(DB_SCHEMA).where({ SID: participant.SID });
       let questions = await db("QUESTION").withSchema(DB_SCHEMA).where({ SID: participant.SID }).orderBy("ORD");
@@ -262,6 +268,11 @@ surveyRouter.post(
     const surveyLink = await db("SURVEY_LINK").withSchema(DB_SCHEMA).where({ SL_TOKEN: token }).first();
 
     if (surveyLink) {
+      if (!isNil(surveyLink.END_DATE)) {
+        const isExpired = new Date(surveyLink.END_DATE) < new Date();
+        if (isExpired) return res.status(404).send("Sorry, it appears this survey has expired.");
+      }
+
       const newToken = makeToken(`DG.${surveyLink.ID}_`).substring(0, 64);
 
       await db.transaction(async (trx) => {

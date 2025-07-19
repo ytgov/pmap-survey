@@ -45,10 +45,10 @@ export const useLinksAdminStore = defineStore("linksAdmin", {
     unselectLink() {
       this.selectedLink = undefined;
     },
-    async addLink(surveyId: any, groupId?: any) {
+    async addLink(surveyId: any, groupId?: any, endDate?: string | null) {
       let api = useApiStore();
 
-      return api.secureCall("post", LINKS_URL, { surveyId, groupId }).then(async (resp) => {
+      return api.secureCall("post", LINKS_URL, { surveyId, groupId, endDate }).then(async (resp) => {
         await this.loadLinks();
         return resp.data;
       });
@@ -70,6 +70,7 @@ export interface SurveyLink {
   SID: number;
   DEMOGRAPHIC_GROUP_ID?: number | null;
   SL_TOKEN: string;
+  END_DATE?: string | null;
 
   survey?: Survey;
   group?: DemographicGroup;

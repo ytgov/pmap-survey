@@ -32,8 +32,9 @@
               dense
               outlined
               clearable
-              label="Demographic group (optional)">
-            </v-select>
+              label="Demographic group (optional)" />
+
+            <DatePickerMenu v-model="endDate" label="End date" />
 
             <v-btn color="primary" class="mt-0 mb-3" @click="doAdd" :disabled="!survey">Add </v-btn>
           </v-card-text>
@@ -48,12 +49,17 @@ import { mapActions, mapState } from "pinia";
 import { useLinksAdminStore } from "../store";
 import { useDemographicAdminStore } from "@/modules/administration/modules/demographic-group/store";
 import { useAdminSurveyStore } from "../../survey/store";
+import DatePickerMenu from "@/components/DatePickerMenu.vue";
 
 export default {
   name: "AddLink",
+  components: {
+    DatePickerMenu,
+  },
   data: () => ({
     survey: null as number | null,
     demographicGroup: null as number | null,
+    endDate:null as string | null,
 
     showEdit: false,
   }),
@@ -80,7 +86,9 @@ export default {
     doAdd() {
       if (!this.survey) return;
 
-      this.addLink(this.survey, this.demographicGroup).then((resp: any) => {
+      console.log("Adding link for survey", this.survey, this.demographicGroup, this.endDate);
+
+      this.addLink(this.survey, this.demographicGroup, this.endDate).then((resp: any) => {
         if (resp && resp.error) {
           this.survey = null;
           this.demographicGroup = null;

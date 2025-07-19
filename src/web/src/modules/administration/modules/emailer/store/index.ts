@@ -11,7 +11,7 @@ export const useEmailerStore = defineStore("emailer", {
   state: (): EmailerStore => ({
     survey: undefined,
     isLoading: false,
-    email: { subject: "", body: "", recipientType: "SEND" },
+    email: { subject: "", body: "", recipientType: "SEND", demographicGroup: null },
   }),
   getters: {
     responseCount(state) {
@@ -49,7 +49,9 @@ export const useEmailerStore = defineStore("emailer", {
         let m = useNotificationStore();
 
         await api
-          .secureCall("post", `${ADMIN_SURVEY_URL}/${this.survey}/send-email`, { ...this.email })
+          .secureCall("post", `${ADMIN_SURVEY_URL}/${this.survey}/send-email`, {
+            ...this.email,
+          })
           .then(async (resp) => {
             m.notify({ variant: "success", text: resp.data });
           })
@@ -61,7 +63,7 @@ export const useEmailerStore = defineStore("emailer", {
     },
     unselect() {
       this.survey = undefined;
-      this.email = { subject: "", body: "", recipientType: "SEND" };
+      this.email = { subject: "", body: "", recipientType: "SEND", demographicGroup: null };
     },
   },
 });
@@ -81,4 +83,5 @@ export interface Email {
   subject: string;
   body: string;
   recipientType: string;
+  demographicGroup: number | null;
 }

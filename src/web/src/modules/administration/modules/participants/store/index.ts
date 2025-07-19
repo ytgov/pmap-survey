@@ -89,9 +89,9 @@ export const useParticipantsStore = defineStore("participants", {
       this.participants = new Array<any>();
     },
 
-    async getParticipants(surveyId: number) {
+    async getParticipants(surveyId: number, demographicGroup: number | null = null) {
       await api
-        .secureCall("get", `${PARTICIPANT_URL}/${surveyId}`)
+        .secureCall("get", `${PARTICIPANT_URL}/${surveyId}/${demographicGroup}`)
         .then(async (resp) => {
           this.participants = resp.data;
         })
@@ -109,7 +109,6 @@ export const useParticipantsStore = defineStore("participants", {
     },
 
     async deleteStaleParticipants(surveyId: number) {
-
       await api
         .secureCall("delete", `${PARTICIPANT_URL}/${surveyId}/stale`)
         .then(async (resp) => {

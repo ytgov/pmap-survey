@@ -126,6 +126,17 @@
             accept="text/csv"
             label="Choose a CSV to import"></v-file-input>
 
+          <v-select
+            v-model="batch.demographicGroup"
+            :items="groups.filter((g) => g.SID == (batch.survey ?? 0))"
+            item-title="NAME"
+            item-value="ID"
+            dense
+            outlined
+            clearable
+            label="Demographic group (optional)">
+          </v-select>
+
           <div v-if="csvFile">
             <v-label class="mb-3">
               This CSV parser assumes:<br />
@@ -163,6 +174,7 @@ import moment from "moment";
 import { parse as csvParser } from "csv-parse/browser/esm";
 
 import { useNotificationStore } from "@/store/NotificationStore";
+import { useDemographicAdminStore } from "@/modules/administration/modules/demographic-group/store";
 
 const notify = useNotificationStore();
 
@@ -190,6 +202,7 @@ export default {
     ...mapWritableState(useParticipantsStore, ["batch"]),
     ...mapState(useParticipantsStore, ["isLoading", "batchIsValid", "participants"]),
     ...mapState(useAdminSurveyStore, { surveys: "activeSurveys" }),
+    ...mapState(useDemographicAdminStore, ["groups"]),
 
     items() {
       return [];
@@ -212,6 +225,7 @@ export default {
   beforeMount() {
     this.loadItems();
     this.loadSurveys();
+    this.getAllGroups();
   },
   unmounted() {
     this.unselect();
@@ -227,6 +241,7 @@ export default {
       "manualSend",
     ]),
     ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
+    ...mapActions(useDemographicAdminStore, ["getAllGroups"]),
 
     async loadItems() {
       //await this.getAllUsers();

@@ -30,7 +30,7 @@ adminSurveyLinkRouter.get("/:ID", async (req: Request, res: Response) => {
 });
 
 adminSurveyLinkRouter.post("/", async (req: Request, res: Response) => {
-  let { surveyId, groupId } = req.body;
+  let { surveyId, groupId, endDate } = req.body;
 
   let newItem = await db("SURVEY_LINK")
     .withSchema(DB_SCHEMA)
@@ -38,6 +38,7 @@ adminSurveyLinkRouter.post("/", async (req: Request, res: Response) => {
       SID: surveyId,
       DEMOGRAPHIC_GROUP_ID: groupId,
       SL_TOKEN: makeToken(),
+      END_DATE: endDate,
     })
     .returning("*");
   res.json({ data: newItem[0] });

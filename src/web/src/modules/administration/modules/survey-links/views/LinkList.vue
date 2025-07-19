@@ -31,7 +31,11 @@
       <add-link />
     </template>
 
-    <v-data-table :search="search" :headers="headers" :items="items" :loading="isLoading" @click:row="rowClick" />
+    <v-data-table :search="search" :headers="headers" :items="items" :loading="isLoading" @click:row="rowClick">
+      <template #item.END_DATE="{ item }">
+        {{ formatDate(item.END_DATE) }}
+      </template>
+    </v-data-table>
 
     <show-link />
   </base-card>
@@ -39,10 +43,11 @@
 <script lang="ts">
 import { mapActions, mapState } from "pinia";
 import { useLinksAdminStore } from "../store";
-import { clone } from "lodash";
+import { clone, isNil } from "lodash";
 import { useAdminSurveyStore } from "../../survey/store";
 import AddLink from "../components/AddLink.vue";
 import ShowLink from "../components/ShowLink.vue";
+import moment from "moment";
 
 export default {
   components: { AddLink, ShowLink },
@@ -51,6 +56,7 @@ export default {
       { title: "Survey", key: "survey.NAME" },
       { title: "Demographic Group", key: "group.NAME" },
       { title: "Token", key: "SL_TOKEN" },
+      { title: "End Date", key: "END_DATE" },
     ],
     search: "",
   }),
@@ -81,6 +87,12 @@ export default {
   methods: {
     ...mapActions(useLinksAdminStore, ["loadLinks", "selectLink"]),
     ...mapActions(useAdminSurveyStore, ["loadSurveys"]),
+
+    formatDate(date: string | null | undefined) {
+      if (isNil(date)) return "";
+
+      return moment(date).format("YYYY-MM-DD");
+    },
 
     async loadItems() {
       await this.loadLinks();

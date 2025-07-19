@@ -5,7 +5,7 @@
     <v-app-bar-title class="pt-0 font-weight-bold" style="margin-left: -20px">{{ title }}</v-app-bar-title>
 
     <template v-slot:append>
-      <v-btn color="primary" to="/sign-in">Admin Sign in </v-btn>
+      <v-btn class="d-none" color="primary" to="/sign-in">Admin Sign in </v-btn>
     </template>
   </v-app-bar>
 

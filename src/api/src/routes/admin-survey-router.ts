@@ -5,7 +5,7 @@ import { param } from "express-validator";
 import { EmailService, UserService } from "../services";
 import { recordSentDate } from "./integration-router";
 import { DB_SCHEMA } from "../config";
-import { sortBy, uniq } from "lodash";
+import { isNil, sortBy, uniq } from "lodash";
 
 export const adminSurveyRouter = express.Router();
 
@@ -347,7 +347,7 @@ adminSurveyRouter.post("/:SID/send-email-test", async (req: Request, res: Respon
 
 adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { subject, body, recipientType } = req.body;
+  let { subject, body, recipientType, demographicGroup } = req.body;
 
   let survey = await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).first();
 
@@ -364,6 +364,9 @@ adminSurveyRouter.post("/:SID/send-email", async (req: Request, res: Response) =
       .select("EMAIL", "PARTICIPANT.TOKEN");
 
     if (recipientType == "SEND") query.whereNull("SENT_DATE");
+
+    if (!isNil(demographicGroup)) query.where("PARTICIPANT.DEMOGRAPHIC_GROUP_ID", demographicGroup);
+
     let participants = await query;
 
     let emailer = new EmailService();

@@ -28,6 +28,18 @@
       item-value="SID"></v-select>
 
     <div v-if="survey">
+      <v-select
+        v-model="email.demographicGroup"
+        :items="groups.filter((g) => g.SID == (survey ?? 0))"
+        item-title="NAME"
+        item-value="ID"
+        dense
+        outlined
+        clearable
+        label="Demographic group (optional)"
+        @update:model-value="groupChange">
+      </v-select>
+
       <v-select label="Recipient Type" :items="participantTypeOptions" v-model="email.recipientType" />
       <v-text-field v-model="email.subject" label="Subject" density="comfortable" variant="outlined"></v-text-field>
       <v-textarea
@@ -61,6 +73,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useEmailerStore } from "../store";
 import { useParticipantsStore } from "../../participants/store";
 import { useAdminSurveyStore } from "../../survey/store";
+import { useDemographicAdminStore } from "@/modules/administration/modules/demographic-group/store";
 
 export default {
   data: () => ({
@@ -79,6 +92,7 @@ export default {
     ...mapState(useEmailerStore, ["emailValid"]),
     ...mapWritableState(useEmailerStore, ["survey", "email"]),
     ...mapState(useParticipantsStore, ["participants"]),
+    ...mapState(useDemographicAdminStore, ["groups"]),
 
     breadcrumbs() {
       return [
@@ -119,6 +133,7 @@ export default {
   },
   beforeMount() {
     this.loadItems();
+    this.getAllGroups();
   },
   unmounted() {
     this.unselectEmailer();
@@ -130,6 +145,7 @@ export default {
     ...mapActions(useEmailerStore, { unselectEmailer: "unselect" }),
 
     ...mapActions(useParticipantsStore, ["getParticipants", "unselect"]),
+    ...mapActions(useDemographicAdminStore, ["getAllGroups"]),
 
     async loadItems() {
       await this.loadSurveys();
@@ -144,7 +160,13 @@ export default {
       if (this.survey && this.selectedSurvey) {
         this.email.body = this.selectedSurvey.EMAIL_BODY ?? "";
         this.email.subject = this.selectedSurvey.EMAIL_SUBJECT ?? "";
-        await this.getParticipants(this.survey);
+        this.email.demographicGroup = null; // Reset demographic group when survey changes
+        await this.getParticipants(this.survey, this.email.demographicGroup);
+      }
+    },
+    async groupChange() {
+      if (this.survey && this.selectedSurvey) {
+        await this.getParticipants(this.survey, this.email.demographicGroup);
       }
     },
   },
