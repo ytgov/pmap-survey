@@ -15,7 +15,6 @@
 
     <v-date-picker
       :model-value="date"
-      :min="new Date()"
       v-bind="dateOptions"
       @update:model-value="updateDateAndCloseMenu"
       @vue:unmounted="validate" />
@@ -54,6 +53,8 @@ const errorMessages = ref<string>("");
 watch(
   () => props.modelValue,
   (newValue) => {
+    console.log("New date value:", newValue);
+
     if (newValue === null) {
       date.value = null;
       return;

@@ -145,6 +145,17 @@
         <div v-else-if="question.TYPE == 'quadrant_title'">
           <QuadrantRenderer :question="question" :subUpdated="subUpdated"></QuadrantRenderer>
         </div>
+        <div v-else-if="question.TYPE == 'number'">
+          <v-text-field
+            v-model="question.answer"
+            type="number"
+            class="mt-4"
+            @update:focused="cleanNumber"
+            @keydown="keydown" />
+        </div>
+        <div v-else-if="question.TYPE == 'date'">
+          <DateRenderer v-model="question.answer" />
+        </div>
 
         <div v-else-if="question.TYPE != 'text'">
           {{ question }}
@@ -158,11 +169,12 @@
 </template>
 
 <script>
-import { isArray, isNull } from "lodash";
+import { isArray, isNil, isNull } from "lodash";
 import { nextTick } from "vue";
 import { RenderMarkdown } from "@/utils";
 import RankingRenderer from "./RankingRenderer.vue";
 import QuadrantRenderer from "./QuadrantRenderer.vue";
+import DateRenderer from "./DateRenderer.vue";
 
 export default {
   name: "Home",
@@ -257,6 +269,56 @@ export default {
           }
         }
       }
+    },
+
+    // this function is the keydown and excludes any key thats not a number
+    // backspace, delete, and arrow keys are allowed
+    keydown(e) {
+      if (e.keyCode === 69 || e.keyCode === 189 || e.keyCode === 190) {
+        e.preventDefault();
+      }
+      if (e.keyCode === 8 || e.keyCode === 46 || e.keyCode === 37 || e.keyCode === 39) {
+        return; // Allow backspace, delete, left arrow, right arrow
+      }
+      if (e.keyCode < 48 || e.keyCode > 57) {
+        if (e.keyCode < 96 || e.keyCode > 105) {
+          e.preventDefault();
+        }
+      }
+    },
+
+    cleanNumber(e) {
+      if (e) return;
+
+      let value = `${this.question.answer ?? ""}`.replace(/[e]/g, "");
+      console.log("cleanNumber", this.question.answer, typeof value);
+
+      if (isNull(value) || value === "") {
+        console.log("cleanNumber is null or empty, setting to null");
+        value = null;
+      } else {
+        console.log("cleanNumber is string", value);
+
+        // Remove non-numeric characters, but leave the first minus sign if it exists and decimal point
+        let v = parseInt(value.replace(/[e]/g, "").replace(/[^0-9.-]+/g, ""));
+
+        console.log("cleanNumber parsed", v);
+
+        if (isNaN(v)) {
+          console.log("cleanNumber is NaN, setting to null");
+          value = null;
+        } else {
+          value = Math.max(0, v);
+        }
+      }
+
+      const q = this.question;
+
+      nextTick(() => {
+        console.log("cleanNumber after", value);
+        if (value === null || value === "") q.answer = null;
+        else q.answer = `${value}`;
+      });
     },
   },
 };
