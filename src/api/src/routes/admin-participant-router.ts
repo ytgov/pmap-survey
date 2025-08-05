@@ -66,6 +66,7 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
         .withSchema(DB_SCHEMA)
         .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
         .where("PARTICIPANT.SID", survey)
+        .where("DEMOGRAPHIC_GROUP_ID", demographicGroup)
         .whereNotNull("EMAIL")
         .select("EMAIL");
 
@@ -105,6 +106,7 @@ adminParticipantRouter.post("/", async (req: Request, res: Response) => {
         .withSchema(DB_SCHEMA)
         .innerJoin("PARTICIPANT", "PARTICIPANT_DATA.TOKEN", "PARTICIPANT.TOKEN")
         .where("PARTICIPANT.SID", survey)
+        .where("DEMOGRAPHIC_GROUP_ID", demographicGroup)
         .whereNotNull("EMAIL")
         .select("EMAIL");
 
