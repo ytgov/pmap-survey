@@ -22,6 +22,12 @@
               dense
               outlined
               label="Survey" />
+            <v-checkbox
+              v-model="chosenOne.ALLOW_DYNAMIC_VALUES"
+              :true-value="1"
+              :false-value="0"
+              label="Allow Dynamic Values"
+              density="compact" />
 
             <v-btn color="primary" class="mt-0 mb-3" @click="doAdd" :disabled="!chosenOne.NAME || !chosenOne.SID"
               >Add

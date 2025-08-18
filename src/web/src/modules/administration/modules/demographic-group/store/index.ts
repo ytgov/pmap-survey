@@ -108,6 +108,7 @@ export interface DemographicGroup {
   ID: number;
   SID: number;
   NAME: string;
+  ALLOW_DYNAMIC_VALUES?: number;
 
   values?: DemographicGroupValue[];
   survey?: Survey;

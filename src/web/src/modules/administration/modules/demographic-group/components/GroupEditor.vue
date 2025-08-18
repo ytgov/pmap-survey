@@ -14,6 +14,12 @@
           :items="surveys.filter((s) => s.ALLOW_DEMOGRAPHIC_GROUP == 1)"
           item-title="NAME"
           item-value="SID" />
+        <v-checkbox
+          v-model="selectedGroup.ALLOW_DYNAMIC_VALUES"
+          :true-value="1"
+          :false-value="0"
+          label="Allow Dynamic Values"
+          density="compact" />
 
         <v-divider class="mb-3" />
 
@@ -91,6 +97,10 @@ export default {
     isValid() {
       if (!this.selectedGroup) return false;
       if (!this.selectedGroup.NAME || !this.selectedGroup.SID) return false;
+
+      console.log(this.selectedGroup.ALLOW_DYNAMIC_VALUES);
+
+      if (this.selectedGroup.ALLOW_DYNAMIC_VALUES === 1) return true;
 
       for (const value of this.selectedGroup.values || []) {
         if (value.DEMOGRAPHIC === "" || (value.NVALUE === null && isEmpty(value.TVALUE))) return false;

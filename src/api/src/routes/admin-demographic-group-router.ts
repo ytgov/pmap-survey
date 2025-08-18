@@ -37,12 +37,13 @@ adminDemographicGroupRouter.get("/:ID", async (req: Request, res: Response) => {
 });
 
 adminDemographicGroupRouter.post("/", async (req: Request, res: Response) => {
-  let { NAME, SID } = req.body;
+  let { NAME, SID, ALLOW_DYNAMIC_VALUES } = req.body;
   let newItem = await db("DEMOGRAPHIC_GROUP")
     .withSchema(DB_SCHEMA)
     .insert({
       NAME,
       SID,
+      ALLOW_DYNAMIC_VALUES,
     })
     .returning("*");
   res.json({ data: newItem[0] });
@@ -50,11 +51,12 @@ adminDemographicGroupRouter.post("/", async (req: Request, res: Response) => {
 
 adminDemographicGroupRouter.put("/:ID", async (req: Request, res: Response) => {
   let { ID } = req.params;
-  let { NAME, SID, values } = req.body;
+  let { NAME, SID, ALLOW_DYNAMIC_VALUES, values } = req.body;
 
   await db("DEMOGRAPHIC_GROUP").withSchema(DB_SCHEMA).where({ ID }).update({
     NAME,
     SID,
+    ALLOW_DYNAMIC_VALUES,
   });
 
   await db("DEMOGRAPHIC_GROUP_VALUE").withSchema(DB_SCHEMA).where({ DEMOGRAPHIC_GROUP_ID: ID }).delete();
