@@ -10,10 +10,15 @@ const userService = new UserService();
 adminSurveyLinkRouter.get("/", async (req: Request, res: Response) => {
   let links = await db("SURVEY_LINK").withSchema(DB_SCHEMA).orderBy("SID", "DEMOGRAPHIC_GROUP_ID");
   let allGroups = await db("DEMOGRAPHIC_GROUP").withSchema(DB_SCHEMA);
+  let allGroupValues = await db("DEMOGRAPHIC_GROUP_VALUE").withSchema(DB_SCHEMA);
   let allSurveys = await db("SURVEY").withSchema(DB_SCHEMA);
 
   for (let item of links) {
     item.group = allGroups.find((r) => r.ID == item.DEMOGRAPHIC_GROUP_ID);
+
+    if (item.group) {
+      item.group.values = allGroupValues.filter((r) => r.DEMOGRAPHIC_GROUP_ID == item.group.ID);
+    }
     item.survey = allSurveys.find((s) => s.SID == item.SID);
   }
 

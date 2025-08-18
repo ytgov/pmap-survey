@@ -27,6 +27,7 @@
               label="Demographic group (optional)" />
 
             <QRCodeVue3
+              v-if="!isDynamic"
               :value="surveyUrl"
               :width="200"
               :height="200"
@@ -41,6 +42,7 @@
                 type: 'square',
                 color: '#000',
               }" />
+            <div v-else>QR Code not available for Dynamic Demographics</div>
             <br />
             <v-text-field
               :model-value="surveyUrl"
@@ -75,9 +77,26 @@ export default {
     },
     surveyUrl() {
       if (this.selectedLink) {
+        if (this.dynamicDemographics.length > 0) {
+          return `${window.location.origin}/survey-link/${this.selectedLink.SL_TOKEN}?${this.dynamicDemographics
+            .map((d) => `${d.toLowerCase()}=VALUE&`)
+            .join("")}`.replace(/&$/, "");
+        }
+
         return `${window.location.origin}/survey-link/${this.selectedLink.SL_TOKEN}`;
       }
       return "";
+    },
+    isDynamic() {
+      if (this.selectedLink) return this.selectedLink.group?.ALLOW_DYNAMIC_VALUES === 1;
+      return false;
+    },
+
+    dynamicDemographics() {
+      if (this.isDynamic && this.selectedLink && this.selectedLink.group) {
+        return this.selectedLink.group?.values?.map((d) => d.DEMOGRAPHIC) || [];
+      }
+      return [];
     },
   },
   methods: {
