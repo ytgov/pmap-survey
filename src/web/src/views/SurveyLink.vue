@@ -59,8 +59,15 @@ export default {
           delete q.TYPE;
           qs.push(q);
         }
+
+        // this is used to pass the dynamic demographic group values
+        const query = this.$route.fullPath.replace(this.$route.path, "");
+
         axios
-          .post(`${SURVEY_URL}/survey-link/${this.surveyId}`, { questions: qs, contact: this.contactMe })
+          .post(`${SURVEY_URL}/survey-link/${this.surveyId}${query}`, {
+            questions: qs,
+            contact: this.contactMe,
+          })
           .then(() => {
             this.$router.push("/survey/complete");
           })

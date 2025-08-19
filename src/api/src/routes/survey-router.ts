@@ -295,9 +295,31 @@ surveyRouter.post(
             .where({ "DEMOGRAPHIC_GROUP.ID": surveyLink.DEMOGRAPHIC_GROUP_ID });
 
           for (let demo of demographicValues) {
-            await trx("PARTICIPANT_DEMOGRAPHIC")
-              .withSchema(DB_SCHEMA)
-              .insert({ TOKEN: newToken, DEMOGRAPHIC: demo.DEMOGRAPHIC, TVALUE: demo.TVALUE, NVALUE: demo.NVALUE });
+            if (demo.ALLOW_DYNAMIC_VALUES === 1) {
+              const item = demo.DEMOGRAPHIC.toLowerCase();
+
+              const dynamicValue = req.query[item];
+
+              if (!isNil(dynamicValue)) {
+                let TVALUE = null;
+                let NVALUE = null;
+
+                const nVal = parseFloat(`${dynamicValue}`);
+
+                if (!isNaN(nVal)) NVALUE = nVal;
+                else TVALUE = dynamicValue;
+
+                await trx("PARTICIPANT_DEMOGRAPHIC")
+                  .withSchema(DB_SCHEMA)
+                  .insert({ TOKEN: newToken, DEMOGRAPHIC: demo.DEMOGRAPHIC, TVALUE, NVALUE });
+              }
+            } else {
+              if (isNil(demo.TVALUE) && isNil(demo.NVALUE)) continue;
+
+              await trx("PARTICIPANT_DEMOGRAPHIC")
+                .withSchema(DB_SCHEMA)
+                .insert({ TOKEN: newToken, DEMOGRAPHIC: demo.DEMOGRAPHIC, TVALUE: demo.TVALUE, NVALUE: demo.NVALUE });
+            }
           }
         }
 
