@@ -1,13 +1,13 @@
 <template>
-  <div>
+  <div style="font-size: 0.75rem">
     <div class="quadrant mt-4" v-if="xAxis && yAxis" :style="blockStyle">
-      <div class="" :style="`height: ${blockHeight}; float: left; width: 50px`">
+      <div class="" :style="`height: ${blockHeight}; float: left; width: 25px`">
         <div
-          class=""
+          class="text-center"
           :style="`position: relative;
-            height: 50px;
+            height: 25px;
             width: ${blockHeight};
-            padding: 14px 0px;
+            padding: 5px 0px;
             top: ${blockHeight};
             rotate: 270deg;
             transform-origin: 00px 00px;`">
@@ -27,11 +27,13 @@
             active: selectedValue == `${xc.val},${yc.val}`,
           }"
           @click="setAnswer([xc.val, yc.val])">
-          <v-icon class="mt-3" size="large" color="red">mdi-circle</v-icon>
+          <v-icon class="mt-5" size="x-large" color="red">mdi-circle</v-icon>
         </div>
       </div>
-      <div class="block side"></div>
-      <div class="block side"><v-icon color="black" style="display: block">mdi-arrow-top-right-thin</v-icon></div>
+      <div class="block side" style="width: 25px"></div>
+      <div class="block side" style="width: 62px">
+        <v-icon color="black" style="display: block">mdi-arrow-top-right-thin</v-icon>
+      </div>
       <div v-for="xc of xOptions" class="block side">{{ xc.descr }}</div>
       <div class="block side wide" :style="`width: ${blockWidth};padding-top:0 !important`">{{ xAxis.ASK }}</div>
     </div>
@@ -70,18 +72,18 @@ export default {
     },
     blockStyle() {
       if (this.xAxis && this.yAxis) {
-        let height = (this.yOptions.length + 2) * 50 + 1;
-        let width = (this.xAxis.choices.length + 2) * 50 + 1;
+        let height = (this.yOptions.length + 2) * 65 + 1;
+        let width = (this.xAxis.choices.length + 1) * 65 + 25;
         return `width: ${width}px; height: ${height}px;`;
       }
 
       return "";
     },
     blockWidth() {
-      return `${(this.xAxis.choices.length + 1) * 50 + 51}px`;
+      return `${(this.xAxis.choices.length + 1) * 65 + 25}px`;
     },
     blockHeight() {
-      return `${this.yAxis.choices.length * 50}px`;
+      return `${this.yAxis.choices.length * 65}px`;
     },
     selectedValue() {
       if (this.xAxis && this.yAxis) {
@@ -112,16 +114,16 @@ export default {
 <style>
 .quadrant .block {
   float: left;
-  height: 50px;
-  width: 50px;
+  height: 65px;
+  width: 65px;
 }
 .quadrant .block.side {
   text-align: center;
   padding: 14px;
 }
 .quadrant .wide {
-  text-align: left !important;
-  padding-left: 100px !important;
+  text-align: center !important;
+  padding-left: 90px !important;
 }
 .rotate {
   rotate: 270deg;
