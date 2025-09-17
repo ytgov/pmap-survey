@@ -114,10 +114,13 @@
             persistent-counter></v-textarea>
         </div>
 
-        <div v-else-if="question.TYPE == 'title_question'">
-          <table class="matrix" v-if="question.subQuestions.length > 0 && question.subQuestions[0].choices">
+        <div v-else-if="question.TYPE == 'title_question'" style="overflow-x: auto">
+          <table
+            class="matrix"
+            :class="{ mobile: smAndDown }"
+            v-if="question.subQuestions.length > 0 && question.subQuestions[0].choices">
             <tr>
-              <td style="width: 50%; border-right: 1px #32323233 solid"></td>
+              <td v-if="!smAndDown" style="width: 50%; border-right: 1px #32323233 solid"></td>
               <th
                 v-for="ch of question.subQuestions[0].choices"
                 :style="'width:' + 50 / question.subQuestions[0].choices.length + '%'">
@@ -125,16 +128,31 @@
               </th>
             </tr>
 
-            <tr v-for="sub of question.subQuestions">
-              <th style="text-align: left; width: 50%; border-right: 1px #32323233 solid" v-if="sub.isVisible">
-                {{ sub.ASK }}
-              </th>
-              <td v-for="ch of sub.choices" v-if="sub.isVisible" :style="'width:' + 50 / sub.choices.length + '%'">
-                <v-radio-group v-model="sub.answer" hide-details class="mb-3" @update:model-value="subUpdated(sub)">
-                  <v-radio class="my-0 mx-auto" hide-details :value="ch.val" density="compact" style="width: 30px" />
-                </v-radio-group>
-              </td>
-            </tr>
+            <tbody v-for="sub of question.subQuestions">
+              <tr v-if="smAndDown">
+                <td :colspan="sub.choices.length" style="text-align: left; border-bottom: none; font-weight: 300">
+                  {{ sub.ASK }}
+                </td>
+              </tr>
+              <tr>
+                <th
+                  v-if="sub.isVisible && !smAndDown"
+                  style="text-align: left; width: 50%; border-right: 1px #32323233 solid">
+                  {{ sub.ASK }}
+                </th>
+                <td v-for="ch of sub.choices" v-if="sub.isVisible" :style="'width:' + 50 / sub.choices.length + '%'">
+                  <v-radio-group v-model="sub.answer" hide-details class="mb-3" @update:model-value="subUpdated(sub)">
+                    <v-radio
+                      class="my-0 mx-auto"
+                      :class="{ 'pt-0': smAndDown }"
+                      hide-details
+                      :value="ch.val"
+                      density="compact"
+                      style="width: 30px" />
+                  </v-radio-group>
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
 
@@ -167,161 +185,159 @@
     </v-card>
   </div>
 </template>
-
-<script>
+<script setup>
+import { ref, computed, watch, nextTick, onMounted } from "vue";
 import { isArray, isNil, isNull } from "lodash";
-import { nextTick } from "vue";
 import { RenderMarkdown } from "@/utils";
 import RankingRenderer from "./RankingRenderer.vue";
 import QuadrantRenderer from "./QuadrantRenderer.vue";
 import DateRenderer from "./DateRenderer.vue";
 
-export default {
-  name: "Home",
-  components: { QuadrantRenderer, RankingRenderer },
-  props: ["index", "question"],
-  data: () => ({}),
-  computed: {
-    options: function () {
-      return this.question.choices || [];
-    },
-    hint: function () {
-      let hint = "";
-      if (this.question.OPTIONAL == 0) {
-        hint = "*";
-      } else {
-        hint = "";
-      }
+import { useDisplay } from "vuetify";
+const { smAndDown } = useDisplay();
 
-      if (this.question.TYPE == "multi-select") hint += ", you may select as many as you see fit";
+// Props
+const props = defineProps({
+  index: Number,
+  question: Object,
+});
+const emit = defineEmits(["answerChanged"]);
 
-      return hint;
-    },
-    selectedOption: function () {
-      return this.options.find((o) => o.val == this.question.answer);
-    },
-    allowCustomText: function () {
-      if (this.selectedOption && this.selectedOption.allow_custom && this.selectedOption.allow_custom == "true") {
-        return true;
-      }
-      return false;
-    },
-    customTextAsk: function () {
-      if (this.allowCustomText) {
-        return this.selectedOption.custom_ask;
-      }
-      return "";
-    },
-    storageID() {
-      return `${this.question.QID}_ANSWER`;
-    },
-  },
-  created() {
-    let val = localStorage.getItem(this.storageID);
-    let value = JSON.parse(val);
-    let q = this.question;
+// Computed properties
+const options = computed(() => props.question.choices || []);
 
-    if (q.subQuestions) {
-      for (let sq of q.subQuestions) {
-        let subStorage = `${sq.QID}_ANSWER`;
-        let sqVal = localStorage.getItem(subStorage);
-        let sqValue = JSON.parse(sqVal);
+const hint = computed(() => {
+  let hint = "";
+  if (props.question.OPTIONAL == 0) {
+    hint = "*";
+  } else {
+    hint = "";
+  }
+  if (props.question.TYPE == "multi-select") hint += ", you may select as many as you see fit";
+  return hint;
+});
 
-        if (sqValue && sqValue.value) sq.answer = sqValue.value;
+const selectedOption = computed(() => {
+  return options.value.find((o) => o.val == props.question.answer);
+});
+
+const allowCustomText = computed(() => {
+  return selectedOption.value && selectedOption.value.allow_custom && selectedOption.value.allow_custom == "true";
+});
+
+const customTextAsk = computed(() => {
+  if (allowCustomText.value) {
+    return selectedOption.value.custom_ask;
+  }
+  return "";
+});
+
+const storageID = computed(() => `${props.question.QID}_ANSWER`);
+
+// Methods
+function renderMarkdown(input) {
+  return RenderMarkdown(input);
+}
+
+function limiter(e) {
+  if (props.question.SELECT_LIMIT) {
+    if (isArray(e)) {
+      if (e.length > props.question.SELECT_LIMIT) {
+        e.pop();
       }
     }
+  }
+}
 
-    nextTick(() => {
-      if (value && value.value) q.answer = value.value;
-    });
-  },
-  watch: {
-    "question.answer": function (nval, oval) {
-      if (!isNull(nval) && nval != "") {
-        localStorage.setItem(this.storageID, JSON.stringify({ value: nval }));
-      } else {
-        localStorage.removeItem(this.storageID);
-      }
+function keydown(e) {
+  if (e.keyCode === 69 || e.keyCode === 189 || e.keyCode === 190) {
+    e.preventDefault();
+  }
+  if (e.keyCode === 8 || e.keyCode === 46 || e.keyCode === 37 || e.keyCode === 39) {
+    return; // Allow backspace, delete, left arrow, right arrow
+  }
+  if (e.keyCode < 48 || e.keyCode > 57) {
+    if (e.keyCode < 96 || e.keyCode > 105) {
+      e.preventDefault();
+    }
+  }
+}
 
-      this.$emit("answerChanged", nval);
-    },
-  },
-  methods: {
-    subUpdated(subQ) {
-      if (!isNull(subQ.answer) && subQ.answer != "") {
-        localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
-      } else {
-        localStorage.removeItem(`${subQ.QID}_ANSWER`);
-      }
+function cleanNumber(e) {
+  if (e) return;
 
-      this.$emit("answerChanged", subQ.answer);
-    },
+  let value = `${props.question.answer ?? ""}`.replace(/[e]/g, "");
+  // console.log("cleanNumber", props.question.answer, typeof value);
 
-    renderMarkdown(input) {
-      return RenderMarkdown(input);
-    },
+  if (isNull(value) || value === "") {
+    // console.log("cleanNumber is null or empty, setting to null");
+    value = null;
+  } else {
+    // console.log("cleanNumber is string", value);
+    let v = parseInt(value.replace(/[e]/g, "").replace(/[^0-9.-]+/g, ""));
+    // console.log("cleanNumber parsed", v);
+    if (isNaN(v)) {
+      // console.log("cleanNumber is NaN, setting to null");
+      value = null;
+    } else {
+      value = Math.max(0, v);
+    }
+  }
 
-    limiter(e) {
-      if (this.question.SELECT_LIMIT) {
-        if (isArray(e)) {
-          if (e.length > this.question.SELECT_LIMIT) {
-            e.pop();
-          }
-        }
-      }
-    },
+  nextTick(() => {
+    // console.log("cleanNumber after", value);
+    if (value === null || value === "") props.question.answer = null;
+    else props.question.answer = `${value}`;
+  });
+}
 
-    // this function is the keydown and excludes any key thats not a number
-    // backspace, delete, and arrow keys are allowed
-    keydown(e) {
-      if (e.keyCode === 69 || e.keyCode === 189 || e.keyCode === 190) {
-        e.preventDefault();
-      }
-      if (e.keyCode === 8 || e.keyCode === 46 || e.keyCode === 37 || e.keyCode === 39) {
-        return; // Allow backspace, delete, left arrow, right arrow
-      }
-      if (e.keyCode < 48 || e.keyCode > 57) {
-        if (e.keyCode < 96 || e.keyCode > 105) {
-          e.preventDefault();
-        }
-      }
-    },
+function subUpdated(subQ) {
+  if (!isNull(subQ.answer) && subQ.answer != "") {
+    localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
+  } else {
+    localStorage.removeItem(`${subQ.QID}_ANSWER`);
+  }
+  emit("answerChanged", subQ.answer);
+}
 
-    cleanNumber(e) {
-      if (e) return;
+// Restore from localStorage on mount
+onMounted(() => {
+  let val = localStorage.getItem(storageID.value);
+  let value = null;
+  try {
+    value = JSON.parse(val);
+  } catch {}
+  let q = props.question;
 
-      let value = `${this.question.answer ?? ""}`.replace(/[e]/g, "");
-      console.log("cleanNumber", this.question.answer, typeof value);
+  if (q.subQuestions) {
+    for (let sq of q.subQuestions) {
+      let subStorage = `${sq.QID}_ANSWER`;
+      let sqVal = localStorage.getItem(subStorage);
+      let sqValue = null;
+      try {
+        sqValue = JSON.parse(sqVal);
+      } catch {}
+      if (sqValue && sqValue.value) sq.answer = sqValue.value;
+    }
+  }
 
-      if (isNull(value) || value === "") {
-        console.log("cleanNumber is null or empty, setting to null");
-        value = null;
-      } else {
-        console.log("cleanNumber is string", value);
+  nextTick(() => {
+    if (value && value.value) q.answer = value.value;
+  });
+});
 
-        // Remove non-numeric characters, but leave the first minus sign if it exists and decimal point
-        let v = parseInt(value.replace(/[e]/g, "").replace(/[^0-9.-]+/g, ""));
-
-        console.log("cleanNumber parsed", v);
-
-        if (isNaN(v)) {
-          console.log("cleanNumber is NaN, setting to null");
-          value = null;
-        } else {
-          value = Math.max(0, v);
-        }
-      }
-
-      const q = this.question;
-
-      nextTick(() => {
-        console.log("cleanNumber after", value);
-        if (value === null || value === "") q.answer = null;
-        else q.answer = `${value}`;
-      });
-    },
-  },
-};
+// Watchers
+watch(
+  () => props.question.answer,
+  (nval, oval) => {
+    if (!isNull(nval) && nval != "") {
+      localStorage.setItem(storageID.value, JSON.stringify({ value: nval }));
+    } else {
+      localStorage.removeItem(storageID.value);
+    }
+    emit("answerChanged", nval);
+  }
+);
 </script>
 
 <style>
@@ -346,6 +362,11 @@ table.matrix th {
   text-align: center;
   font-weight: 400;
   font-size: 0.95rem;
+}
+
+table.mobile.matrix td,
+table.mobile.matrix th {
+  font-size: 0.85rem;
 }
 
 .rankingOption {
