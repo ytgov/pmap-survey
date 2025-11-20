@@ -6,6 +6,7 @@
         <question-renderer
           :index="question.questionIndex"
           :question="question"
+          :allowStorage="survey.survey.NO_LOCAL_STORAGE == 0"
           @answerChanged="checkAllValid"
           :class="{ 'd-none': !question.isVisible }"></question-renderer>
       </div>

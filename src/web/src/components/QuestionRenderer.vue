@@ -186,8 +186,8 @@
   </div>
 </template>
 <script setup>
-import { ref, computed, watch, nextTick, onMounted } from "vue";
-import { isArray, isNil, isNull } from "lodash";
+import { computed, watch, nextTick, onMounted } from "vue";
+import { isArray, isNull } from "lodash";
 import { RenderMarkdown } from "@/utils";
 import RankingRenderer from "./RankingRenderer.vue";
 import QuadrantRenderer from "./QuadrantRenderer.vue";
@@ -200,6 +200,10 @@ const { smAndDown } = useDisplay();
 const props = defineProps({
   index: Number,
   question: Object,
+  allowStorage: {
+    type: Boolean,
+    default: true,
+  },
 });
 const emit = defineEmits(["answerChanged"]);
 
@@ -292,7 +296,7 @@ function cleanNumber(e) {
 }
 
 function subUpdated(subQ) {
-  if (!isNull(subQ.answer) && subQ.answer != "") {
+  if (!isNull(subQ.answer) && subQ.answer != "" && props.allowStorage) {
     localStorage.setItem(`${subQ.QID}_ANSWER`, JSON.stringify({ value: subQ.answer }));
   } else {
     localStorage.removeItem(`${subQ.QID}_ANSWER`);
@@ -302,6 +306,8 @@ function subUpdated(subQ) {
 
 // Restore from localStorage on mount
 onMounted(() => {
+  if (!props.allowStorage) return;
+
   let val = localStorage.getItem(storageID.value);
   let value = null;
   try {
@@ -330,6 +336,8 @@ onMounted(() => {
 watch(
   () => props.question.answer,
   (nval, oval) => {
+    if (!props.allowStorage) return;
+
     if (!isNull(nval) && nval != "") {
       localStorage.setItem(storageID.value, JSON.stringify({ value: nval }));
     } else {
