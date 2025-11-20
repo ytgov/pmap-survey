@@ -117,6 +117,7 @@ adminSurveyRouter.post("/", requireAdminOrOwner, async (req: Request, res: Respo
     ALLOW_AUDIT,
     ALLOW_AUTO_PARTICIPANT,
     ALLOW_DEMOGRAPHIC_GROUP,
+    NO_LOCAL_STORAGE,
   } = req.body;
 
   let newItem = await db("SURVEY")
@@ -132,6 +133,7 @@ adminSurveyRouter.post("/", requireAdminOrOwner, async (req: Request, res: Respo
       ALLOW_AUDIT,
       ALLOW_AUTO_PARTICIPANT,
       ALLOW_DEMOGRAPHIC_GROUP,
+      NO_LOCAL_STORAGE,
     })
     .returning("*");
 
@@ -155,6 +157,7 @@ adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
     STATUS,
     ALLOW_AUTO_PARTICIPANT,
     ALLOW_DEMOGRAPHIC_GROUP,
+    NO_LOCAL_STORAGE,
   } = req.body;
 
   await db("SURVEY").withSchema(DB_SCHEMA).where({ SID }).update({
@@ -169,6 +172,7 @@ adminSurveyRouter.put("/:SID/", async (req: Request, res: Response) => {
     STATUS,
     ALLOW_AUTO_PARTICIPANT,
     ALLOW_DEMOGRAPHIC_GROUP,
+    NO_LOCAL_STORAGE,
   });
 
   res.json({ data: "success" });

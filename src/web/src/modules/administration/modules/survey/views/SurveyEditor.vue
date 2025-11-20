@@ -61,6 +61,13 @@
           density="compact"
           :false-value="0"
           :true-value="1" />
+        <v-checkbox
+          label="No local storage"
+          v-model="survey.NO_LOCAL_STORAGE"
+          hide-details
+          density="compact"
+          :false-value="0"
+          :true-value="1" />
       </v-col>
     </v-row>
 

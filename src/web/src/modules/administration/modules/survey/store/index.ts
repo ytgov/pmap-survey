@@ -298,6 +298,7 @@ interface Survey {
   ALLOW_AUDIT: number;
   ALLOW_DEMOGRAPHIC_GROUP?: number;
   ALLOW_AUTO_PARTICIPANT?: number;
+  NO_LOCAL_STORAGE?: number;
   STATUS: string;
   questions?: Question[];
   choices?: any[];
