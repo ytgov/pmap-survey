@@ -6,3 +6,5 @@ export * from "./admin-survey-router";
 export * from "./admin-participant-router";
 export * from "./admin-demographic-group-router";
 export * from "./admin-survey-link-router";
+
+export * from "./ai-router";

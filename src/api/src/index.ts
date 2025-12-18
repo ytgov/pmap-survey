@@ -10,7 +10,7 @@ import {
   adminSurveyLinkRouter,
   adminSurveyRouter,
   integrationRouter,
-  surveyRouter,
+  aiRouter,
   userRouter,
 } from "./routes";
 import { checkJwt, loadUser } from "./middleware/authz.middleware";
@@ -52,7 +52,7 @@ app.get("/api/healthCheck", (req: Request, res: Response) => {
 });
 
 app.use("/api/user", checkJwt, loadUser, userRouter);
-app.use("/api/survey", surveyRouter);
+app.use("/api/survey", aiRouter);
 app.use("/api/integration", integrationRouter);
 
 app.use("/api/admin/survey", checkJwt, loadUser, requireAdminOrOwner, adminSurveyRouter);

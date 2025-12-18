@@ -28,7 +28,17 @@ services:
       - "8111:80"
     volumes:
       - my-data:/var/lib/pgadmin
-      
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist models and configuration
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    
 volumes:
   pg-data:
   my-data:
+  ollama_data:
