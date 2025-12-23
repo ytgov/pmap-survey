@@ -52,7 +52,7 @@ app.get("/api/healthCheck", (req: Request, res: Response) => {
 });
 
 app.use("/api/user", checkJwt, loadUser, userRouter);
-app.use("/api/survey", aiRouter);
+app.use("/api/ai", aiRouter);
 app.use("/api/integration", integrationRouter);
 
 app.use("/api/admin/survey", checkJwt, loadUser, requireAdminOrOwner, adminSurveyRouter);
