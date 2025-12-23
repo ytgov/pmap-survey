@@ -237,7 +237,7 @@ adminSurveyRouter.get("/question-types", async (req: Request, res: Response) => 
 
 adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => {
   let { SID } = req.params;
-  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH } =
+  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH, PROMPT } =
     req.body;
 
   /* if (JSON_ID == -1) {
@@ -268,6 +268,7 @@ adminSurveyRouter.post("/:SID/question", async (req: Request, res: Response) => 
     SELECT_MIN,
     RENDER_AS,
     MAX_LENGTH,
+    PROMPT,
   });
   res.json({ data: "success" });
 });
@@ -296,7 +297,7 @@ adminSurveyRouter.put("/:SID/question/:QID/conditions", async (req: Request, res
 
 adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response) => {
   let { SID, QID } = req.params;
-  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH } =
+  let { ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH, PROMPT } =
     req.body;
 
   /*  if (JSON_ID == -1) {
@@ -316,7 +317,20 @@ adminSurveyRouter.put("/:SID/question/:QID", async (req: Request, res: Response)
   await db("QUESTION")
     .withSchema(DB_SCHEMA)
     .where({ QID })
-    .update({ ASK, OPTIONAL, ORD, TYPE, RANGE, GROUP_ID, JSON_ID, SELECT_LIMIT, SELECT_MIN, RENDER_AS, MAX_LENGTH });
+    .update({
+      ASK,
+      OPTIONAL,
+      ORD,
+      TYPE,
+      RANGE,
+      GROUP_ID,
+      JSON_ID,
+      SELECT_LIMIT,
+      SELECT_MIN,
+      RENDER_AS,
+      MAX_LENGTH,
+      PROMPT,
+    });
   res.json({ data: "success" });
 });
 
