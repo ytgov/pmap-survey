@@ -113,6 +113,20 @@
         </v-card-text>
       </v-card>
     </v-col>
+
+    <v-col cols="12" md="4" v-if="user">
+      <v-card elevation="3" color="#7A9A0166" to="/administration/ai-assistant">
+        <v-card-text style="text-align: right">
+          <v-icon
+            class="float-left"
+            style="font-size: 90px; opacity: 25%; position: absolute; left: 10px; margin-top: -12px"
+            >mdi-chat-processing</v-icon
+          >
+          <div style="font-size: 52px; line-height: 52px">&nbsp</div>
+          <div>AI Assistant</div>
+        </v-card-text>
+      </v-card>
+    </v-col>
   </v-row>
 
   <!-- <div v-if="mySurveys.length > 0">

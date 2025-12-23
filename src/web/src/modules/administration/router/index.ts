@@ -87,6 +87,14 @@ const routes = [
           allow_admin: true,
         },
       },
+      {
+        path: "ai-assistant",
+        component: () => import("../modules/ai-assistant/views/AIAssistant.vue"),
+        beforeEnter: requireAccess,
+        meta: {
+          allow_admin: true,
+        },
+      },
     ],
   },
 ];
