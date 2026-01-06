@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
+import { apiBaseUrl } from "@/config";
 
 export interface OllamaMessage {
   role: "system" | "user" | "assistant";
@@ -26,7 +27,7 @@ interface AIState {
   error: string | null;
 }
 
-const API_BASE = "/api/ai";
+const API_BASE = apiBaseUrl + "/api/ai";
 
 export const useAIAssistantStore = defineStore("ai-assistant", {
   state: (): AIState => ({
@@ -48,7 +49,7 @@ export const useAIAssistantStore = defineStore("ai-assistant", {
       try {
         this.isLoading = true;
         this.error = null;
-        const response = await axios.get(`${API_BASE}/`);
+        const response = await axios.get(`${API_BASE}`);
         this.isConnected = response.data.data.connected;
         this.models = response.data.data.models || [];
 

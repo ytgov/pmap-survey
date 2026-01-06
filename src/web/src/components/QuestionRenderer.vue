@@ -163,7 +163,7 @@
         <div v-else-if="question.TYPE == 'quadrant_title'">
           <QuadrantRenderer :question="question" :subUpdated="subUpdated"></QuadrantRenderer>
         </div>
-        <div v-else-if="question.TYPE == 'ai'"><AIRenderer :question="question" /></div>
+        <div v-else-if="question.TYPE == 'ai_free-text'"><AIRenderer :question="question" /></div>
         <div v-else-if="question.TYPE == 'number'">
           <v-text-field
             v-model="question.answer"
