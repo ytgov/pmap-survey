@@ -2,6 +2,8 @@ import express, { Request, Response } from "express";
 import { AIService } from "../services";
 import { body, param } from "express-validator";
 import { ReturnValidationErrors } from "../middleware";
+import { db } from "../data";
+import { DB_SCHEMA } from "../config";
 
 export const aiRouter = express.Router();
 const aiService = new AIService();
@@ -16,13 +18,13 @@ aiRouter.get("/", async (req: Request, res: Response) => {
     } else {
       return res.status(503).json({
         error: "Ollama is not running",
-        messages: [{ variant: "error", text: "Ollama service is not available" }]
+        messages: [{ variant: "error", text: "Ollama service is not available" }],
       });
     }
   } catch (error: any) {
     return res.status(500).json({
       error: error.message,
-      messages: [{ variant: "error", text: "Failed to connect to Ollama" }]
+      messages: [{ variant: "error", text: "Failed to connect to Ollama" }],
     });
   }
 });
@@ -35,7 +37,7 @@ aiRouter.get("/models", async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       error: error.message,
-      messages: [{ variant: "error", text: "Failed to list models" }]
+      messages: [{ variant: "error", text: "Failed to list models" }],
     });
   }
 });
@@ -61,7 +63,7 @@ aiRouter.put(
       aiService.setDefaultModel(model);
       return res.json({
         data: { model },
-        messages: [{ variant: "success", text: "Default model updated" }]
+        messages: [{ variant: "success", text: "Default model updated" }],
       });
     } catch (error: any) {
       return res.status(500).json({ error: error.message });
@@ -80,12 +82,12 @@ aiRouter.post(
       await aiService.pullModel(modelName);
       return res.json({
         data: { modelName },
-        messages: [{ variant: "success", text: `Model ${modelName} pulled successfully` }]
+        messages: [{ variant: "success", text: `Model ${modelName} pulled successfully` }],
       });
     } catch (error: any) {
       return res.status(500).json({
         error: error.message,
-        messages: [{ variant: "error", text: `Failed to pull model: ${error.message}` }]
+        messages: [{ variant: "error", text: `Failed to pull model: ${error.message}` }],
       });
     }
   }
@@ -101,12 +103,12 @@ aiRouter.delete(
       const { modelName } = req.params;
       await aiService.deleteModel(modelName);
       return res.json({
-        messages: [{ variant: "success", text: `Model ${modelName} deleted successfully` }]
+        messages: [{ variant: "success", text: `Model ${modelName} deleted successfully` }],
       });
     } catch (error: any) {
       return res.status(500).json({
         error: error.message,
-        messages: [{ variant: "error", text: `Failed to delete model: ${error.message}` }]
+        messages: [{ variant: "error", text: `Failed to delete model: ${error.message}` }],
       });
     }
   }
@@ -115,15 +117,32 @@ aiRouter.delete(
 // Chat endpoint (non-streaming)
 aiRouter.post(
   "/chat",
-  [
-    body("messages").isArray().notEmpty(),
-    body("model").optional().isString(),
-    body("options").optional().isObject(),
-  ],
+  [body("messages").isArray().notEmpty(), body("model").optional().isString(), body("options").optional().isObject()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     try {
-      const { messages, model, options, format } = req.body;
+      const { messages, model, options, format, questionId } = req.body;
+
+      if (!questionId) {
+        return res.status(400).json({
+          error: "Invalid question ID",
+          messages: [{ variant: "error", text: "No question ID provided" }],
+        });
+      }
+      const question = await db("QUESTION").withSchema(DB_SCHEMA).where({ QID: questionId }).first();
+
+      if (!question) {
+        return res.status(400).json({
+          error: "Invalid question ID",
+          messages: [{ variant: "error", text: "The provided question ID does not exist" }],
+        });
+      }
+
+      const prompt = question.PROMPT || "";
+      messages.unshift({ role: "system", content: prompt });
+
+      console.log("Messages with system prompt:", messages);
+
       const response = await aiService.chat({
         model,
         messages,
@@ -134,7 +153,7 @@ aiRouter.post(
     } catch (error: any) {
       return res.status(500).json({
         error: error.message,
-        messages: [{ variant: "error", text: `Chat request failed: ${error.message}` }]
+        messages: [{ variant: "error", text: `Chat request failed: ${error.message}` }],
       });
     }
   }
@@ -143,11 +162,7 @@ aiRouter.post(
 // Chat endpoint (streaming)
 aiRouter.post(
   "/chat/stream",
-  [
-    body("messages").isArray().notEmpty(),
-    body("model").optional().isString(),
-    body("options").optional().isObject(),
-  ],
+  [body("messages").isArray().notEmpty(), body("model").optional().isString(), body("options").optional().isObject()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     try {
@@ -176,7 +191,7 @@ aiRouter.post(
       if (!res.headersSent) {
         return res.status(500).json({
           error: error.message,
-          messages: [{ variant: "error", text: `Chat stream failed: ${error.message}` }]
+          messages: [{ variant: "error", text: `Chat stream failed: ${error.message}` }],
         });
       }
     }
@@ -186,11 +201,7 @@ aiRouter.post(
 // Generate endpoint (non-streaming)
 aiRouter.post(
   "/generate",
-  [
-    body("prompt").isString().notEmpty(),
-    body("model").optional().isString(),
-    body("options").optional().isObject(),
-  ],
+  [body("prompt").isString().notEmpty(), body("model").optional().isString(), body("options").optional().isObject()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     try {
@@ -205,7 +216,7 @@ aiRouter.post(
     } catch (error: any) {
       return res.status(500).json({
         error: error.message,
-        messages: [{ variant: "error", text: `Generate request failed: ${error.message}` }]
+        messages: [{ variant: "error", text: `Generate request failed: ${error.message}` }],
       });
     }
   }
@@ -214,11 +225,7 @@ aiRouter.post(
 // Generate endpoint (streaming)
 aiRouter.post(
   "/generate/stream",
-  [
-    body("prompt").isString().notEmpty(),
-    body("model").optional().isString(),
-    body("options").optional().isObject(),
-  ],
+  [body("prompt").isString().notEmpty(), body("model").optional().isString(), body("options").optional().isObject()],
   ReturnValidationErrors,
   async (req: Request, res: Response) => {
     try {
@@ -247,7 +254,7 @@ aiRouter.post(
       if (!res.headersSent) {
         return res.status(500).json({
           error: error.message,
-          messages: [{ variant: "error", text: `Generate stream failed: ${error.message}` }]
+          messages: [{ variant: "error", text: `Generate stream failed: ${error.message}` }],
         });
       }
     }

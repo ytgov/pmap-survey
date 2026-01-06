@@ -81,4 +81,4 @@ export const AD_CLIENT_SECRET = process.env.AD_CLIENT_SECRET || "";
 export const AD_TENANT_ID = process.env.AD_TENANT_ID || "";
 
 export const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
-export const OLLAMA_DEFAULT_MODEL = process.env.OLLAMA_DEFAULT_MODEL || "llama2";
+export const OLLAMA_DEFAULT_MODEL = process.env.OLLAMA_DEFAULT_MODEL || "tinyllama";

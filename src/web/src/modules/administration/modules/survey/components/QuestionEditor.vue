@@ -140,8 +140,8 @@
           <v-col v-if="question.TYPE == 'free-text'" cols="4">
             <v-text-field v-model="question.MAX_LENGTH" label="Maximum length" />
           </v-col>
-          <v-col v-if="question.TYPE == 'ai_free-text'" cols="4">
-            <v-text-field v-model="question.PROMPT" label="Prompt" />
+          <v-col v-if="question.TYPE == 'ai_free-text'" cols="12">
+            <v-textarea v-model="question.PROMPT" label="Prompt" />
           </v-col>
         </v-row>
         <div class="d-flex mb-2">

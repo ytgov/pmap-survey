@@ -134,6 +134,7 @@ export class AIService {
         format: request.format,
         options: request.options,
       });
+
       return response.data;
     } catch (error: any) {
       console.error("Chat request failed:", error.message);
@@ -145,10 +146,7 @@ export class AIService {
    * Send a chat request with streaming response
    * Returns a stream of response chunks
    */
-  async chatStream(
-    request: OllamaChatRequest,
-    onChunk: (chunk: OllamaChatResponse) => void
-  ): Promise<void> {
+  async chatStream(request: OllamaChatRequest, onChunk: (chunk: OllamaChatResponse) => void): Promise<void> {
     try {
       const response = await this.client.post(
         "/api/chat",
