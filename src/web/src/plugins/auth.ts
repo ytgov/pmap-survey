@@ -1,5 +1,5 @@
 import { createAuth0 } from "@auth0/auth0-vue";
-import { production, development } from "../../auth-config.json";
+import { production, development. test } from "../../auth-config.json";
 
 // The "@auth0/auth0-vue" library composables to load and manage
 // authentication information.  In components this information is available
@@ -12,6 +12,7 @@ import { production, development } from "../../auth-config.json";
 let config = production;
 
 if (window.location.host == "localhost:8080") config = development;
+else if (window.location.host == "psc-survey-test.gov.yk.ca") config = test;
 
 export const AuthHelper = createAuth0({
   domain: config.domain,
