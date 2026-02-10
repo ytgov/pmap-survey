@@ -338,15 +338,13 @@ onMounted(() => {
 watch(
   () => props.question.answer,
   (nval, oval) => {
-    if (!props.allowStorage) return;
-
     if (!isNull(nval) && nval != "") {
-      localStorage.setItem(storageID.value, JSON.stringify({ value: nval }));
+      if (props.allowStorage) localStorage.setItem(storageID.value, JSON.stringify({ value: nval }));
     } else {
       localStorage.removeItem(storageID.value);
     }
     emit("answerChanged", nval);
-  }
+  },
 );
 </script>
 
