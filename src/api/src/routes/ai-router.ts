@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { AIService } from "../services";
+import { AIService, AIChatLogService } from "../services";
 import { body, param } from "express-validator";
 import { ReturnValidationErrors } from "../middleware";
 import { db } from "../data";
@@ -7,6 +7,7 @@ import { DB_SCHEMA } from "../config";
 
 export const aiRouter = express.Router();
 const aiService = new AIService();
+const aiChatLogService = new AIChatLogService();
 
 // Test connection to Ollama
 aiRouter.get("/", async (req: Request, res: Response) => {
@@ -68,7 +69,7 @@ aiRouter.put(
     } catch (error: any) {
       return res.status(500).json({ error: error.message });
     }
-  }
+  },
 );
 
 // Pull a model
@@ -90,7 +91,7 @@ aiRouter.post(
         messages: [{ variant: "error", text: `Failed to pull model: ${error.message}` }],
       });
     }
-  }
+  },
 );
 
 // Delete a model
@@ -111,7 +112,7 @@ aiRouter.delete(
         messages: [{ variant: "error", text: `Failed to delete model: ${error.message}` }],
       });
     }
-  }
+  },
 );
 
 // Chat endpoint (non-streaming)
@@ -141,7 +142,15 @@ aiRouter.post(
       const prompt = question.PROMPT || "";
       messages.unshift({ role: "system", content: prompt });
 
-      console.log("Messages with system prompt:", messages);
+      const interactionLimit = question.SELECT_LIMIT ?? 3;
+      const currentCount = messages.filter((msg: any) => msg.role === "user").length;
+
+      if (currentCount > interactionLimit) {
+        return res.status(400).json({
+          error: "Interaction limit exceeded",
+          messages: [{ variant: "error", text: `You have exceeded the interaction limit of ${interactionLimit}` }],
+        });
+      }
 
       const response = await aiService.chat({
         model,
@@ -149,6 +158,21 @@ aiRouter.post(
         format,
         options,
       });
+
+      // Log the chat interaction
+      const lastUserMessage = messages.filter((msg: any) => msg.role === "user").pop();
+      if (lastUserMessage && response.message) {
+        await aiChatLogService.create({
+          QUESTION_ID: questionId,
+          MODEL: response.model,
+          USER_MESSAGE: lastUserMessage.content,
+          ASSISTANT_MESSAGE: response.message.content,
+          PROMPT_EVAL_COUNT: response.prompt_eval_count,
+          EVAL_COUNT: response.eval_count,
+          TOTAL_DURATION: response.total_duration,
+        });
+      }
+
       return res.json({ data: response });
     } catch (error: any) {
       return res.status(500).json({
@@ -156,7 +180,7 @@ aiRouter.post(
         messages: [{ variant: "error", text: `Chat request failed: ${error.message}` }],
       });
     }
-  }
+  },
 );
 
 // Chat endpoint (streaming)
@@ -183,7 +207,7 @@ aiRouter.post(
         (chunk) => {
           // Send chunk as Server-Sent Event
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-        }
+        },
       );
 
       res.end();
@@ -195,7 +219,7 @@ aiRouter.post(
         });
       }
     }
-  }
+  },
 );
 
 // Generate endpoint (non-streaming)
@@ -219,7 +243,7 @@ aiRouter.post(
         messages: [{ variant: "error", text: `Generate request failed: ${error.message}` }],
       });
     }
-  }
+  },
 );
 
 // Generate endpoint (streaming)
@@ -246,7 +270,7 @@ aiRouter.post(
         (chunk) => {
           // Send chunk as Server-Sent Event
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-        }
+        },
       );
 
       res.end();
@@ -258,5 +282,5 @@ aiRouter.post(
         });
       }
     }
-  }
+  },
 );

@@ -19,6 +19,10 @@
     <v-row class="mt-3" v-else>
       <v-col>
         <v-card variant="outlined" class="ai-conversation">
+          <v-alert v-if="isDone" type="success" variant="tonal" density="compact" class="ma-3 mb-0">
+            <v-icon size="small" class="mr-2">mdi-check-circle</v-icon>
+            Conversation completed.
+          </v-alert>
           <v-card-text style="max-height: 400px; overflow-y: auto" ref="chatContainer">
             <div v-for="(message, index) in conversationThread" :key="index" class="mb-3">
               <v-row :class="message.role === 'user' ? 'justify-end' : 'justify-start'">
@@ -66,24 +70,46 @@
 
           <v-card-actions class="pa-3">
             <v-textarea
+              v-if="!isDone"
               v-model="newMessage"
               label="Type your response..."
               rows="2"
               variant="outlined"
               auto-grow
               density="compact"
-              :disabled="isLoading"
+              :disabled="isLoading || isDone"
               @keydown.ctrl.enter="sendMessage"
               @keydown.meta.enter="sendMessage"
               hide-details>
             </v-textarea>
-            <v-btn
-              @click="sendMessage"
-              color="primary"
-              icon="mdi-send"
-              size="small"
-              :disabled="!newMessage.trim() || isLoading"
-              class="ml-2"></v-btn>
+            <div class="ml-2 d-flex flex-column ga-2">
+              <v-btn
+                v-if="!isDone"
+                @click="sendMessage"
+                color="primary"
+                class="my-0"
+                icon="mdi-send"
+                size="small"
+                :disabled="!newMessage.trim() || isLoading || isDone"></v-btn>
+              <v-btn
+                v-if="conversationThread.length > 0"
+                @click="resetConversation"
+                color="warning"
+                class="my-0"
+                icon="mdi-refresh"
+                size="small"
+                :disabled="isLoading || conversationThread.length === 0"
+                title="Reset conversation"></v-btn>
+              <v-btn
+                v-if="!isDone"
+                @click="markAsDone"
+                color="success"
+                class="my-0"
+                icon="mdi-check"
+                size="small"
+                :disabled="isLoading || conversationThread.length === 0"
+                title="Finish conversation"></v-btn>
+            </div>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -105,6 +131,7 @@ const isLoading = ref(false);
 const chatContainer = ref(null);
 const serviceUnavailable = ref(false);
 const fallbackAnswer = ref("");
+const isDone = ref(false);
 
 const API_BASE = apiBaseUrl + "/api/ai";
 
@@ -123,10 +150,20 @@ onMounted(async () => {
     if (props.question && props.question.answer) {
       try {
         // Try to parse as conversation first
-        const savedConversation = JSON.parse(props.question.answer);
-        if (Array.isArray(savedConversation)) {
+        const savedData = JSON.parse(props.question.answer);
+        let messages = [];
+
+        if (savedData.messages && Array.isArray(savedData.messages)) {
+          // New format with metadata
+          messages = savedData.messages;
+        } else if (Array.isArray(savedData)) {
+          // Legacy format - array of messages
+          messages = savedData;
+        }
+
+        if (messages.length > 0) {
           // If it's a conversation, extract text from it
-          fallbackAnswer.value = savedConversation
+          fallbackAnswer.value = messages
             .filter((msg) => msg.role !== "system")
             .map((msg) => `${msg.role === "user" ? "You" : "AI"}: ${msg.content}`)
             .join("\n\n");
@@ -144,10 +181,14 @@ onMounted(async () => {
   // Load conversation from question answer if it exists
   if (props.question && props.question.answer) {
     try {
-      const savedConversation = JSON.parse(props.question.answer);
-      if (Array.isArray(savedConversation)) {
-        // Filter out system messages since backend will add them
-        conversationThread.value = savedConversation.filter(msg => msg.role !== 'system');
+      const savedData = JSON.parse(props.question.answer);
+      if (savedData.messages && Array.isArray(savedData.messages)) {
+        // New format with metadata
+        conversationThread.value = savedData.messages.filter((msg) => msg.role !== "system");
+        isDone.value = savedData.isDone || false;
+      } else if (Array.isArray(savedData)) {
+        // Legacy format - just array of messages
+        conversationThread.value = savedData.filter((msg) => msg.role !== "system");
       }
     } catch (e) {
       // If parsing fails, start fresh
@@ -180,13 +221,11 @@ async function sendMessage() {
   try {
     // Prepare messages for API (exclude system messages - backend will add the correct one)
     const apiMessages = conversationThread.value
-      .filter(msg => msg.role !== 'system')
+      .filter((msg) => msg.role !== "system")
       .map(({ role, content }) => ({
         role,
         content,
       }));
-
-    console.log("Sending messages to AI:", apiMessages);
 
     const response = await axios.post(`${API_BASE}/chat`, {
       messages: apiMessages,
@@ -227,7 +266,10 @@ async function sendMessage() {
 }
 
 function saveConversation() {
-  const conversationData = JSON.stringify(conversationThread.value);
+  const conversationData = JSON.stringify({
+    messages: conversationThread.value,
+    isDone: isDone.value,
+  });
   props.question.answer = conversationData;
   emit("answerChanged", conversationData);
 }
@@ -238,6 +280,21 @@ function scrollToBottom() {
   }
 }
 
+function resetConversation() {
+  if (confirm("Are you sure you want to reset the conversation? This will clear all messages.")) {
+    conversationThread.value = [];
+    newMessage.value = "";
+    isDone.value = false;
+    props.question.answer = "";
+    emit("answerChanged", "");
+  }
+}
+
+function markAsDone() {
+  isDone.value = true;
+  saveConversation();
+}
+
 // Watch for changes to conversation thread
 watch(
   conversationThread,
@@ -246,7 +303,7 @@ watch(
       scrollToBottom();
     });
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 

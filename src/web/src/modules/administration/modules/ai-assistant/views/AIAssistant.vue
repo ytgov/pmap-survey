@@ -192,6 +192,43 @@
           </v-card-text>
         </v-card>
 
+        <!-- Default Model Setting -->
+        <v-card elevation="2" class="mb-4">
+          <v-card-title>Default Model Setting</v-card-title>
+          <v-divider></v-divider>
+          <v-card-text>
+            <v-select
+              v-model="defaultModelSelection"
+              :items="models"
+              item-title="name"
+              item-value="name"
+              label="Default Model"
+              variant="outlined"
+              density="compact"
+              :disabled="!isConnected || models.length === 0"
+              hint="This model will be used by default for AI features"
+              persistent-hint></v-select>
+            <v-btn
+              @click="saveDefaultModel"
+              color="primary"
+              block
+              class="mt-4"
+              :disabled="!defaultModelSelection || isSavingDefault"
+              :loading="isSavingDefault">
+              <v-icon left>mdi-content-save</v-icon>
+              Save Default Model
+            </v-btn>
+            <v-alert
+              v-if="defaultModel"
+              type="info"
+              variant="tonal"
+              class="mt-4"
+              density="compact">
+              Current default: <strong>{{ defaultModel }}</strong>
+            </v-alert>
+          </v-card-text>
+        </v-card>
+
         <!-- Pull New Model -->
         <v-card elevation="2">
           <v-card-title>Download Model</v-card-title>
@@ -254,14 +291,17 @@ export default {
     newModelName: "",
     deleteDialog: false,
     modelToDelete: "",
+    defaultModelSelection: "",
   }),
   computed: {
     ...mapState(useAIAssistantStore, [
       "messages",
       "models",
       "selectedModel",
+      "defaultModel",
       "isConnected",
       "isLoading",
+      "isSavingDefault",
       "error",
       "hasMessages",
     ]),
@@ -269,6 +309,8 @@ export default {
   async mounted() {
     const store = useAIAssistantStore();
     await store.checkConnection();
+    await store.loadDefaultModel();
+    this.defaultModelSelection = store.defaultModel;
   },
   methods: {
     async checkConnection() {
@@ -318,6 +360,15 @@ export default {
         this.modelToDelete = "";
       } catch (error: any) {
         console.error("Failed to delete model:", error);
+      }
+    },
+    async saveDefaultModel() {
+      if (!this.defaultModelSelection) return;
+      try {
+        const store = useAIAssistantStore();
+        await store.saveDefaultModel(this.defaultModelSelection);
+      } catch (error: any) {
+        console.error("Failed to save default model:", error);
       }
     },
     formatTime(date: Date) {

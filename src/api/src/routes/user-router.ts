@@ -37,16 +37,23 @@ userRouter.post("/", requiresAdmin, async (req: Request, res: Response) => {
       return res.json({ data: { error: [{ text: "User already exists", variant: "error" }] } });
     }
 
-    await db.create({
-      EMAIL: user.email,
-      USER_ID: "SUB_MISSING",
-      STATUS: UserStatus.ACTIVE,
-      FIRST_NAME: user.first_name,
-      LAST_NAME: user.last_name,
-      IS_ADMIN: "N",
-      ROLE: "",
-      CREATE_DATE: new Date(),
-    });
+    try {
+      await db.create({
+        EMAIL: user.email,
+        USER_ID: "SUB_MISSING",
+        STATUS: UserStatus.ACTIVE,
+        FIRST_NAME: user.first_name,
+        LAST_NAME: user.last_name,
+        IS_ADMIN: "N",
+        ROLE: "",
+        CREATE_DATE: new Date(),
+      });
+    } catch (error) {
+      console.error("Failed to create user:", error);
+      return res.status(500).json({
+        data: { error: [{ text: "Failed to create user", variant: "error" }] },
+      });
+    }
   }
   return res.json({});
 });
@@ -85,7 +92,7 @@ userRouter.put(
     }
 
     res.status(404).send();
-  }
+  },
 );
 
 userRouter.post("/search-directory", async (req: Request, res: Response) => {

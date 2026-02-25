@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { SURVEY_URL } from "@/urls";
 import { useApiStore } from "./ApiStore";
-import { intersection, uniq } from "lodash";
+import { intersection, isArray, isNil, uniq } from "lodash";
 
 export const useSurveyStore = defineStore("survey", {
   state: () => ({
@@ -121,6 +121,19 @@ export const useSurveyStore = defineStore("survey", {
 
           if (q.TYPE == "matrix_question") {
             return q.answer && q.answer != false;
+          }
+
+          if (q.TYPE == "ai_free-text") {
+            if (isNil(q.answer)) return false;
+            try {
+              const parsed = JSON.parse(q.answer);
+              if (isArray(parsed.messages)) {
+                return parsed.messages.length > 0;
+              }
+              return false;
+            } catch (e) {
+              return false;
+            }
           }
 
           let trimAnswer = `${q.answer}`.replace("null", "").trim();

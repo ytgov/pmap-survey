@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { OLLAMA_BASE_URL, OLLAMA_DEFAULT_MODEL } from "../config";
+import { SETTING_KEY, SettingService } from "./setting-service";
 
 export interface OllamaMessage {
   role: "system" | "user" | "assistant";
@@ -77,10 +78,12 @@ export class AIService {
   private client: AxiosInstance;
   private baseUrl: string;
   private defaultModel: string;
+  private settingService: SettingService;
 
   constructor() {
     this.baseUrl = OLLAMA_BASE_URL;
     this.defaultModel = OLLAMA_DEFAULT_MODEL;
+    this.settingService = new SettingService();
     this.client = axios.create({
       baseURL: this.baseUrl,
       timeout: 120000, // 2 minutes timeout for longer responses
@@ -91,16 +94,34 @@ export class AIService {
   }
 
   /**
+   * Load the default model from the settings table
+   */
+  async loadDefaultModel(): Promise<string> {
+    try {
+      const setting = await this.settingService.getGlobalByKey(SETTING_KEY.DEFAULT_MODEL);
+      if (setting?.VALUE) {
+        this.defaultModel = setting.VALUE;
+      }
+    } catch (error: any) {
+      console.error("Failed to load default model from settings:", error.message);
+    }
+    return this.defaultModel;
+  }
+
+  /**
    * Test connection to Ollama instance
    */
   async connect(): Promise<any> {
     try {
+      await this.loadDefaultModel();
+
       const response = await this.client.get("/api/tags");
       this.connected = true;
       return {
         connected: true,
         models: response.data.models || [],
         baseUrl: this.baseUrl,
+        defaultModel: this.defaultModel,
       };
     } catch (error: any) {
       this.connected = false;
@@ -159,7 +180,7 @@ export class AIService {
         },
         {
           responseType: "stream",
-        }
+        },
       );
 
       return new Promise((resolve, reject) => {
@@ -208,7 +229,7 @@ export class AIService {
    */
   async generateStream(
     request: OllamaGenerateRequest,
-    onChunk: (chunk: OllamaGenerateResponse) => void
+    onChunk: (chunk: OllamaGenerateResponse) => void,
   ): Promise<void> {
     try {
       const response = await this.client.post(
@@ -222,7 +243,7 @@ export class AIService {
         },
         {
           responseType: "stream",
-        }
+        },
       );
 
       return new Promise((resolve, reject) => {
@@ -260,7 +281,7 @@ export class AIService {
         },
         {
           timeout: 600000, // 10 minutes for model download
-        }
+        },
       );
       return response.data;
     } catch (error: any) {
