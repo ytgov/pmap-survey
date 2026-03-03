@@ -33,13 +33,13 @@
                     elevation="1">
                     <v-card-text class="pa-3">
                       <div class="d-flex align-center mb-1">
-                        <v-icon :color="message.role === 'user' ? 'white' : 'grey-darken-2'" size="small" class="mr-2">
-                          {{ message.role === "user" ? "mdi-account" : "mdi-robot" }}
-                        </v-icon>
+                        <img v-if="message.role !== 'user'" :src="Pumuckl" alt="Pumuckl" class="mr-2" width="26px" />
+                        <v-icon v-else color="white" size="small" class="mr-2"> mdi-account </v-icon>
+
                         <strong
                           class="text-caption"
                           :class="message.role === 'user' ? 'text-white' : 'text-grey-darken-2'">
-                          {{ message.role === "user" ? "You" : "AI" }}
+                          {{ message.role === "user" ? "You" : "Pumuckl" }}
                         </strong>
                       </div>
                       <div style="white-space: pre-wrap">{{ message.content }}</div>
@@ -55,9 +55,9 @@
                   <v-card color="grey-lighten-4" elevation="1">
                     <v-card-text class="pa-3">
                       <div class="d-flex align-center">
-                        <v-icon color="grey-darken-2" size="small" class="mr-2">mdi-robot</v-icon>
+                        <img :src="Pumuckl" alt="Pumuckl" class="mr-2" width="26px" />
                         <v-progress-circular indeterminate color="primary" size="16"></v-progress-circular>
-                        <span class="ml-2 text-caption">Thinking...</span>
+                        <span class="ml-2 text-caption">Pumuckl...</span>
                       </div>
                     </v-card-text>
                   </v-card>
@@ -121,6 +121,8 @@
 import { onMounted, ref, nextTick, watch } from "vue";
 import axios from "axios";
 import { apiBaseUrl } from "@/config";
+
+import Pumuckl from "@/assets/pumuckl.png";
 
 const props = defineProps(["question"]);
 const emit = defineEmits(["answerChanged"]);
@@ -217,6 +219,15 @@ async function sendMessage() {
   conversationThread.value.push(userMessage);
 
   isLoading.value = true;
+
+  const chatCount = conversationThread.value.filter((msg) => msg.role == "user");
+
+  if (props.question.SELECT_LIMIT && chatCount.length >= props.question.SELECT_LIMIT) {
+    isDone.value = true;
+    isLoading.value = false;
+    saveConversation();
+    return;
+  }
 
   try {
     // Prepare messages for API (exclude system messages - backend will add the correct one)
